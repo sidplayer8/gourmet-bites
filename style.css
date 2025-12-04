@@ -799,6 +799,24 @@ textarea {
 select {
     width: 100%;
     background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+    color: var(--text-main);
+    font-family: inherit;
+    outline: none;
+}
+
+/* Animations */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+    background: var(--bg-input);
     border: none;
     color: var(--text-main);
     outline: none;
