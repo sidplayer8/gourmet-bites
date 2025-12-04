@@ -1,5 +1,5 @@
 // Twilio SMS Authentication
-console.log("📱 Twilio SMS Auth Loading...");
+console.log("📱 Twilio SMS Auth Loading v3.2...");
 
 // Global State
 window.currentVerifyingPhone = null;
