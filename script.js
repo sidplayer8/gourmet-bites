@@ -662,6 +662,9 @@ async function renderProfile() {
         `;
     }
 
+    // Clear previous orders to prevent flash
+    app.orderHistory.innerHTML = adminSettingsHtml + '<div style="text-align:center; padding:40px;"><span class="material-icons-round spin">refresh</span> Loading orders...</div>';
+
     // Fetch Real Orders from API
     try {
         const userId = currentUser?.uid || (state.isAdmin ? 'admin' : state.user);
