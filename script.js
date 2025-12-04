@@ -816,6 +816,12 @@ function updateCartUI() {
         app.navCartCount.textContent = totalQty;
         app.navCartCount.classList.remove('hidden');
         app.cartFab.classList.remove('hidden');
+
+        // Auto-hide cart FAB after 3 seconds
+        clearTimeout(window.cartFabTimer);
+        window.cartFabTimer = setTimeout(() => {
+            app.cartFab.classList.add('hidden');
+        }, 3000);
     } else {
         app.navCartCount.classList.add('hidden');
         app.cartFab.classList.add('hidden');
