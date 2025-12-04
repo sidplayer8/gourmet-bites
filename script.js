@@ -142,6 +142,12 @@ async function init() {
                 state.isAdmin = false;
                 updateUserUI(user);
                 enterApp();
+
+                // Navigate to user route if not already on a route
+                if (!window.location.hash || window.location.hash === '#/') {
+                    const encryptedId = encryptUserId(state.user);
+                    Router.navigate('/user/' + encryptedId);
+                }
             } else {
                 console.log("User is signed out");
                 currentUser = null;
@@ -1026,6 +1032,9 @@ const Router = {
         console.log('📍 Route:', hash, '| User:', state.user, '| Admin:', state.isAdmin);
 
         switch (path) {
+            case 'login':
+                this.handleLoginRoute();
+                break;
             case 'admin':
                 this.handleAdminRoute();
                 break;
@@ -1037,6 +1046,22 @@ const Router = {
                 break;
             default:
                 this.handleDefaultRoute();
+        }
+    },
+
+    handleLoginRoute() {
+        console.log('🔑 Login route requested');
+        if (state.user) {
+            // Already logged in - redirect to appropriate route
+            if (state.isAdmin) {
+                this.navigate('/admin');
+            } else {
+                const encryptedId = encryptUserId(state.user);
+                this.navigate('/user/' + encryptedId);
+            }
+        } else {
+            // Show login page
+            showView('login');
         }
     },
 
