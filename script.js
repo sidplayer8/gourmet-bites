@@ -379,9 +379,10 @@ function enterApp() {
     app.loginView.classList.add('hidden');
 
     app.bottomNav.classList.remove('hidden');
-    if (state.activeTab === 'menu' && app.mainView.classList.contains('hidden')) {
-        switchTab('menu');
-    }
+
+    // Force render of the active tab (default to menu if not set)
+    if (!state.activeTab) state.activeTab = 'menu';
+    switchTab(state.activeTab);
 }
 
 function resetApp() {
@@ -768,30 +769,58 @@ function addToCartWithCustomization() {
 
     const item = state.currentCustomizingItem;
     const instructions = app.specialInstructions.value.trim();
-    const selectedOptions = Array.from(app.customizeOptions.querySelectorAll('input:checked')).map(cb => cb.value);
+    const selectedOptions = Array.from(app.customizeOptions.querySelectorAll('input:checked')).map(cb => cb.value).sort();
 
-    // Calculate extra price from options (simple logic: +$1 or +$2 if string contains it)
+    // Calculate extra price from options
     let extraPrice = 0;
     selectedOptions.forEach(opt => {
         if (opt.includes("+$1")) extraPrice += 1;
         if (opt.includes("+$2")) extraPrice += 2;
     });
 
-    const cartItem = {
-        ...item,
-        price: item.price + extraPrice,
-        qty: 1,
-        instructions: instructions,
-        selectedOptions: selectedOptions,
-        cartId: Date.now() // Unique ID for cart item (since same item can have diff customizations)
-    };
+    // Check if identical item exists in cart
+    const existingItem = state.cart.find(cartItem =>
+        cartItem.id === item.id &&
+        cartItem.instructions === instructions &&
+        JSON.stringify(cartItem.selectedOptions.sort()) === JSON.stringify(selectedOptions)
+    );
 
-    state.cart.push(cartItem);
+    if (existingItem) {
+        existingItem.qty += 1;
+        // Update price if needed (though it should be same)
+    } else {
+        const cartItem = {
+            ...item,
+            price: parseFloat(item.price) + extraPrice, // Ensure float
+            qty: 1,
+            instructions: instructions,
+            selectedOptions: selectedOptions,
+            cartId: Date.now()
+        };
+        state.cart.push(cartItem);
+    }
+
     updateCartUI();
     closeCustomize();
 
-    // Feedback
-    // alert("Added to cart!"); 
+    // Show feedback toast instead of alert
+    showToast("Item added to cart!");
+}
+
+// Helper for toast notification
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    // Trigger animation
+    requestAnimationFrame(() => toast.classList.add('show'));
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 2000);
 }
 
 // Cart Logic
@@ -907,11 +936,22 @@ async function checkout() {
         const data = await response.json();
 
         console.log("✅ Order saved:", data);
-        alert("Order placed successfully! Kitchen is preparing your food.");
 
+        // Show Success Modal
         state.cart = [];
         updateCartUI();
         closeCart();
+
+        const successModal = document.getElementById('order-success-modal');
+        if (successModal) {
+            successModal.classList.remove('hidden');
+            // Auto close after 5 seconds if not clicked
+            setTimeout(() => {
+                if (!successModal.classList.contains('hidden')) closeOrderSuccess();
+            }, 5000);
+        } else {
+            alert("Order placed successfully! Kitchen is preparing your food.");
+        }
 
     } catch (error) {
         console.error("❌ Error placing order:", error);
@@ -923,3 +963,8 @@ async function checkout() {
         }
     }
 }
+
+window.closeOrderSuccess = () => {
+    const modal = document.getElementById('order-success-modal');
+    if (modal) modal.classList.add('hidden');
+};
