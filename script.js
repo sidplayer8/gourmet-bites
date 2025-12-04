@@ -144,7 +144,7 @@ async function init() {
                 enterApp();
 
                 // Navigate to user route if not already on a route
-                if (!window.location.hash || window.location.hash === '#/') {
+                if (!window.location.hash || window.location.hash === '#/' || window.location.hash === '#/login') {
                     const encryptedId = encryptUserId(state.user);
                     Router.navigate('/user/' + encryptedId);
                 }
