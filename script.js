@@ -16,8 +16,6 @@ async function fetchMenu() {
         renderMenu(); // Re-render menu after fetching
     } catch (error) {
         console.error("❌ Error fetching menu:", error);
-        // Fallback to empty or show error
-        showStatus("Failed to load menu. Please refresh.", true);
     }
 }
 
