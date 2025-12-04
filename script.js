@@ -508,7 +508,7 @@ function renderMenu() {
                 <div class="item-desc">${item.description}</div>
                 <div class="item-allergens">${allergenTags}</div>
                 <div class="item-footer">
-                    <div class="item-price">$${item.price.toFixed(2)}</div>
+                    <div class="item-price">$${parseFloat(item.price).toFixed(2)}</div>
                     <button class="add-btn" onclick="openCustomize(${item.id})">
                         <span class="material-icons-round">add</span>
                     </button>
