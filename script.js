@@ -424,18 +424,21 @@ function updateUserUI(user) {
 }
 
 async function handleLogout() {
-    if (state.isAdmin) {
-        resetApp();
-    } else if (state.user && !auth.currentUser) {
-        // Phone login - no Firebase auth
-        resetApp();
-    } else {
+    // Clear all state
+    state.isAdmin = false;
+    state.cart = [];
+
+    if (auth.currentUser) {
         try {
             await auth.signOut();
         } catch (error) {
             console.error("Logout Error:", error);
         }
     }
+
+    resetApp();
+    // Force reload menu to remove admin buttons
+    await fetchMenu();
 }
 
 // Navigation
@@ -565,49 +568,56 @@ window.openEditItem = (id) => {
     app.itemModal.classList.remove('hidden');
 };
 
-function saveItem() {
-    const id = app.itemId.value ? parseInt(app.itemId.value) : Date.now();
+async function saveItem() {
+    const id = app.itemId.value ? parseInt(app.itemId.value) : null;
     const name = app.itemName.value;
-    const desc = app.itemDesc.value;
+    const description = app.itemDesc.value;
     const price = parseFloat(app.itemPrice.value);
     const category = app.itemCategory.value;
     const image = app.itemImage.value || "burger.jpg";
     const allergens = app.itemAllergens.value.split(',').map(s => s.trim()).filter(s => s);
 
-    const existingItemIndex = MENU_DATA.findIndex(i => i.id === id);
-
-    if (existingItemIndex >= 0) {
-        // Update
-        MENU_DATA[existingItemIndex] = {
-            ...MENU_DATA[existingItemIndex],
-            name, desc, price, category, image, allergens
-        };
-        alert("Item updated successfully!");
-    } else {
-        // Add
-        MENU_DATA.push({
-            id, name, desc, price, category, image, allergens,
-            options: [] // Default empty options
+    try {
+        const method = id ? 'PUT' : 'POST';
+        const response = await fetch('/api/menu/manage', {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, name, description, price, category, image, allergens })
         });
-        alert("Item added successfully!");
-    }
 
-    saveMenuData();
-    renderMenu();
-    app.itemModal.classList.add('hidden');
+        if (!response.ok) throw new Error('Save failed');
+
+        alert(id ? "Item updated successfully!" : "Item added successfully!");
+        await fetchMenu(); // Reload from database
+        app.itemModal.classList.add('hidden');
+    } catch (error) {
+        console.error("Error saving item:", error);
+        alert("Failed to save item: " + error.message);
+    }
 }
 
-function deleteItem() {
+async function deleteItem() {
     const id = parseInt(app.itemId.value);
-    if (confirm("Are you sure you want to delete this item?")) {
-        const index = MENU_DATA.findIndex(i => i.id === id);
-        if (index >= 0) {
-            MENU_DATA.splice(index, 1);
-            saveMenuData();
-            renderMenu();
-            app.itemModal.classList.add('hidden');
-            alert("Item deleted.");
-        }
+
+    if (!confirm("Are you sure you want to delete this item?")) {
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/menu/manage', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+        });
+
+        if (!response.ok) throw new Error('Delete failed');
+
+        alert("Item deleted successfully!");
+        await fetchMenu(); // Reload from database
+        app.itemModal.classList.add('hidden');
+    } catch (error) {
+        console.error("Error deleting item:", error);
+        alert("Failed to delete item: " + error.message);
     }
 }
 
@@ -652,21 +662,16 @@ async function renderProfile() {
         `;
     }
 
-    // Fetch Real Orders from Supabase
+    // Fetch Real Orders from API
     try {
-        let ordersQuery = supabase
-            .from('orders')
-            .select('*')
-            .order('created_at', { ascending: false });
+        const userId = currentUser?.uid || (state.isAdmin ? 'admin' : state.user);
+        const isAdmin = state.isAdmin ? 'true' : 'false';
+        const url = `/api/orders?user_id=${userId}&is_admin=${isAdmin}`;
 
-        // Filter by user if not admin
-        if (!state.isAdmin && currentUser) {
-            ordersQuery = ordersQuery.eq('user_id', currentUser.uid);
-        }
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Failed to fetch orders');
 
-        const { data: orders, error } = await ordersQuery;
-
-        if (error) throw error;
+        const orders = await response.json();
 
         if (!orders || orders.length === 0) {
             app.orderHistory.innerHTML = adminSettingsHtml + '<p style="color:var(--text-muted); text-align:center; padding:40px;">No orders yet</p>';
@@ -883,12 +888,14 @@ async function checkout() {
         btn.textContent = "Processing...";
         btn.disabled = true;
 
-        const { data, error } = await supabase
-            .from('orders')
-            .insert([orderData])
-            .select();
+        const response = await fetch('/api/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderData)
+        });
 
-        if (error) throw error;
+        if (!response.ok) throw new Error('Order failed');
+        const data = await response.json();
 
         console.log("✅ Order saved:", data);
         alert("Order placed successfully! Kitchen is preparing your food.");
