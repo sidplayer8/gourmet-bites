@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Authentication - Gourmet Bites</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #0a0a0f;
+            color: #e8e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: #16161f;
+            padding: 40px;
+            border-radius: 16px;
+            border: 2px solid #2a2a3a;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #ff6b35;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #a0a0b8;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .section {
+            background: #1f1f2e;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .section h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #ff6b35;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            background: #0a0a0f;
+            border: 2px solid #2a2a3a;
+            border-radius: 8px;
+            color: #e8e8f0;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #ff6b35;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #ff6b35;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #ff5722;
+        }
+
+        .status {
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .status.success {
+            background: #10b981;
+            color: white;
+        }
+
+        .status.error {
+            background: #ef4444;
+            color: white;
+        }
+
+        .links {
+            display: grid;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .links a {
+            padding: 12px;
+            background: #2a2a3a;
+            color: #e8e8f0;
+            text-decoration: none;
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .links a:hover {
+            background: #ff6b35;
+        }
+
+        code {
+            background: #0a0a0f;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: #ff6b35;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔑 Setup Authentication</h1>
+        <p>Set your user ID to access the admin dashboards. Use "1" for Owner access (full permissions).</p>
+
+        <div class="section">
+            <h2>Quick Setup (Owner)</h2>
+            <input type="number" id="ownerId" placeholder="Enter your user ID (default: 1)" value="1">
+            <button onclick="setupOwner()">Set as Owner</button>
+            <div id="ownerStatus" class="status"></div>
+        </div>
+
+        <div class="section">
+            <h2>Chef Setup</h2>
+            <input type="number" id="chefId" placeholder="Enter chef user ID (default: 2)" value="2">
+            <button onclick="setupChef()">Set as Chef</button>
+            <div id="chefStatus" class="status"></div>
+        </div>
+
+        <div class="section">
+            <h2>Waiter Setup</h2>
+            <input type="number" id="waiterId" placeholder="Enter waiter user ID (default: 3)" value="3">
+            <button onclick="setupWaiter()">Set as Waiter</button>
+            <div id="waiterStatus" class="status"></div>
+        </div>
+
+        <div class="section">
+            <h2>📱 Quick Access Links</h2>
+            <div class="links">
+                <a href="dashboard.html">Owner Dashboard</a>
+                <a href="chef.html">Chef Kitchen Display</a>
+                <a href="waiter.html">Waiter Station</a>
+                <a href="index.html">Menu Management</a>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>ℹ️ Instructions</h2>
+            <p style="font-size: 14px; margin-bottom: 10px;">1. Click "Set as Owner" to access all dashboards</p>
+            <p style="font-size: 14px; margin-bottom: 10px;">2. Open any dashboard link above</p>
+            <p style="font-size: 14px; margin-bottom: 10px;">3. If you see "Permission denied", you need to create your user account first</p>
+            <p style="font-size: 14px; margin-bottom: 0;">4. To create users, log into the main site with Google/Phone, then check your user ID in the browser console</p>
+        </div>
+    </div>
+
+    <script>
+        function setupOwner() {
+            const userId = document.getElementById('ownerId').value || '1';
+            localStorage.setItem('ownerId', userId);
+            localStorage.setItem('currentUserId', userId);
+            showStatus('ownerStatus', `✅ Owner ID set to ${userId}! You can now access the Owner Dashboard.`, 'success');
+        }
+
+        function setupChef() {
+            const userId = document.getElementById('chefId').value || '2';
+            localStorage.setItem('chefId', userId);
+            localStorage.setItem('currentUserId', userId);
+            showStatus('chefStatus', `✅ Chef ID set to ${userId}! You can now access the Kitchen Display.`, 'success');
+        }
+
+        function setupWaiter() {
+            const userId = document.getElementById('waiterId').value || '3';
+            localStorage.setItem('waiterId', userId);
+            localStorage.setItem('currentUserId', userId);
+            showStatus('waiterStatus', `✅ Waiter ID set to ${userId}! You can now access the Waiter Station.`, 'success');
+        }
+
+        function showStatus(elementId, message, type) {
+            const status = document.getElementById(elementId);
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 5000);
+        }
+
+        // Show current settings on load
+        window.onload = function() {
+            const ownerId = localStorage.getItem('ownerId');
+            const chefId = localStorage.getItem('chefId');
+            const waiterId = localStorage.getItem('waiterId');
+
+            if (ownerId) document.getElementById('ownerId').value = ownerId;
+            if (chefId) document.getElementById('chefId').value = chefId;
+            if (waiterId) document.getElementById('waiterId').value = waiterId;
+        };
+    </script>
+</body>
+</html>
