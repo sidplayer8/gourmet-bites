@@ -11,7 +11,12 @@ async function fetchMenu() {
         const response = await fetch('https://gourmet-bites.vercel.app/api/menu');
         if (!response.ok) throw new Error('Failed to fetch menu');
 
-        MENU_DATA = await response.json();
+        const data = await response.json();
+        // Normalize data to ensure price is always a number
+        MENU_DATA = data.map(item => ({
+            ...item,
+            price: parseFloat(item.price) || 0
+        }));
         console.log("✅ Menu loaded from database:", MENU_DATA.length, "items");
         renderMenu(); // Re-render menu after fetching
     } catch (error) {
@@ -610,6 +615,10 @@ function renderMenu() {
             </button>
         ` : '';
 
+        // Safely parse price with fallback
+        const priceValue = parseFloat(item.price) || 0;
+        const formattedPrice = priceValue.toFixed(2);
+
         return `
         <div class="menu-item" style="position:relative;">
             ${editBtn}
@@ -619,7 +628,7 @@ function renderMenu() {
                 <div class="item-desc">${item.description}</div>
                 <div class="item-allergens">${allergenTags}</div>
                 <div class="item-footer">
-                    <div class="item-price">$${parseFloat(item.price).toFixed(2)}</div>
+                    <div class="item-price">$${formattedPrice}</div>
                     <button class="add-btn" onclick="openCustomize(${item.id})">
                         <span class="material-icons-round">add</span>
                     </button>

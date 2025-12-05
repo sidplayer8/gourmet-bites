@@ -811,21 +811,24 @@
                                     const response = await fetch('https://gourmet-bites.vercel.app/api/menu?t=' + new Date().getTime());
                                     if (response.ok) {
                                         const data = await response.json();
+                                        console.log('✅ Loaded menu from API:', data.length, 'items');
                                         // Normalize data to ensure price is a number
                                         menuItems = data.map(item => ({
                                             ...item,
                                             price: parseFloat(item.price) || 0
                                         }));
                                     } else {
-                                        console.error('Failed to load menu:', response.status);
-                                        // Silent fallback
-                                        menuItems = getDefaultMenu();
+                                        console.error('❌ Failed to load menu. Status:', response.status);
+                                        const errorText = await response.text();
+                                        console.error('Response:', errorText);
+                                        alert('Failed to load menu from database. Please refresh the page.');
+                                        menuItems = [];
                                     }
                                     renderMenu();
                                 } catch (error) {
-                                    console.error('Error loading menu:', error);
-                                    // Silent fallback
-                                    menuItems = getDefaultMenu();
+                                    console.error('❌ Error loading menu:', error);
+                                    alert('Error connecting to menu API: ' + error.message + '\nPlease check your internet connection and refresh.');
+                                    menuItems = [];
                                     renderMenu();
                                 }
                             }
@@ -992,27 +995,6 @@
                                 }
                             });
 
-                            // Default menu (fallback)
-                            function getDefaultMenu() {
-                                return [
-                                    {
-                                        id: 1,
-                                        name: "Classic Burger",
-                                        description: "Juicy beef patty with fresh lettuce, tomato, and special sauce",
-                                        price: 12.99,
-                                        category: "Burgers",
-                                        image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800"
-                                    },
-                                    {
-                                        id: 2,
-                                        name: "Margherita Pizza",
-                                        description: "Fresh mozzarella, basil, and tomato sauce on thin crust",
-                                        price: 14.99,
-                                        category: "Pizza",
-                                        image: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=800"
-                                    }
-                                ];
-                            }
                         </script>
                     </body>
 
