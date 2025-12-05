@@ -643,37 +643,14 @@
             addCard.innerHTML = `
                 <span class="material-icons-round">add_circle</span>
                 <h3>Add New Item</h3>
-            `;
-            addCard.addEventListener('click', () => openModal());
-            menuGrid.appendChild(addCard);
-
-            // Render menu items
-            menuItems.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'menu-card';
-                card.innerHTML = `
-                    <img src="${item.image}" alt="${item.name}" class="card-image">
-                    <div class="card-content">
-                        <h3>${item.name}</h3>
-                        <p>${item.description}</p>
-                        <div class="card-meta">
-                            <span class="price">$${parseFloat(item.price).toFixed(2)}</span>
-                            <span class="category-badge">${item.category}</span>
-                        </div>
-                        <div class="card-actions">
-                            <button class="btn-edit" onclick="editItem(${item.id})">
-                                <span class="material-icons-round">edit</span>
-                                Edit
-                            </button>
-                            <button class="btn-delete" onclick="deleteItem(${item.id})">
                                 <span class="material-icons-round">delete</span>
                                 Delete
                             </button>
                         </div>
                     </div>
                 `;
-                menuGrid.appendChild(card);
-            });
+            menuGrid.appendChild(card);
+        });
         }
 
         // Modal functions
