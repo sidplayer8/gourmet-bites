@@ -110,9 +110,16 @@ module.exports = async function handler(req, res) {
         `;
         console.log('✅ Updated user permissions');
 
+        // 6. Fix user_id constraint to allow guest orders
+        await sql`
+            ALTER TABLE orders
+            ALTER COLUMN user_id DROP NOT NULL
+        `;
+        console.log('✅ Fixed user_id constraint - guest orders now supported');
+
         return res.status(200).json({
             success: true,
-            message: 'RBAC migration completed successfully',
+            message: 'RBAC migration completed successfully (including guest order fix)',
             timestamp: new Date().toISOString()
         });
 
