@@ -15,9 +15,10 @@ module.exports = async function handler(req, res) {
         if (method === 'POST') {
             // Create item
             const { name, description, price, category, image, allergens } = body;
+            const allergensArray = allergens || [];
             const result = await sql`
                 INSERT INTO menu_items (name, description, price, category, image, allergens)
-                VALUES (${name}, ${description}, ${price}, ${category}, ${image}, ${JSON.stringify(allergens || [])}::jsonb)
+                VALUES (${name}, ${description}, ${price}, ${category}, ${image}, ${allergensArray})
                 RETURNING *
             `;
             return res.status(201).json(result.rows[0]);
@@ -25,10 +26,11 @@ module.exports = async function handler(req, res) {
         } else if (method === 'PUT') {
             // Update item
             const { id, name, description, price, category, image, allergens } = body;
+            const allergensArray = allergens || [];
             const result = await sql`
-                UPDATE menu_items 
+                UPDATE menu_items
                 SET name = ${name}, description = ${description}, price = ${price},
-                    category = ${category}, image = ${image}, allergens = ${JSON.stringify(allergens || [])}::jsonb
+                    category = ${category}, image = ${image}, allergens = ${allergensArray}
                 WHERE id = ${id}
                 RETURNING *
             `;
