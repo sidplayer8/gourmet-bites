@@ -628,157 +628,128 @@
             } catch (error) {
                 console.error('Error loading menu:', error);
                 // Silent fallback
-                menuItems = getDefaultMenu();
-                renderMenu();
+
+                if (item) {
+                    document.getElementById('item-name').value = item.name;
+                    document.getElementById('item-description').value = item.description;
+                    document.getElementById('item-price').value = item.price;
+                    document.getElementById('item-category').value = item.category;
+                    document.getElementById('item-image').value = item.image;
+                } else {
+                    itemForm.reset();
+                }
+
+                itemModal.classList.add('active');
             }
-        }
 
-        // Render menu
-        function renderMenu() {
-            menuGrid.innerHTML = '';
-
-            // Add new item card
-            const addCard = document.createElement('div');
-            addCard.className = 'menu-card add-new';
-            addCard.innerHTML = `
-                <span class="material-icons-round">add_circle</span>
-                <h3>Add New Item</h3>
-                                <span class="material-icons-round">delete</span>
-                                Delete
-                            </button>
-                        </div>
-                    </div>
-                `;
-            menuGrid.appendChild(card);
-        });
-        }
-
-        // Modal functions
-        function openModal(item = null) {
-            editingItemId = item ? item.id : null;
-            modalTitle.textContent = item ? 'Edit Item' : 'Add New Item';
-
-            if (item) {
-                document.getElementById('item-name').value = item.name;
-                document.getElementById('item-description').value = item.description;
-                document.getElementById('item-price').value = item.price;
-                document.getElementById('item-category').value = item.category;
-                document.getElementById('item-image').value = item.image;
-            } else {
+            function closeModalFn() {
+                itemModal.classList.remove('active');
+                editingItemId = null;
                 itemForm.reset();
             }
 
-            itemModal.classList.add('active');
-        }
+            closeModal.addEventListener('click', closeModalFn);
+            cancelBtn.addEventListener('click', closeModalFn);
 
-        function closeModalFn() {
-            itemModal.classList.remove('active');
-            editingItemId = null;
-            itemForm.reset();
-        }
-
-        closeModal.addEventListener('click', closeModalFn);
-        cancelBtn.addEventListener('click', closeModalFn);
-
-        // Edit item
-        window.editItem = function (id) {
-            const item = menuItems.find(i => i.id === id);
-            if (item) openModal(item);
-        };
-
-        // Delete item
-        window.deleteItem = async function (id) {
-            if (!confirm('Are you sure you want to delete this item?')) return;
-
-            try {
-                const response = await fetch('https://gourmet-bites.vercel.app/api/menu/manage', {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id })
-                });
-
-                if (response.ok) {
-                    menuItems = menuItems.filter(i => i.id !== id);
-                    renderMenu();
-                } else {
-                    console.error('Failed to delete item');
-                }
-            } catch (error) {
-                console.error('Error deleting item:', error);
-            }
-        };
-
-        // Save item
-        itemForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const itemData = {
-                name: document.getElementById('item-name').value,
-                description: document.getElementById('item-description').value,
-                price: parseFloat(document.getElementById('item-price').value),
-                category: document.getElementById('item-category').value,
-                image: document.getElementById('item-image').value
+            // Edit item
+            window.editItem = function (id) {
+                const item = menuItems.find(i => i.id === id);
+                if (item) openModal(item);
             };
 
-            try {
-                const url = 'https://gourmet-bites.vercel.app/api/menu/manage';
+            // Delete item
+            window.deleteItem = async function (id) {
+                if (!confirm('Are you sure you want to delete this item?')) return;
 
-                if (editingItemId) {
-                    // Update existing item
-                    const response = await fetch(url, {
-                        method: 'PUT',
+                try {
+                    const response = await fetch('https://gourmet-bites.vercel.app/api/menu/manage', {
+                        method: 'DELETE',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ ...itemData, id: editingItemId })
+                        body: JSON.stringify({ id })
                     });
 
                     if (response.ok) {
-                        // Reload menu to get fresh data
-                        loadMenu();
+                        menuItems = menuItems.filter(i => i.id !== id);
+                        renderMenu();
                     } else {
-                        throw new Error('Failed to update');
+                        console.error('Failed to delete item');
                     }
-                } else {
-                    // Add new item
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(itemData)
-                    });
-
-                    if (response.ok) {
-                        loadMenu();
-                    } else {
-                        throw new Error('Failed to create');
-                    }
+                } catch (error) {
+                    console.error('Error deleting item:', error);
                 }
+            };
 
-                closeModalFn();
-            } catch (error) {
-                console.error('Error saving item:', error);
+            // Save item
+            itemForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const itemData = {
+                    name: document.getElementById('item-name').value,
+                    description: document.getElementById('item-description').value,
+                    price: parseFloat(document.getElementById('item-price').value),
+                    category: document.getElementById('item-category').value,
+                    image: document.getElementById('item-image').value
+                };
+
+                try {
+                    const url = 'https://gourmet-bites.vercel.app/api/menu/manage';
+
+                    if (editingItemId) {
+                        // Update existing item
+                        const response = await fetch(url, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ ...itemData, id: editingItemId })
+                        });
+
+                        if (response.ok) {
+                            // Reload menu to get fresh data
+                            loadMenu();
+                        } else {
+                            throw new Error('Failed to update');
+                        }
+                    } else {
+                        // Add new item
+                        const response = await fetch(url, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(itemData)
+                        });
+
+                        if (response.ok) {
+                            loadMenu();
+                        } else {
+                            throw new Error('Failed to create');
+                        }
+                    }
+
+                    closeModalFn();
+                } catch (error) {
+                    console.error('Error saving item:', error);
+                }
+            });
+
+            // Default menu (fallback)
+            function getDefaultMenu() {
+                return [
+                    {
+                        id: 1,
+                        name: "Classic Burger",
+                        description: "Juicy beef patty with fresh lettuce, tomato, and special sauce",
+                        price: 12.99,
+                        category: "Burgers",
+                        image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800"
+                    },
+                    {
+                        id: 2,
+                        name: "Margherita Pizza",
+                        description: "Fresh mozzarella, basil, and tomato sauce on thin crust",
+                        price: 14.99,
+                        category: "Pizza",
+                        image: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=800"
+                    }
+                ];
             }
-        });
-
-        // Default menu (fallback)
-        function getDefaultMenu() {
-            return [
-                {
-                    id: 1,
-                    name: "Classic Burger",
-                    description: "Juicy beef patty with fresh lettuce, tomato, and special sauce",
-                    price: 12.99,
-                    category: "Burgers",
-                    image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800"
-                },
-                {
-                    id: 2,
-                    name: "Margherita Pizza",
-                    description: "Fresh mozzarella, basil, and tomato sauce on thin crust",
-                    price: 14.99,
-                    category: "Pizza",
-                    image: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=800"
-                }
-            ];
-        }
     </script>
 </body>
 
