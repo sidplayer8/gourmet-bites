@@ -8,7 +8,7 @@ let MENU_DATA = [];
 // Fetch Menu from Vercel Postgres API
 async function fetchMenu() {
     try {
-        const response = await fetch('/api/menu');
+        const response = await fetch('https://gourmet-bites.vercel.app/api/menu');
         if (!response.ok) throw new Error('Failed to fetch menu');
 
         MENU_DATA = await response.json();
