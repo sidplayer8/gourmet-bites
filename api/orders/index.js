@@ -12,7 +12,16 @@ module.exports = async function handler(req, res) {
     try {
         if (req.method === 'GET') {
             // Get orders (with optional user filter)
-            const { user_id, is_admin } = req.query;
+            const { user_id, is_admin, setup } = req.query;
+
+            if (setup === 'true') {
+                console.log('Running RBAC Migration...');
+                await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'customer'`;
+                await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS permissions JSONB DEFAULT '{}'`;
+                await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS assigned_by TEXT`;
+                await sql`CREATE INDEX IF NOT EXISTS idx_users_role ON users(role)`;
+                return res.status(200).json({ message: 'Migration complete' });
+            }
 
             let result;
             if (is_admin === 'true') {
