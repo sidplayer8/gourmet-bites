@@ -12,27 +12,7 @@ module.exports = async function handler(req, res) {
     try {
         if (req.method === 'GET') {
             // Get orders (with optional user filter)
-            const { user_id, is_admin, setup } = req.query;
-
-            if (setup === 'true') {
-                const results = [];
-                try {
-                    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'customer'`;
-                    results.push('Added role column');
-                } catch (e) { results.push('Role error: ' + e.message); }
-
-                try {
-                    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS permissions JSONB DEFAULT '{}'`;
-                    results.push('Added permissions column');
-                } catch (e) { results.push('Permissions error: ' + e.message); }
-
-                try {
-                    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS assigned_by TEXT`;
-                    results.push('Added assigned_by column');
-                } catch (e) { results.push('Assigned_by error: ' + e.message); }
-
-                return res.status(200).json({ migration_results: results });
-            }
+            const { user_id, is_admin } = req.query;
 
             let result;
             if (is_admin === 'true') {
