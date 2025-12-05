@@ -23,11 +23,34 @@
             background: #16161f;
             padding: 20px;
             border-bottom: 2px solid #2a2a3a;
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .header h1 {
             font-size: 28px;
+            color: #ff6b35;
+            flex: 1;
+            text-align: center;
+        }
+
+        .btn-back {
+            padding: 12px 20px;
+            background: #0a0a0f;
+            color: #e8e8f0;
+            border: 2px solid #2a2a3a;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .btn-back:hover {
+            border-color: #ff6b35;
             color: #ff6b35;
         }
 
@@ -136,7 +159,12 @@
 </head>
 <body>
     <div class="header">
+        <a href="index.html" class="btn-back">
+            <span class="material-icons-round">arrow_back</span>
+            Back
+        </a>
         <h1>🍽️ Waiter Station</h1>
+        <div style="width: 100px;"></div>
     </div>
 
     <div class="tabs">

@@ -21,12 +21,35 @@
         }
 
         .header {
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 30px;
         }
 
         .header h1 {
             font-size: 36px;
+            color: #ff6b35;
+            flex: 1;
+            text-align: center;
+        }
+
+        .btn-back {
+            padding: 12px 20px;
+            background: #16161f;
+            color: #e8e8f0;
+            border: 2px solid #2a2a3a;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .btn-back:hover {
+            border-color: #ff6b35;
             color: #ff6b35;
         }
 
@@ -121,8 +144,15 @@
 </head>
 <body>
     <div class="header">
-        <h1>🔥 Kitchen Display</h1>
-        <p style="color: #a0a0b8;">Active Orders</p>
+        <a href="index.html" class="btn-back">
+            <span class="material-icons-round">arrow_back</span>
+            Back
+        </a>
+        <div style="text-align: center; flex: 1;">
+            <h1>🔥 Kitchen Display</h1>
+            <p style="color: #a0a0b8;">Active Orders</p>
+        </div>
+        <div style="width: 100px;"></div>
     </div>
 
     <div class="orders-grid" id="ordersGrid">
@@ -135,7 +165,7 @@
 
         async function loadOrders() {
             try {
-                const response = await fetch(`${API_BASE}/orders?status=pending,preparing&limit=50`, {
+                const response = await fetch(`${API_BASE}/orders?limit=50`, {
                     headers: { 'X-User-ID': currentUserId }
                 });
                 const data = await response.json();
@@ -148,7 +178,7 @@
         function renderOrders(orders) {
             const container = document.getElementById('ordersGrid');
 
-            const activeOrders = orders.filter(o => ['pending', 'preparing'].includes(o.status));
+            const activeOrders = orders.filter(o => ['pending', 'preparing', 'ready'].includes(o.status));
 
             if (activeOrders.length === 0) {
                 container.innerHTML = '<div class="empty"><span class="material-icons-round" style="font-size: 64px; opacity: 0.3;">check_circle</span><p style="font-size: 18px;">All caught up!</p></div>';
@@ -184,9 +214,13 @@
                                 <button class="btn btn-start" onclick="updateStatus(${order.id}, 'preparing')">
                                     Start Cooking
                                 </button>
-                            ` : `
+                            ` : order.status === 'preparing' ? `
                                 <button class="btn btn-ready" onclick="updateStatus(${order.id}, 'ready')">
                                     Mark Ready
+                                </button>
+                            ` : `
+                                <button class="btn btn-ready" onclick="updateStatus(${order.id}, 'completed')" style="background: #10b981;">
+                                    Mark Served
                                 </button>
                             `}
                         </div>
