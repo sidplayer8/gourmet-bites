@@ -12,7 +12,35 @@ module.exports = async function handler(req, res) {
     try {
         if (req.method === 'GET') {
             // Get orders (with optional user filter)
-            const { user_id, is_admin } = req.query;
+            const { user_id, is_admin, setup } = req.query;
+
+            if (setup === 'true') {
+                try {
+                    await sql`
+                        CREATE TABLE IF NOT EXISTS users (
+                            id SERIAL PRIMARY KEY,
+                            phone_number TEXT UNIQUE,
+                            google_email TEXT UNIQUE,
+                            google_id TEXT UNIQUE,
+                            display_name TEXT NOT NULL,
+                            avatar_url TEXT,
+                            role TEXT DEFAULT 'customer',
+                            permissions JSONB DEFAULT '{}',
+                            assigned_by TEXT,
+                            created_at TIMESTAMP DEFAULT NOW(),
+                            last_login TIMESTAMP DEFAULT NOW()
+                        )
+                    `;
+                    await sql`CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone_number)`;
+                    await sql`CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id)`;
+                    await sql`CREATE INDEX IF NOT EXISTS idx_users_email ON users(google_email)`;
+                    await sql`CREATE INDEX IF NOT EXISTS idx_users_role ON users(role)`;
+
+                    return res.status(200).json({ message: 'Users table created with RBAC columns' });
+                } catch (e) {
+                    return res.status(500).json({ error: e.message });
+                }
+            }
 
             let result;
             if (is_admin === 'true') {
