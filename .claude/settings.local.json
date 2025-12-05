@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs:*)",
+      "Bash(twilio --version:*)",
+      "Bash(vercel --version:*)",
+      "Bash(twilio login:*)",
+      "Bash(vercel whoami:*)",
+      "Bash(set:*)",
+      "Bash(twilio profiles:use:*)",
+      "Bash(twilio profiles:create:*)",
+      "Bash(twilio api:core:accounts:fetch:*)",
+      "Bash(twilio profiles:list:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(vercel ls:*)",
+      "Bash(vercel --prod:*)",
+      "Bash(node fix-menu-items.js:*)",
+      "Bash(curl:*)",
+      "Bash(node:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
