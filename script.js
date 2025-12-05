@@ -31,16 +31,39 @@ if (storedMenu) {
 
 const CATEGORIES = ["All", "Burgers", "Pizza", "Japanese", "Indian", "Mexican", "Chinese", "Italian", "Thai", "Western", "Mediterranean", "Starters", "Salads", "Desserts", "Drinks"];
 
-// State
+// State - Initialize from localStorage to support admin login
 let state = {
-    user: null,
+    user: localStorage.getItem('user') || null,
     avatar: null,
-    isAdmin: false,
+    isAdmin: localStorage.getItem('isAdmin') === 'true',
     cart: [],
     activeCategory: "All",
     activeTab: 'menu',
     currentCustomizingItem: null
 };
+
+// Load cart from localStorage on page load
+function loadCart() {
+    try {
+        const savedCart = localStorage.getItem('cart');
+        if (savedCart) {
+            state.cart = JSON.parse(savedCart);
+            console.log('✅ Cart loaded from localStorage:', state.cart.length, 'items');
+        }
+    } catch (error) {
+        console.error('❌ Error loading cart:', error);
+        state.cart = [];
+    }
+}
+
+// Save cart to localStorage
+function saveCart() {
+    try {
+        localStorage.setItem('cart', JSON.stringify(state.cart));
+    } catch (error) {
+        console.error('❌ Error saving cart:', error);
+    }
+}
 
 // Admin Credentials (Default)
 const DEFAULT_ADMIN = {
@@ -123,6 +146,10 @@ async function init() {
     setupEventListeners();
     renderCategories();
 
+    // Load cart from localStorage
+    loadCart();
+    updateCartUI(); // Update UI with loaded cart
+
     // Fetch menu from Supabase
     await fetchMenu();
 
@@ -139,12 +166,18 @@ async function init() {
                 currentUser = user;
                 state.user = user.displayName || user.phoneNumber || user.email;
                 state.avatar = user.photoURL;
-                state.isAdmin = false;
+
+                // Check if user is admin from localStorage BEFORE overwriting
+                const storedIsAdmin = localStorage.getItem('isAdmin');
+                state.isAdmin = storedIsAdmin === 'true';
+
                 updateUserUI(user);
                 enterApp();
 
-                // Navigate to user route if not already on a route
-                if (!window.location.hash || window.location.hash === '#/' || window.location.hash === '#/login') {
+                // Navigate to user route if not already on a route AND not admin AND not on admin route
+                const currentHash = window.location.hash;
+                const isOnAdminRoute = currentHash.includes('/admin');
+                if (!state.isAdmin && !isOnAdminRoute && (!currentHash || currentHash === '#/' || currentHash === '#/login')) {
                     const encryptedId = encryptUserId(state.user);
                     Router.navigate('/user/' + encryptedId);
                 }
@@ -175,10 +208,10 @@ function setupEventListeners() {
                 if (window.sendTwilioVerificationCode) {
                     window.sendTwilioVerificationCode(phone);
                 } else {
-                    alert("SMS service not available. Please try again.");
+                    showToast("SMS service not available. Please try again.");
                 }
             } else {
-                alert("Please enter a valid phone number (at least 8 digits).");
+                showToast("Please enter a valid phone number (at least 8 digits).");
             }
         });
     } else {
@@ -198,7 +231,7 @@ function setupEventListeners() {
             if (window.verifyTwilioSMSCode) {
                 window.verifyTwilioSMSCode(enteredCode);
             } else {
-                alert("SMS verification not available. Please try again.");
+                showToast("SMS verification not available. Please try again.");
             }
         });
     }
@@ -232,9 +265,30 @@ function setupEventListeners() {
 
                 await auth.signInWithPopup(provider);
 
+                // Save user to database
+                const user = auth.currentUser;
+                if (user) {
+                    try {
+                        await fetch('/api/auth/save-user', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                googleId: user.uid,
+                                googleEmail: user.email,
+                                displayName: user.displayName || user.email,
+                                avatarUrl: user.photoURL
+                            })
+                        });
+                        console.log('✅ User saved to database');
+                    } catch (dbError) {
+                        console.error('❌ Failed to save user to DB:', dbError);
+                        // Don't block login if DB save fails
+                    }
+                }
+
             } catch (error) {
                 console.error(error);
-                alert("Login Failed: " + error.message);
+                showToast("Login Failed: " + error.message);
                 app.googleLoginBtn.disabled = false;
                 app.googleLoginBtn.innerHTML = originalContent;
             }
@@ -276,7 +330,7 @@ function setupEventListeners() {
             if (storedCreds && user === storedCreds.user && pass === storedCreds.pass) {
                 loginAdmin(user);
             } else {
-                alert("Invalid Admin Credentials");
+                showToast("Invalid Admin Credentials");
             }
         });
     }
@@ -414,6 +468,15 @@ function resetApp() {
         <span>Sign in with Google</span>
     `;
 
+    // Reset phone/verification steps
+    const phoneStep = document.getElementById('phone-step');
+    const verificationStep = document.getElementById('verification-step');
+    const phoneInput = document.getElementById('phone');
+
+    if (phoneStep) phoneStep.classList.remove('hidden');
+    if (verificationStep) verificationStep.classList.add('hidden');
+    if (phoneInput) phoneInput.value = '';
+
     // Navigate to login route
     if (typeof Router !== 'undefined' && window.location.hash !== '#/login') {
         Router.navigate('/login');
@@ -471,6 +534,9 @@ async function handleLogout() {
     // Clear all state
     state.isAdmin = false;
     state.cart = [];
+
+    // Clear cart from localStorage
+    localStorage.removeItem('cart');
 
     if (auth.currentUser) {
         try {
@@ -843,6 +909,7 @@ function addToCartWithCustomization() {
         state.cart.push(cartItem);
     }
 
+    saveCart(); // Persist cart to localStorage
     updateCartUI();
     closeCustomize();
 
@@ -1066,6 +1133,7 @@ const Router = {
                 this.handleLoginRoute();
                 break;
             case 'admin':
+            case 'admin-login':  // Additional secure admin URL
                 this.handleAdminRoute();
                 break;
             case 'user':

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Gourmet Bites</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Round" rel="stylesheet">
+</head>
+
+<body>
+    <div id="admin-login-page" class="view">
+        <div class="login-container">
+            <div class="brand-logo">
+                <span class="material-icons-round">admin_panel_settings</span>
+            </div>
+            <h1>Admin Access</h1>
+            <p class="subtitle">Authorized personnel only</p>
+
+            <div class="input-group">
+                <span class="material-icons-round">person</span>
+                <input type="text" id="admin-username" placeholder="Username" autocomplete="username">
+            </div>
+
+            <div class="input-group">
+                <span class="material-icons-round">lock</span>
+                <input type="password" id="admin-password" placeholder="Password" autocomplete="current-password">
+            </div>
+
+            <button id="admin-login-submit" class="btn-primary full-width">
+                <span class="material-icons-round">login</span>
+                Login as Admin
+            </button>
+
+            <p class="disclaimer" style="margin-top: 40px;">
+                <a href="/" style="color: var(--primary); text-decoration: none;">← Back to Customer Login</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script src="supabase-client.js"></script>
+    <script>
+        // Admin login credentials (in production, validate on backend)
+        const ADMIN_CREDENTIALS = {
+            username: 'sidplayer8',
+            password: 'adithidumb'
+        };
+
+        document.getElementById('admin-login-submit').addEventListener('click', function () {
+            const username = document.getElementById('admin-username').value.trim();
+            const password = document.getElementById('admin-password').value;
+
+            if (!username || !password) {
+                console.error('Please enter both username and password');
+                const statusDiv = document.getElementById('login-status');
+                if (statusDiv) statusDiv.textContent = 'Please enter both username and password';
+
+                return;
+            }
+
+            if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+                // Store admin session
+                localStorage.setItem('isAdmin', 'true');
+                localStorage.setItem('adminUser', username);
+
+                // Redirect to main app
+                window.location.href = '/index.html#/admin';
+            } else {
+                console.error('Invalid credentials. Access denied.');
+                const statusDiv = document.getElementById('login-status');
+                if (statusDiv) statusDiv.textContent = 'Invalid credentials. Access denied.';
+
+                document.getElementById('admin-password').value = '';
+            }
+        });
+
+        // Allow Enter key to submit
+        document.getElementById('admin-password').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                document.getElementById('admin-login-submit').click();
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -45,7 +45,12 @@ window.sendTwilioVerificationCode = async function (phoneNumber) {
         }
     } catch (error) {
         console.error("❌ SMS send failed:", error);
-        alert("Failed to send SMS: " + error.message);
+        console.error("Failed to send SMS: " + error.message);
+        const statusDiv = document.getElementById("status-message");
+        if (statusDiv) {
+            statusDiv.textContent = "Failed to send SMS: " + error.message;
+            statusDiv.style.color = "red";
+        }
     } finally {
         if (sendButton) {
             sendButton.disabled = false;
@@ -91,7 +96,12 @@ window.verifyTwilioSMSCode = async function (code) {
         }
     } catch (error) {
         console.error("❌ Verification failed:", error);
-        alert(error.message || "Invalid code. Try again.");
+        console.error(error.message || "Invalid code. Try again.");
+        const statusDiv = document.getElementById("status-message");
+        if (statusDiv) {
+            statusDiv.textContent = error.message || "Invalid code. Try again.";
+            statusDiv.style.color = "red";
+        }
 
         if (verifyButton) {
             verifyButton.disabled = false;
