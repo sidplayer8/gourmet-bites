@@ -1,14 +1,4 @@
 {
     "version": 2,
-    "name": "gourmet-bites-admin",
-    "builds": [
-        {
-            "src": "*.html",
-            "use": "@vercel/static"
-        },
-        {
-            "src": "*.css",
-            "use": "@vercel/static"
-        }
-    ]
+    "name": "gourmet-bites-admin"
 }

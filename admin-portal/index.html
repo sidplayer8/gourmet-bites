@@ -149,6 +149,32 @@
             border-bottom: 1px solid var(--border);
         }
 
+        .nav-menu {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .nav-link {
+            padding: 10px 20px;
+            background: var(--surface);
+            color: var(--text);
+            text-decoration: none;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link:hover {
+            background: var(--surface-hover);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
         .dashboard-header h1 {
             font-size: 32px;
             display: flex;
@@ -474,10 +500,24 @@
                 <span class="material-icons-round">restaurant_menu</span>
                 Menu Management
             </h1>
-            <button class="btn-logout" id="logout-btn">
-                <span class="material-icons-round">logout</span>
-                Logout
-            </button>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <a href="dashboard.html" class="nav-link">
+                    <span class="material-icons-round">dashboard</span>
+                    Owner Dashboard
+                </a>
+                <a href="chef.html" class="nav-link">
+                    <span class="material-icons-round">soup_kitchen</span>
+                    Kitchen Display
+                </a>
+                <a href="waiter.html" class="nav-link">
+                    <span class="material-icons-round">room_service</span>
+                    Waiter Station
+                </a>
+                <button class="btn-logout" id="logout-btn">
+                    <span class="material-icons-round">logout</span>
+                    Logout
+                </button>
+            </div>
         </div>
 
         <div class="menu-grid" id="menu-grid">
