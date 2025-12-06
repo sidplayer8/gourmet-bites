@@ -212,9 +212,9 @@
                         <div class="order-items">
                             ${items.map(item => `
                                 <div class="item">
-                                    <span class="item-qty">${item.quantity}x</span>
+                                    <span class="item-qty">${item.qty || item.quantity || 1}x</span>
                                     <span class="item-name">${item.name}</span>
-                                    ${item.customizations ? `<div style="font-size: 13px; color: #a0a0b8;">${item.customizations}</div>` : ''}
+                                    ${item.instructions ? `<div style="font-size: 13px; color: #a0a0b8;">Note: ${item.instructions}</div>` : ''}
                                 </div>
                             `).join('')}
                         </div>

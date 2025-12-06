@@ -177,12 +177,7 @@
         <div id="tables-view">
             <h2 style="margin-bottom: 20px;">Table Status</h2>
             <div class="table-grid" id="tablesGrid">
-                ${[1,2,3,4,5,6,7,8,9,10,11,12].map(num => `
-                    <div class="table-card" onclick="viewTable(${num})">
-                        <div class="table-number">Table ${num}</div>
-                        <div class="table-status">Available</div>
-                    </div>
-                `).join('')}
+                <!-- Tables will be rendered by JavaScript -->
             </div>
         </div>
 
@@ -202,6 +197,16 @@
         if (!currentUserId) {
             alert('Please login first at /login.html');
             window.location.href = 'login.html';
+        }
+
+        function renderTables() {
+            const tablesGrid = document.getElementById('tablesGrid');
+            tablesGrid.innerHTML = [1,2,3,4,5,6,7,8,9,10,11,12].map(num => `
+                <div class="table-card" onclick="viewTable(${num})">
+                    <div class="table-number">Table ${num}</div>
+                    <div class="table-status">Available</div>
+                </div>
+            `).join('');
         }
 
         function showTab(tab) {
@@ -256,6 +261,8 @@
             alert(`Table ${tableNum} - Feature coming soon!`);
         }
 
+        // Initialize
+        renderTables();
         loadOrders();
         setInterval(loadOrders, 15000);
     </script>

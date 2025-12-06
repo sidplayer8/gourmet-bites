@@ -539,6 +539,14 @@
                     <input type="tel" class="form-input" id="phone" placeholder="+1234567890">
                 </div>
                 <div class="form-group">
+                    <label class="form-label">Username * (for staff login)</label>
+                    <input type="text" class="form-input" id="username" placeholder="chef1, waiter2, etc." required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password * (for staff login)</label>
+                    <input type="password" class="form-input" id="password" placeholder="Minimum 6 characters" minlength="6" required>
+                </div>
+                <div class="form-group">
                     <label class="form-label">Role *</label>
                     <select class="form-select" id="role" required>
                         <option value="chef">Chef</option>
@@ -708,11 +716,14 @@
                         ${users.map(user => `
                             <tr>
                                 <td>${user.display_name || 'Unknown'}</td>
-                                <td>${user.google_email || user.phone_number || '-'}</td>
+                                <td>${user.username || user.google_email || user.phone_number || '-'}</td>
                                 <td><span class="badge badge-${user.role}">${user.role}</span></td>
                                 <td><span class="badge badge-${user.is_active ? 'active' : 'inactive'}">${user.is_active ? 'Active' : 'Inactive'}</span></td>
                                 <td>${new Date(user.created_at).toLocaleDateString()}</td>
                                 <td>
+                                    <button class="btn-icon" onclick='editUser(${JSON.stringify(user)})' style="margin-right: 8px; background: #ff6b35;">
+                                        <span class="material-icons-round" style="font-size: 16px;">edit</span>
+                                    </button>
                                     <button class="btn-icon btn-danger" onclick="deleteUser(${user.id}, '${user.display_name}')">
                                         <span class="material-icons-round" style="font-size: 16px;">delete</span>
                                     </button>
@@ -789,10 +800,16 @@
                 document.getElementById('displayName').value = user.display_name;
                 document.getElementById('email').value = user.google_email || '';
                 document.getElementById('phone').value = user.phone_number || '';
+                document.getElementById('username').value = user.username || '';
+                document.getElementById('password').value = ''; // Don't show password
+                document.getElementById('password').placeholder = 'Leave blank to keep current password';
+                document.getElementById('password').removeAttribute('required'); // Not required when editing
                 document.getElementById('role').value = user.role;
                 document.getElementById('notes').value = user.notes || '';
             } else {
                 document.getElementById('userForm').reset();
+                document.getElementById('password').setAttribute('required', 'required');
+                document.getElementById('password').placeholder = 'Minimum 6 characters';
             }
             document.getElementById('userModal').classList.add('active');
         }
@@ -801,20 +818,36 @@
             document.getElementById('userModal').classList.remove('active');
         }
 
+        function editUser(user) {
+            openUserModal(user);
+            // Store user ID for updating
+            document.getElementById('userForm').dataset.userId = user.id;
+        }
+
         async function saveUser(event) {
             event.preventDefault();
+
+            const userId = event.target.dataset.userId;
+            const isEditing = !!userId;
 
             const userData = {
                 display_name: document.getElementById('displayName').value,
                 email: document.getElementById('email').value,
                 phone: document.getElementById('phone').value,
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value || undefined, // Only include if provided
                 role: document.getElementById('role').value,
                 notes: document.getElementById('notes').value
             };
 
+            // If editing, include user ID
+            if (isEditing) {
+                userData.id = userId;
+            }
+
             try {
                 const response = await fetch(`${API_BASE}/admin/users`, {
-                    method: 'POST',
+                    method: isEditing ? 'PUT' : 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-User-ID': currentUserId
@@ -823,8 +856,9 @@
                 });
 
                 if (response.ok) {
-                    alert('Staff member added successfully!');
+                    alert(isEditing ? 'Staff member updated successfully!' : 'Staff member added successfully!');
                     closeUserModal();
+                    delete event.target.dataset.userId; // Clear the user ID
                     loadUsers();
                     loadOverviewData();
                 } else {
