@@ -144,9 +144,9 @@
 </head>
 <body>
     <div class="header">
-        <a href="index.html" class="btn-back">
+        <a href="login.html" class="btn-back" onclick="localStorage.clear()">
             <span class="material-icons-round">arrow_back</span>
-            Back
+            Logout
         </a>
         <div style="text-align: center; flex: 1;">
             <h1>🔥 Kitchen Display</h1>
@@ -191,7 +191,12 @@
             }
 
             container.innerHTML = activeOrders.map(order => {
-                const items = JSON.parse(order.items || '[]');
+                let items = [];
+                try {
+                    items = typeof order.items === 'string' ? JSON.parse(order.items) : order.items;
+                } catch (e) {
+                    items = [];
+                }
                 const timeAgo = getTimeAgo(order.created_at);
 
                 return `
