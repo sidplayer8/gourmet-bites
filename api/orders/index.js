@@ -30,11 +30,7 @@ module.exports = async function handler(req, res) {
 
         if (method === 'GET') {
             // Get orders with filters
-            const { user_id, status, order_type, from_date, to_date, limit = 100 } = query;
-
-            // Build dynamic query
-            let queryConditions = [];
-            let queryParams = [];
+            const { user_id, status, order_type, limit = 100 } = query;
 
             // Check if user has permission to view all orders
             let canViewAll = false;
@@ -49,38 +45,42 @@ module.exports = async function handler(req, res) {
             // Apply filters
             if (!canViewAll && user_id) {
                 // Regular user can only see their own orders
-                queryConditions.push(`user_id = ${user_id}`);
+                const result = await sql`
+                    SELECT * FROM orders
+                    WHERE user_id = ${user_id}
+                    ORDER BY created_at DESC
+                    LIMIT ${parseInt(limit)}
+                `;
+
+                const stats = await sql`
+                    SELECT
+                        COUNT(*) as total_orders,
+                        SUM(total) as total_revenue,
+                        COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending_count,
+                        COUNT(CASE WHEN status = 'preparing' THEN 1 END) as preparing_count,
+                        COUNT(CASE WHEN status = 'ready' THEN 1 END) as ready_count,
+                        COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_count
+                    FROM orders
+                    WHERE user_id = ${user_id}
+                `;
+
+                return res.status(200).json({
+                    orders: result.rows,
+                    statistics: stats.rows[0],
+                    total: result.rows.length
+                });
             } else if (!canViewAll) {
                 return res.status(403).json({ error: 'Permission denied' });
             }
 
-            if (status) {
-                queryConditions.push(`status = '${status}'`);
-            }
-
-            if (order_type) {
-                queryConditions.push(`order_type = '${order_type}'`);
-            }
-
-            if (from_date) {
-                queryConditions.push(`created_at >= '${from_date}'`);
-            }
-
-            if (to_date) {
-                queryConditions.push(`created_at <= '${to_date}'`);
-            }
-
-            const whereClause = queryConditions.length > 0 ? `WHERE ${queryConditions.join(' AND ')}` : '';
-
-            const result = await sql.unsafe(`
+            // Staff can view all orders
+            const result = await sql`
                 SELECT * FROM orders
-                ${whereClause}
                 ORDER BY created_at DESC
                 LIMIT ${parseInt(limit)}
-            `);
+            `;
 
-            // Get statistics
-            const stats = await sql.unsafe(`
+            const stats = await sql`
                 SELECT
                     COUNT(*) as total_orders,
                     SUM(total) as total_revenue,
@@ -89,8 +89,7 @@ module.exports = async function handler(req, res) {
                     COUNT(CASE WHEN status = 'ready' THEN 1 END) as ready_count,
                     COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_count
                 FROM orders
-                ${whereClause}
-            `);
+            `;
 
             return res.status(200).json({
                 orders: result.rows,
