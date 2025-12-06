@@ -36,33 +36,38 @@ module.exports = async function handler(req, res) {
 
         // Create owner account
         const owner = await sql`
-            INSERT INTO users (display_name, role, permissions, is_active, created_by)
-            VALUES ('Restaurant Owner', 'owner', ${JSON.stringify(OWNER_PERMISSIONS)}::jsonb, true, 'system')
-            RETURNING id, display_name, role
+            INSERT INTO users (username, password, display_name, role, permissions, is_active, created_by)
+            VALUES ('owner', 'admin123', 'Restaurant Owner', 'owner', ${JSON.stringify(OWNER_PERMISSIONS)}::jsonb, true, 'system')
+            RETURNING id, username, display_name, role
         `;
 
         // Create sample chef account
         const chef = await sql`
-            INSERT INTO users (display_name, role, permissions, is_active, created_by)
-            VALUES ('Head Chef', 'chef', ${JSON.stringify(CHEF_PERMISSIONS)}::jsonb, true, 'system')
-            RETURNING id, display_name, role
+            INSERT INTO users (username, password, display_name, role, permissions, is_active, created_by)
+            VALUES ('chef', 'chef123', 'Head Chef', 'chef', ${JSON.stringify(CHEF_PERMISSIONS)}::jsonb, true, 'system')
+            RETURNING id, username, display_name, role
         `;
 
         // Create sample waiter account
         const waiter = await sql`
-            INSERT INTO users (display_name, role, permissions, is_active, created_by)
-            VALUES ('Waiter', 'waiter', ${JSON.stringify(WAITER_PERMISSIONS)}::jsonb, true, 'system')
-            RETURNING id, display_name, role
+            INSERT INTO users (username, password, display_name, role, permissions, is_active, created_by)
+            VALUES ('waiter', 'waiter123', 'Waiter', 'waiter', ${JSON.stringify(WAITER_PERMISSIONS)}::jsonb, true, 'system')
+            RETURNING id, username, display_name, role
         `;
 
         return res.status(200).json({
             message: 'Default accounts created successfully',
             accounts: {
-                owner: owner.rows[0],
-                chef: chef.rows[0],
-                waiter: waiter.rows[0]
+                owner: { ...owner.rows[0], password: 'admin123' },
+                chef: { ...chef.rows[0], password: 'chef123' },
+                waiter: { ...waiter.rows[0], password: 'waiter123' }
             },
-            instructions: 'Use these IDs in the setup-auth.html page'
+            credentials: {
+                owner: 'username: owner, password: admin123',
+                chef: 'username: chef, password: chef123',
+                waiter: 'username: waiter, password: waiter123'
+            },
+            instructions: 'Staff can login at /login.html with these credentials'
         });
     } catch (e) {
         return res.status(500).json({ error: e.message, stack: e.stack });

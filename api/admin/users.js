@@ -107,7 +107,7 @@ module.exports = async function handler(req, res) {
                 return res.status(403).json({ error: 'Forbidden: No permission to create users' });
             }
 
-            const { display_name, email, phone, google_id, role, notes, customPermissions } = body;
+            const { display_name, email, phone, google_id, username, password, role, notes, customPermissions } = body;
 
             // Validate
             if (!display_name || !role) {
@@ -118,13 +118,18 @@ module.exports = async function handler(req, res) {
                 return res.status(400).json({ error: 'Invalid role' });
             }
 
+            // For staff roles, require username and password
+            if (['owner', 'chef', 'waiter'].includes(role) && (!username || !password)) {
+                return res.status(400).json({ error: 'Username and password required for staff accounts' });
+            }
+
             // Get permissions
             const userPermissions = customPermissions || ROLE_PERMISSIONS[role];
 
             const result = await sql`
-                INSERT INTO users (phone_number, google_email, google_id, display_name, role, permissions, assigned_by, created_by, notes, is_active)
-                VALUES (${phone || null}, ${email || null}, ${google_id || null}, ${display_name}, ${role}, ${JSON.stringify(userPermissions)}::jsonb, ${currentUserId}, ${user.display_name || user.google_email}, ${notes || null}, true)
-                RETURNING id, phone_number, google_email, display_name, role, permissions, is_active, created_at
+                INSERT INTO users (phone_number, google_email, google_id, username, password, display_name, role, permissions, assigned_by, created_by, notes, is_active)
+                VALUES (${phone || null}, ${email || null}, ${google_id || null}, ${username || null}, ${password || null}, ${display_name}, ${role}, ${JSON.stringify(userPermissions)}::jsonb, ${currentUserId}, ${user.display_name || user.google_email}, ${notes || null}, true)
+                RETURNING id, username, phone_number, google_email, display_name, role, permissions, is_active, created_at
             `;
 
             const newUser = result.rows[0];
@@ -139,7 +144,7 @@ module.exports = async function handler(req, res) {
                 return res.status(403).json({ error: 'Forbidden: No permission to edit users' });
             }
 
-            const { id, display_name, role, permissions: newPermissions, is_active, notes } = body;
+            const { id, display_name, username, password, role, permissions: newPermissions, is_active, notes } = body;
 
             if (!id) {
                 return res.status(400).json({ error: 'User ID required' });
@@ -159,13 +164,15 @@ module.exports = async function handler(req, res) {
             const result = await sql`
                 UPDATE users
                 SET display_name = COALESCE(${display_name}, display_name),
+                    username = COALESCE(${username}, username),
+                    password = COALESCE(${password}, password),
                     role = COALESCE(${role}, role),
                     permissions = COALESCE(${finalPermissions ? JSON.stringify(finalPermissions) : null}::jsonb, permissions),
                     is_active = COALESCE(${is_active}, is_active),
                     notes = COALESCE(${notes}, notes),
                     updated_at = CURRENT_TIMESTAMP
                 WHERE id = ${id}
-                RETURNING id, phone_number, google_email, display_name, role, permissions, is_active, updated_at
+                RETURNING id, username, phone_number, google_email, display_name, role, permissions, is_active, updated_at
             `;
 
             if (result.rows.length === 0) {

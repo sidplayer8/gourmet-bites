@@ -13,6 +13,8 @@ module.exports = async function handler(req, res) {
         // 1. Add new columns to users table if they don't exist
         await sql`
             ALTER TABLE users
+            ADD COLUMN IF NOT EXISTS username VARCHAR(100) UNIQUE,
+            ADD COLUMN IF NOT EXISTS password VARCHAR(255),
             ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true,
             ADD COLUMN IF NOT EXISTS assigned_by INTEGER,
             ADD COLUMN IF NOT EXISTS created_by VARCHAR(100),
