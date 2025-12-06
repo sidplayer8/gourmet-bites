@@ -561,7 +561,13 @@
     <script>
         // Configuration
         const API_BASE = 'https://gourmet-bites.vercel.app/api';
-        let currentUserId = localStorage.getItem('ownerId') || '1'; // Get from login
+        // Check if user is logged in
+        let currentUserId = localStorage.getItem('currentUserId') || localStorage.getItem('ownerId') || null;
+
+        if (!currentUserId) {
+            alert('Please login first at /login.html');
+            window.location.href = 'login.html';
+        }
 
         // Initialize
         window.addEventListener('DOMContentLoaded', () => {

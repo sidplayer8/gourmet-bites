@@ -197,7 +197,12 @@
 
     <script>
         const API_BASE = 'https://gourmet-bites.vercel.app/api';
-        let currentUserId = localStorage.getItem('waiterId') || '3';
+        let currentUserId = localStorage.getItem('currentUserId') || localStorage.getItem('waiterId') || null;
+
+        if (!currentUserId) {
+            alert('Please login first at /login.html');
+            window.location.href = 'login.html';
+        }
 
         function showTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));

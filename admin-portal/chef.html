@@ -161,7 +161,12 @@
 
     <script>
         const API_BASE = 'https://gourmet-bites.vercel.app/api';
-        let currentUserId = localStorage.getItem('chefId') || '2';
+        let currentUserId = localStorage.getItem('currentUserId') || localStorage.getItem('chefId') || null;
+
+        if (!currentUserId) {
+            alert('Please login first at /login.html');
+            window.location.href = 'login.html';
+        }
 
         async function loadOrders() {
             try {
