@@ -81,14 +81,14 @@ module.exports = async function handler(req, res) {
 
             if (role) {
                 result = await sql`
-                    SELECT id, phone_number, google_email, display_name, avatar_url, role, permissions, is_active, created_at, last_login
+                    SELECT id, username, phone_number, google_email, display_name, avatar_url, role, permissions, is_active, created_at, last_login, notes
                     FROM users
                     WHERE role = ${role}
                     ORDER BY display_name
                 `;
             } else {
                 result = await sql`
-                    SELECT id, phone_number, google_email, display_name, avatar_url, role, permissions, is_active, created_at, last_login
+                    SELECT id, username, phone_number, google_email, display_name, avatar_url, role, permissions, is_active, created_at, last_login, notes
                     FROM users
                     ORDER BY role, display_name
                 `;
@@ -144,7 +144,7 @@ module.exports = async function handler(req, res) {
                 return res.status(403).json({ error: 'Forbidden: No permission to edit users' });
             }
 
-            const { id, display_name, username, password, role, permissions: newPermissions, is_active, notes } = body;
+            const { id, display_name, email, phone, username, password, role, permissions: newPermissions, is_active, notes } = body;
 
             if (!id) {
                 return res.status(400).json({ error: 'User ID required' });
@@ -153,6 +153,17 @@ module.exports = async function handler(req, res) {
             // Prevent owner from demoting themselves
             if (parseInt(id) === parseInt(currentUserId) && role && role !== 'owner') {
                 return res.status(400).json({ error: 'Cannot change your own role' });
+            }
+
+            // Check for duplicate username if username is being changed
+            if (username) {
+                const existingUser = await sql`
+                    SELECT id FROM users 
+                    WHERE username = ${username} AND id != ${id}
+                `;
+                if (existingUser.rows.length > 0) {
+                    return res.status(400).json({ error: 'Username already exists. Please choose a different username.' });
+                }
             }
 
             // Get updated permissions
@@ -164,6 +175,8 @@ module.exports = async function handler(req, res) {
             const result = await sql`
                 UPDATE users
                 SET display_name = COALESCE(${display_name}, display_name),
+                    google_email = COALESCE(${email}, google_email),
+                    phone_number = COALESCE(${phone}, phone_number),
                     username = COALESCE(${username}, username),
                     password = COALESCE(${password}, password),
                     role = COALESCE(${role}, role),
