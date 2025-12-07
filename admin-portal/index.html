@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Staff Login - Gourmet Bites</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Round" rel="stylesheet">
@@ -145,12 +148,12 @@
         <form id="loginForm">
             <div class="input-group">
                 <label>Username</label>
-                <input type="text" id="username" placeholder="Enter your username" required>
+                <input type="text" id="username" placeholder="Enter your username" required autocomplete="username">
             </div>
 
             <div class="input-group">
                 <label>Password</label>
-                <input type="password" id="password" placeholder="Enter your password" required>
+                <input type="password" id="password" placeholder="Enter your password" required autocomplete="current-password">
             </div>
 
             <button type="submit" class="btn-login" id="loginBtn">
@@ -178,11 +181,9 @@
             const errorMsg = document.getElementById('errorMsg');
             const successMsg = document.getElementById('successMsg');
 
-            // Hide messages
             errorMsg.style.display = 'none';
             successMsg.style.display = 'none';
 
-            // Disable button
             loginBtn.disabled = true;
             loginBtn.textContent = 'Logging in...';
 
@@ -196,12 +197,10 @@
                 const data = await response.json();
 
                 if (response.ok && data.user) {
-                    // Store user info
                     localStorage.setItem('currentUserId', data.user.id);
                     localStorage.setItem('userRole', data.user.role);
                     localStorage.setItem('userName', data.user.display_name);
 
-                    // Also set role-specific ID
                     if (data.user.role === 'owner') {
                         localStorage.setItem('ownerId', data.user.id);
                     } else if (data.user.role === 'chef') {
@@ -210,11 +209,9 @@
                         localStorage.setItem('waiterId', data.user.id);
                     }
 
-                    // Show success
                     successMsg.textContent = `✅ Welcome, ${data.user.display_name}!`;
                     successMsg.style.display = 'block';
 
-                    // Redirect based on role
                     setTimeout(() => {
                         if (data.user.role === 'owner') {
                             window.location.href = 'dashboard.html';
