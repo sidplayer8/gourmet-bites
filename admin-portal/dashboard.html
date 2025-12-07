@@ -533,6 +533,52 @@
             color: var(--primary);
             font-weight: 500;
         }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 300px;
+            animation: slideIn 0.3s ease;
+            z-index: 10000;
+        }
+
+        .toast.success {
+            border-left: 4px solid #10b981;
+        }
+
+        .toast.error {
+            border-left: 4px solid #ef4444;
+        }
+
+        .toast-icon {
+            font-size: 24px;
+        }
+
+        .toast-message {
+            flex: 1;
+            font-size: 14px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 
@@ -573,6 +619,10 @@
         <button class="nav-tab" onclick="switchTab('menu')">
             <span class="material-icons-round">restaurant_menu</span>
             Menu
+        </button>
+        <button class="nav-tab" onclick="switchTab('roles')">
+            <span class="material-icons-round">admin_panel_settings</span>
+            Roles
         </button>
     </div>
 
@@ -661,6 +711,22 @@
                     </button>
                 </div>
                 <div class="loading">Click "Manage Menu" to edit menu items</div>
+            </div>
+        </div>
+
+        <!-- Roles Tab -->
+        <div id="roles-panel" class="tab-panel">
+            <div class="table-container">
+                <div class="table-header">
+                    <div class="table-title">Custom Roles</div>
+                    <button class="btn-primary" onclick="openRoleModal()">
+                        <span class="material-icons-round">add</span>
+                        Create Role
+                    </button>
+                </div>
+                <div id="rolesTable">
+                    <div class="loading">Loading roles...</div>
+                </div>
             </div>
         </div>
     </div>
@@ -870,6 +936,240 @@
         </div>
     </div>
 
+    <!-- Create/Edit Role Modal -->
+    <div id="roleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="roleModalTitle">Create Custom Role</div>
+                <button class="close-btn" onclick="closeRoleModal()">×</button>
+            </div>
+            <form id="roleForm" onsubmit="saveRole(event)">
+                <div class="form-group">
+                    <label>Role Name *</label>
+                    <input type="text" id="roleName" placeholder="e.g., Manager" required>
+                    <small>Internal name (lowercase, no spaces)</small>
+                </div>
+                <div class="form-group">
+                    <label>Display Name *</label>
+                    <input type="text" id="roleDisplayName" placeholder="e.g., Manager" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="roleDescription" placeholder="Brief description of this role" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Badge Color</label>
+                    <input type="color" id="roleColor" value="#6b7280">
+                </div>
+
+                <!-- Role Permissions Section (reuse same UI as staff permissions) -->
+                <div class="permissions-section" id="rolePermissionsSection">
+                    <h3>📋 Role Permissions</h3>
+                    <p class="permissions-help">Set default permissions for this role</p>
+
+                    <div class="permissions-container">
+                        <!-- Dashboard & Analytics -->
+                        <div class="permission-category">
+                            <div class="category-header">📊 Dashboard & Analytics</div>
+                            <div class="permission-item">
+                                <label>
+                                    <input type="checkbox" name="role-perm-dashboard-view"
+                                        id="role-perm-dashboard-view">
+                                    <span class="permission-label">View Dashboard</span>
+                                </label>
+                            </div>
+                            <div class="permission-item">
+                                <label>
+                                    <input type="checkbox" name="role-perm-analytics-view"
+                                        id="role-perm-analytics-view">
+                                    <span class="permission-label">View Analytics</span>
+                                </label>
+                            </div>
+                            <div class="permission-item">
+                                <label>
+                                    <input type="checkbox" name="role-perm-reports-view" id="role-perm-reports-view">
+                                    <span class="permission-label">Generate Reports</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Menu Management -->
+                        <div class="permission-category">
+                            <div class="category-header">🍽️ Menu Management</div>
+                            <div class="permission-item">
+                                <label>
+                                    <input type="checkbox" name="role-perm-menu-view" id="role-perm-menu-view">
+                                    <span class="permission-label">View Menu</span>
+                                </label>
+                            </div>
+                            <div class="permission-item">
+                                <label>
+                                    <input type="checkbox" name="role-perm-menu-create" id="role-perm-menu-create">
+                                    <span class="permission-label">Add New Items</span>
+                                </label>
+                            </div>
+                            <div class="permission-item">
+                                <label>
+                                    <input type="checkbox" name="role-perm-menu-edit" id="role-perm-menu-edit">
+                                    <span class="permission-label">Edit Menu Items</span>
+                                </label>
+                            </div>
+                            <div class="permission-item">
+                                <label>
+                                    <input type="checkbox" name="role-perm-menu-delete" id="role-perm-menu-delete">
+                                    <span class="permission-label">Delete Menu Items</span>
+                                </label>
+                            </div>
+                            <div class="permission-item">
+                                <label>
+                                    <input type="checkbox" name="role-perm-menu-prices" id="role-perm-menu-prices">
+                                    <span class="permission-label">Change Prices</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Orders Management -->
+                        <div class="permission-category">
+                            <div class="category-header">📦 Orders Management</div>
+                            <div class="permission-item">
+                                <label>
+                                    <input type="checkbox" name="role-perm-orders-view" id="role-perm-orders-view">
+                                    <span class="permission-label">View Orders</span>
+                                </label>
+                            </div>
+                            <div class="permission-item">
+                                <label>
+                                    <input type="checkbox" name="role-perm-orders-create" id="role-perm-orders-create">
+                                    <span class="permission-label">Create Orders</span>
+                                </label>
+                            </div>
+                            <div class="permission-item">
+                                <label>
+                                    <input type="checkbox" name="role-perm-orders-edit" id="role-perm-orders-edit">
+                                    <span class="permission-label">Modify Orders</span>
+                                </label>
+                            </div>
+                            <div class="permission-item">
+                                <label>
+                                    <input type="checkbox" name="role-perm-orders-cancel" id="role-perm-orders-cancel">
+                                    <span class="permission-label">Cancel Orders</span>
+                                </label>
+                            </div>
+                            <div class="permission-item">
+                                <label>
+                                    <input type="checkbox" name="role-perm-orders-refund" id="role-perm-orders-refund">
+                                    <span class="permission-label">Process Refunds</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Kitchen Operations -->
+                        <div class="permission-category">
+                            <div class="category-header">👨‍🍳 Kitchen Operations</div>
+                            <div class="permission-item">
+                                <label>
+                                    <input type="checkbox" name="role-perm-kitchen-view" id="role-perm-kitchen-view">
+                                    <span class="permission-label">View Kitchen Orders</span>
+                                </label>
+                            </div>
+                            <div class="permission-item">
+                                <label>
+                                    <input type="checkbox" name="role-perm-kitchen-start" id="role-perm-kitchen-start">
+                                    <span class="permission-label">Start Cooking</span>
+                                </label>
+                            </div>
+                            <div class="permission-item">
+                                <label>
+                                    <input type="checkbox" name="role-perm-kitchen-ready" id="role-perm-kitchen-ready">
+                                    <span class="permission-label">Mark as Ready</span>
+                                </label>
+                            </div>
+                            <div class="permission-item">
+                                <label>
+                                    <input type="checkbox" name="role-perm-kitchen-assign"
+                                        id="role-perm-kitchen-assign">
+                                    <span class="permission-label">Assign Orders to Chef</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Staff Management -->
+                        <div class="permission-category">
+                            <div class="category-header">👥 Staff Management</div>
+                            <div class="permission-item">
+                                <label>
+                                    <input type="checkbox" name="role-perm-staff-view" id="role-perm-staff-view">
+                                    <span class="permission-label">View Staff</span>
+                                </label>
+                            </div>
+                            <div class="permission-item">
+                                <label>
+                                    <input type="checkbox" name="role-perm-staff-create" id="role-perm-staff-create">
+                                    <span class="permission-label">Add Staff</span>
+                                </label>
+                            </div>
+                            <div class="permission-item">
+                                <label>
+                                    <input type="checkbox" name="role-perm-staff-edit" id="role-perm-staff-edit">
+                                    <span class="permission-label">Edit Staff</span>
+                                </label>
+                            </div>
+                            <div class="permission-item">
+                                <label>
+                                    <input type="checkbox" name="role-perm-staff-delete" id="role-perm-staff-delete">
+                                    <span class="permission-label">Remove Staff</span>
+                                </label>
+                            </div>
+                            <div class="permission-item">
+                                <label>
+                                    <input type="checkbox" name="role-perm-staff-permissions"
+                                        id="role-perm-staff-permissions">
+                                    <span class="permission-label">Manage Permissions</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Restaurant Settings -->
+                        <div class="permission-category">
+                            <div class="category-header">⚙️ Restaurant Settings</div>
+                            <div class="permission-item">
+                                <label>
+                                    <input type="checkbox" name="role-perm-settings-view" id="role-perm-settings-view">
+                                    <span class="permission-label">View Settings</span>
+                                </label>
+                            </div>
+                            <div class="permission-item">
+                                <label>
+                                    <input type="checkbox" name="role-perm-settings-edit" id="role-perm-settings-edit">
+                                    <span class="permission-label">Edit Restaurant Info</span>
+                                </label>
+                            </div>
+                            <div class="permission-item">
+                                <label>
+                                    <input type="checkbox" name="role-perm-settings-hours"
+                                        id="role-perm-settings-hours">
+                                    <span class="permission-label">Change Operating Hours</span>
+                                </label>
+                            </div>
+                            <div class="permission-item">
+                                <label>
+                                    <input type="checkbox" name="role-perm-settings-payments"
+                                        id="role-perm-settings-payments">
+                                    <span class="permission-label">Manage Payment Methods</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeRoleModal()">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Role</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         // Configuration
         const API_BASE = 'https://gourmet-bites.vercel.app/api';
@@ -900,6 +1200,7 @@
             // Load data for specific tabs
             if (tabName === 'orders') loadOrders();
             if (tabName === 'users') loadUsers();
+            if (tabName === 'roles') loadRoles();
         }
 
         // Load Overview Stats
@@ -1022,7 +1323,7 @@
                                 <td>${user.display_name || 'Unknown'}</td>
                                 <td>${user.username || user.google_email || user.phone_number || '-'}</td>
                                 <td><span class="badge badge-${user.role}">${user.role}</span></td>
-                                <td><span class="badge badge-${user.is_active ? 'active' : 'inactive'}">${user.is_active ? 'Active' : 'Inactive'}</span></td>
+                                <td><span class="badge badge-${(user.is_active !== false) ? 'active' : 'inactive'}">${(user.is_active !== false) ? 'Active' : 'Inactive'}</span></td>
                                 <td>${new Date(user.created_at).toLocaleDateString()}</td>
                                 <td>
                                     <button class="btn-icon" onclick='editUser(${JSON.stringify(user)})' style="margin-right: 8px; background: #ff6b35;">
@@ -1325,6 +1626,285 @@
             } catch (error) {
                 console.error('Error deleting user:', error);
                 alert('Failed to delete user');
+            }
+        }
+
+        // ============================================================
+        // TOAST NOTIFICATIONS
+        // ============================================================
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <span class="toast-icon">${type === 'success' ? '✅' : '❌'}</span>
+                <div class="toast-message">${message}</div>
+            `;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // ============================================================
+        // ROLE MANAGEMENT FUNCTIONS
+        // ============================================================
+
+        // Load all roles from API
+        async function loadRoles() {
+            try {
+                const response = await fetch(`${API_BASE}/admin/roles`, {
+                    headers: { 'X-User-ID': currentUserId }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    renderRoles(data.roles || []);
+                } else {
+                    console.error('Failed to load roles');
+                    document.getElementById('rolesTable').innerHTML = '<div class="loading">Failed to load roles</div>';
+                }
+            } catch (error) {
+                console.error('Error loading roles:', error);
+                document.getElementById('rolesTable').innerHTML = '<div class="loading">Error loading roles</div>';
+            }
+        }
+
+        // Render roles table
+        function renderRoles(roles) {
+            const container = document.getElementById('rolesTable');
+
+            if (roles.length === 0) {
+                container.innerHTML = '<div class="loading">No custom roles yet. Create one to get started!</div>';
+                return;
+            }
+
+            let html = '<table><thead><tr>';
+            html += '<th>Role</th><th>Description</th><th>Permissions</th><th>Type</th><th>Actions</th>';
+            html += '</tr></thead><tbody>';
+
+            roles.forEach(role => {
+                const permCount = countPermissions(role.permissions);
+                const badgeStyle = `background: ${role.color}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.85rem;`;
+
+                html += '<tr>';
+                html += `<td><span style="${badgeStyle}">${role.display_name}</span></td>`;
+                html += `<td>${role.description || '-'}</td>`;
+                html += `<td>${permCount} permissions</td>`;
+                html += `<td>${role.is_system_role ? '<span style="color: #7c3aed;">System</span>' : 'Custom'}</td>`;
+                html += '<td>';
+
+                if (!role.is_system_role) {
+                    html += `<button class="btn-icon" onclick="editRole(${role.id})" title="Edit"><span class="material-icons-round">edit</span></button>`;
+                    html += `<button class="btn-icon" onclick="deleteRole(${role.id}, '${role.display_name}')" title="Delete"><span class="material-icons-round">delete</span></button>`;
+                } else {
+                    html += '<span style="color: #9ca3af;">Protected</span>';
+                }
+
+                html += '</td></tr>';
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // Count enabled permissions in a permissions object
+        function countPermissions(perms) {
+            let count = 0;
+            Object.keys(perms).forEach(category => {
+                if (typeof perms[category] === 'object') {
+                    Object.keys(perms[category]).forEach(action => {
+                        if (perms[category][action] === true) count++;
+                    });
+                }
+            });
+            return count;
+        }
+
+        // Open role modal for creating/editing
+        function openRoleModal(roleId = null) {
+            const modal = document.getElementById('roleModal');
+            const form = document.getElementById('roleForm');
+            const title = document.getElementById('roleModalTitle');
+
+            // Reset form
+            form.reset();
+            clearRolePermissions();
+
+            if (roleId) {
+                title.textContent = 'Edit Custom Role';
+                form.dataset.roleId = roleId;
+                // TODO: Load role data
+            } else {
+                title.textContent = 'Create Custom Role';
+                delete form.dataset.roleId;
+            }
+
+            modal.classList.add('active');
+        }
+
+        // Close role modal
+        function closeRoleModal() {
+            document.getElementById('roleModal').classList.remove('active');
+        }
+
+        // Clear all role permissions checkboxes
+        function clearRolePermissions() {
+            document.querySelectorAll('[name^="role-perm-"]').forEach(cb => cb.checked = false);
+        }
+
+        // Get role permissions from checkboxes
+        function getRolePermissions() {
+            const permissions = {
+                dashboard: {},
+                analytics: {},
+                reports: {},
+                menu: {},
+                orders: {},
+                kitchen: {},
+                staff: {},
+                settings: {}
+            };
+
+            document.querySelectorAll('[name^="role-perm-"]').forEach(checkbox => {
+                const parts = checkbox.name.split('-');
+                if (parts.length === 3) {
+                    const category = parts[2];
+                    const action = checkbox.id.split('-').pop();
+
+                    // Map checkbox ID to permission structure
+                    if (permissions[category]) {
+                        permissions[category][action] = checkbox.checked;
+                    }
+                }
+            });
+
+            return permissions;
+        }
+
+        // Save role (create or update)
+        async function saveRole(event) {
+            event.preventDefault();
+
+            const form = event.target;
+            const roleId = form.dataset.roleId;
+            const isEditing = !!roleId;
+
+            const roleData = {
+                name: document.getElementById('roleName').value.toLowerCase().replace(/\s+/g, '_'),
+                display_name: document.getElementById('roleDisplayName').value,
+                description: document.getElementById('roleDescription').value || null,
+                color: document.getElementById('roleColor').value,
+                permissions: getRolePermissions()
+            };
+
+            // Validate
+            if (!roleData.name || !roleData.display_name) {
+                showToast('Role name and display name are required', 'error');
+                return;
+            }
+
+            try {
+                const url = `${API_BASE}/admin/roles`;
+                const response = await fetch(url, {
+                    method: isEditing ? 'PUT' : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-User-ID': currentUserId
+                    },
+                    body: JSON.stringify(isEditing ? { ...roleData, id: roleId } : roleData)
+                });
+
+                if (response.ok) {
+                    alert(isEditing ? 'Role updated successfully!' : 'Role created successfully!');
+                    closeRoleModal();
+                    loadRoles();
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + (error.error || 'Failed to save role'));
+                }
+            } catch (error) {
+                console.error('Error saving role:', error);
+                alert('Failed to save role');
+            }
+        }
+
+        // Edit role
+        async function editRole(roleId) {
+            try {
+                const response = await fetch(`${API_BASE}/admin/roles`, {
+                    headers: { 'X-User-ID': currentUserId }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const role = data.roles.find(r => r.id === roleId);
+
+                    if (role) {
+                        openRoleModal(roleId);
+
+                        // Populate form
+                        document.getElementById('roleName').value = role.name;
+                        document.getElementById('roleDisplayName').value = role.display_name;
+                        document.getElementById('roleDescription').value = role.description || '';
+                        document.getElementById('roleColor').value = role.color;
+
+                        // Load permissions
+                        loadRolePermissions(role.permissions);
+                    }
+                } else {
+                    showToast('Failed to load role data', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading role:', error);
+                showToast('Failed to load role', 'error');
+            }
+        }
+
+        // Load role permissions into checkboxes
+        function loadRolePermissions(permissions) {
+            clearRolePermissions();
+
+            Object.keys(permissions).forEach(category => {
+                if (typeof permissions[category] === 'object') {
+                    Object.keys(permissions[category]).forEach(action => {
+                        const checkbox = document.getElementById(`role-perm-${category}-${action}`);
+                        if (checkbox) {
+                            checkbox.checked = permissions[category][action];
+                        }
+                    });
+                }
+            });
+        }
+
+        // Delete role
+        async function deleteRole(roleId, roleName) {
+            if (!confirm(`Are you sure you want to delete the "${roleName}" role?\n\nThis action cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/admin/roles`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-User-ID': currentUserId
+                    },
+                    body: JSON.stringify({ id: roleId })
+                });
+
+                if (response.ok) {
+                    alert('Role deleted successfully!');
+                    loadRoles();
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + (error.error || error.message || 'Failed to delete role'));
+                }
+            } catch (error) {
+                console.error('Error deleting role:', error);
+                alert('Failed to delete role');
             }
         }
 
