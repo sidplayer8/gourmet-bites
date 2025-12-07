@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -247,17 +248,55 @@
             font-weight: 500;
         }
 
-        .badge-owner { background: #7c3aed; color: white; }
-        .badge-chef { background: #f59e0b; color: white; }
-        .badge-waiter { background: #3b82f6; color: white; }
-        .badge-customer { background: #6b7280; color: white; }
-        .badge-active { background: var(--success); color: white; }
-        .badge-inactive { background: var(--danger); color: white; }
+        .badge-owner {
+            background: #7c3aed;
+            color: white;
+        }
 
-        .badge-pending { background: #f59e0b; color: white; }
-        .badge-preparing { background: #3b82f6; color: white; }
-        .badge-ready { background: var(--success); color: white; }
-        .badge-completed { background: #6b7280; color: white; }
+        .badge-chef {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .badge-waiter {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .badge-customer {
+            background: #6b7280;
+            color: white;
+        }
+
+        .badge-active {
+            background: var(--success);
+            color: white;
+        }
+
+        .badge-inactive {
+            background: var(--danger);
+            color: white;
+        }
+
+        .badge-pending {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .badge-preparing {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .badge-ready {
+            background: var(--success);
+            color: white;
+        }
+
+        .badge-completed {
+            background: #6b7280;
+            color: white;
+        }
 
         .btn-icon {
             padding: 8px;
@@ -333,7 +372,8 @@
             color: var(--text-muted);
         }
 
-        .form-input, .form-select {
+        .form-input,
+        .form-select {
             width: 100%;
             padding: 12px 16px;
             background: var(--bg);
@@ -344,7 +384,8 @@
             font-family: 'Outfit', sans-serif;
         }
 
-        .form-input:focus, .form-select:focus {
+        .form-input:focus,
+        .form-select:focus {
             outline: none;
             border-color: var(--primary);
         }
@@ -388,8 +429,113 @@
             opacity: 0.3;
             margin-bottom: 16px;
         }
+
+        /* Permissions Container */
+        .btn-preset {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--primary) 0%, #ff5722 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 16px;
+            transition: all 0.2s;
+        }
+
+        .btn-preset:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        }
+
+        .permissions-container {
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            max-height: 450px;
+            overflow-y: auto;
+        }
+
+        .permissions-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .permissions-container::-webkit-scrollbar-track {
+            background: var(--bg);
+            border-radius: 4px;
+        }
+
+        .permissions-container::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        .permissions-container::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        .permission-category {
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .permission-category:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .permission-header {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 12px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .perm-icon {
+            font-size: 18px;
+        }
+
+        .permission-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.15s;
+            margin: 4px 0;
+        }
+
+        .permission-item:hover {
+            background: var(--surface-hover);
+        }
+
+        .permission-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .permission-item span {
+            color: var(--text);
+            font-size: 14px;
+            user-select: none;
+        }
+
+        .permission-item input[type="checkbox"]:checked+span {
+            color: var(--primary);
+            font-weight: 500;
+        }
     </style>
 </head>
+
 <body>
     <!-- Header -->
     <div class="header">
@@ -544,7 +690,8 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Password * (for staff login)</label>
-                    <input type="password" class="form-input" id="password" placeholder="Minimum 6 characters" minlength="6" required>
+                    <input type="password" class="form-input" id="password" placeholder="Minimum 6 characters"
+                        minlength="6" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Role *</label>
@@ -557,6 +704,163 @@
                 <div class="form-group">
                     <label class="form-label">Notes</label>
                     <input type="text" class="form-input" id="notes" placeholder="Optional notes">
+                </div>
+
+                <!-- Restaurant Permissions -->
+                <div class="form-group" id="permissionsSection">
+                    <label class="form-label">Custom Permissions</label>
+                    <button type="button" class="btn-preset" onclick="applyRolePreset()">
+                        📋 Apply Role Defaults
+                    </button>
+                    <div class="permissions-container">
+
+                        <!-- Dashboard Permissions -->
+                        <div class="permission-category">
+                            <div class="permission-header">
+                                <span class="perm-icon">📊</span> Dashboard & Analytics
+                            </div>
+                            <label class="permission-item">
+                                <input type="checkbox" name="perm-dashboard-view" id="perm-dashboard-view">
+                                <span>View Dashboard Overview</span>
+                            </label>
+                            <label class="permission-item">
+                                <input type="checkbox" name="perm-analytics-view" id="perm-analytics-view">
+                                <span>View Sales Analytics</span>
+                            </label>
+                            <label class="permission-item">
+                                <input type="checkbox" name="perm-reports-view" id="perm-reports-view">
+                                <span>View Reports</span>
+                            </label>
+                        </div>
+
+                        <!-- Menu Permissions -->
+                        <div class="permission-category">
+                            <div class="permission-header">
+                                <span class="perm-icon">🍽️</span> Menu Management
+                            </div>
+                            <label class="permission-item">
+                                <input type="checkbox" name="perm-menu-view" id="perm-menu-view">
+                                <span>View Menu Items</span>
+                            </label>
+                            <label class="permission-item">
+                                <input type="checkbox" name="perm-menu-create" id="perm-menu-create">
+                                <span>Add New Items</span>
+                            </label>
+                            <label class="permission-item">
+                                <input type="checkbox" name="perm-menu-edit" id="perm-menu-edit">
+                                <span>Edit Menu Items</span>
+                            </label>
+                            <label class="permission-item">
+                                <input type="checkbox" name="perm-menu-delete" id="perm-menu-delete">
+                                <span>Delete Menu Items</span>
+                            </label>
+                            <label class="permission-item">
+                                <input type="checkbox" name="perm-menu-prices" id="perm-menu-prices">
+                                <span>Change Prices</span>
+                            </label>
+                        </div>
+
+                        <!-- Orders Permissions -->
+                        <div class="permission-category">
+                            <div class="permission-header">
+                                <span class="perm-icon">📦</span> Orders Management
+                            </div>
+                            <label class="permission-item">
+                                <input type="checkbox" name="perm-orders-view" id="perm-orders-view">
+                                <span>View All Orders</span>
+                            </label>
+                            <label class="permission-item">
+                                <input type="checkbox" name="perm-orders-create" id="perm-orders-create">
+                                <span>Create New Orders</span>
+                            </label>
+                            <label class="permission-item">
+                                <input type="checkbox" name="perm-orders-edit" id="perm-orders-edit">
+                                <span>Edit Order Status</span>
+                            </label>
+                            <label class="permission-item">
+                                <input type="checkbox" name="perm-orders-cancel" id="perm-orders-cancel">
+                                <span>Cancel Orders</span>
+                            </label>
+                            <label class="permission-item">
+                                <input type="checkbox" name="perm-orders-refund" id="perm-orders-refund">
+                                <span>Process Refunds</span>
+                            </label>
+                        </div>
+
+                        <!-- Kitchen Permissions -->
+                        <div class="permission-category">
+                            <div class="permission-header">
+                                <span class="perm-icon">👨‍🍳</span> Kitchen Operations
+                            </div>
+                            <label class="permission-item">
+                                <input type="checkbox" name="perm-kitchen-view" id="perm-kitchen-view">
+                                <span>View Kitchen Display</span>
+                            </label>
+                            <label class="permission-item">
+                                <input type="checkbox" name="perm-kitchen-start" id="perm-kitchen-start">
+                                <span>Start Cooking Orders</span>
+                            </label>
+                            <label class="permission-item">
+                                <input type="checkbox" name="perm-kitchen-ready" id="perm-kitchen-ready">
+                                <span>Mark Orders Ready</span>
+                            </label>
+                            <label class="permission-item">
+                                <input type="checkbox" name="perm-kitchen-assign" id="perm-kitchen-assign">
+                                <span>Assign Orders to Chefs</span>
+                            </label>
+                        </div>
+
+                        <!-- Staff Management Permissions -->
+                        <div class="permission-category">
+                            <div class="permission-header">
+                                <span class="perm-icon">👥</span> Staff Management
+                            </div>
+                            <label class="permission-item">
+                                <input type="checkbox" name="perm-staff-view" id="perm-staff-view">
+                                <span>View Staff List</span>
+                            </label>
+                            <label class="permission-item">
+                                <input type="checkbox" name="perm-staff-create" id="perm-staff-create">
+                                <span>Add New Staff</span>
+                            </label>
+                            <label class="permission-item">
+                                <input type="checkbox" name="perm-staff-edit" id="perm-staff-edit">
+                                <span>Edit Staff Details</span>
+                            </label>
+                            <label class="permission-item">
+                                <input type="checkbox" name="perm-staff-delete" id="perm-staff-delete">
+                                <span>Remove Staff</span>
+                            </label>
+                            <label class="permission-item">
+                                <input type="checkbox" name="perm-staff-permissions" id="perm-staff-permissions">
+                                <span>Manage Staff Permissions</span>
+                            </label>
+                        </div>
+
+                        <!-- Settings Permissions -->
+                        <div class="permission-category">
+                            <div class="permission-header">
+                                <span class="perm-icon">⚙️</span> Restaurant Settings
+                            </div>
+                            <label class="permission-item">
+                                <input type="checkbox" name="perm-settings-view" id="perm-settings-view">
+                                <span>View Settings</span>
+                            </label>
+                            <label class="permission-item">
+                                <input type="checkbox" name="perm-settings-edit" id="perm-settings-edit">
+                                <span>Edit Restaurant Info</span>
+                            </label>
+                            <label class="permission-item">
+                                <input type="checkbox" name="perm-settings-hours" id="perm-settings-hours">
+                                <span>Change Operating Hours</span>
+                            </label>
+                            <label class="permission-item">
+                                <input type="checkbox" name="perm-settings-payments" id="perm-settings-payments">
+                                <span>Manage Payment Settings</span>
+                            </label>
+                        </div>
+
+                    </div>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn-secondary" onclick="closeUserModal()">Cancel</button>
@@ -771,8 +1075,8 @@
                     </thead>
                     <tbody>
                         ${orders.map(order => {
-                            const items = JSON.parse(order.items || '[]');
-                            return `
+                const items = JSON.parse(order.items || '[]');
+                return `
                                 <tr>
                                     <td>#${order.id}</td>
                                     <td>${order.user_name || order.user_phone || 'Guest'}</td>
@@ -783,7 +1087,7 @@
                                     <td>${new Date(order.created_at).toLocaleString()}</td>
                                 </tr>
                             `;
-                        }).join('')}
+            }).join('')}
                     </tbody>
                 </table>
             `;
@@ -818,8 +1122,133 @@
             document.getElementById('userModal').classList.remove('active');
         }
 
+        // ========== PERMISSIONS SYSTEM ==========
+
+        // Role presets for different roles
+        const ROLE_PRESETS = {
+            owner: {
+                dashboard: { view: true },
+                analytics: { view: true },
+                reports: { view: true },
+                menu: { view: true, create: true, edit: true, delete: true, prices: true },
+                orders: { view: true, create: true, edit: true, cancel: true, refund: true },
+                kitchen: { view: true, start: true, ready: true, assign: true },
+                staff: { view: true, create: true, edit: true, delete: true, permissions: true },
+                settings: { view: true, edit: true, hours: true, payments: true }
+            },
+            chef: {
+                dashboard: { view: false },
+                analytics: { view: false },
+                reports: { view: false },
+                menu: { view: true, create: false, edit: false, delete: false, prices: false },
+                orders: { view: true, create: false, edit: true, cancel: false, refund: false },
+                kitchen: { view: true, start: true, ready: true, assign: false },
+                staff: { view: false, create: false, edit: false, delete: false, permissions: false },
+                settings: { view: false, edit: false, hours: false, payments: false }
+            },
+            waiter: {
+                dashboard: { view: false },
+                analytics: { view: false },
+                reports: { view: false },
+                menu: { view: true, create: false, edit: false, delete: false, prices: false },
+                orders: { view: true, create: true, edit: true, cancel: false, refund: false },
+                kitchen: { view: false, start: false, ready: false, assign: false },
+                staff: { view: false, create: false, edit: false, delete: false, permissions: false },
+                settings: { view: false, edit: false, hours: false, payments: false }
+            }
+        };
+
+        // Apply role preset to checkboxes
+        function applyRolePreset() {
+            const role = document.getElementById('role').value;
+            const preset = ROLE_PRESETS[role];
+
+            if (!preset) return;
+
+            // Apply preset
+            Object.keys(preset).forEach(category => {
+                Object.keys(preset[category]).forEach(action => {
+                    const checkbox = document.getElementById(`perm-${category}-${action}`);
+                    if (checkbox) {
+                        checkbox.checked = preset[category][action];
+                    }
+                });
+            });
+
+            console.log(`✅ Applied ${role} role preset`);
+        }
+
+        // Collect permissions from checkboxes
+        function getCustomPermissions() {
+            const permissions = {
+                dashboard: {},
+                analytics: {},
+                reports: {},
+                menu: {},
+                orders: {},
+                kitchen: {},
+                staff: {},
+                settings: {}
+            };
+
+            document.querySelectorAll('[name^="perm-"]').forEach(checkbox => {
+                const parts = checkbox.name.split('-');
+                if (parts.length === 3) {
+                    const category = parts[1];
+                    const action = parts[2];
+                    if (permissions[category]) {
+                        permissions[category][action] = checkbox.checked;
+                    }
+                }
+            });
+
+            return permissions;
+        }
+
+        // Load permissions into checkboxes
+        function loadPermissions(permissions) {
+            if (!permissions || typeof permissions !== 'object') {
+                console.log('No custom permissions, applying role defaults');
+                applyRolePreset();
+                return;
+            }
+
+            Object.keys(permissions).forEach(category => {
+                if (typeof permissions[category] === 'object') {
+                    Object.keys(permissions[category]).forEach(action => {
+                        const checkbox = document.getElementById(`perm-${category}-${action}`);
+                        if (checkbox) {
+                            checkbox.checked = permissions[category][action];
+                        }
+                    });
+                }
+            });
+
+            console.log('✅ Loaded custom permissions');
+        }
+
+        // Listen to role changes to auto-suggest permissions
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const roleSelect = document.getElementById('role');
+            if (roleSelect) {
+                roleSelect.addEventListener('change', () => {
+                    // Only auto-apply on new user creation
+                    const isEditing = !!document.getElementById('userForm').dataset.userId;
+                    if (!isEditing) {
+                        applyRolePreset();
+                    }
+                });
+            }
+        });
+
         function editUser(user) {
             openUserModal(user);
+            //  Load permissions when editing
+            if (user.permissions) {
+                loadPermissions(user.permissions);
+            } else {
+                applyRolePreset();
+            }
             // Store user ID for updating
             document.getElementById('userForm').dataset.userId = user.id;
         }
@@ -832,12 +1261,13 @@
 
             const userData = {
                 display_name: document.getElementById('displayName').value,
-                email: document.getElementById('email').value,
-                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value || null,
+                phone: document.getElementById('phone').value || null,
                 username: document.getElementById('username').value,
                 password: document.getElementById('password').value || undefined, // Only include if provided
                 role: document.getElementById('role').value,
-                notes: document.getElementById('notes').value
+                notes: document.getElementById('notes').value || null,
+                customPermissions: getCustomPermissions() // 👈 Collect permissions from checkboxes
             };
 
             // If editing, include user ID
@@ -905,4 +1335,5 @@
         }
     </script>
 </body>
+
 </html>
