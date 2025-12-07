@@ -22,7 +22,7 @@ module.exports = async function handler(req, res) {
 
         // Find user by username
         const result = await sql`
-            SELECT id, username, password, display_name, role, permissions, is_active
+            SELECT id, username, password_hash, display_name, role, permissions, is_active
             FROM users
             WHERE username = ${username}
             AND is_active = true
@@ -35,7 +35,7 @@ module.exports = async function handler(req, res) {
         const user = result.rows[0];
 
         // Simple password comparison (in production, use bcrypt)
-        if (user.password !== password) {
+        if (user.password_hash !== password) {
             return res.status(401).json({ error: 'Invalid username or password' });
         }
 
