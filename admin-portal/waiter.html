@@ -195,18 +195,46 @@
         let currentUserId = localStorage.getItem('currentUserId') || localStorage.getItem('waiterId') || null;
 
         if (!currentUserId) {
-            alert('Please login first at /login.html');
-            window.location.href = 'login.html';
+            alert('Please login first');
+            window.location.href = 'index.html';
         }
 
-        function renderTables() {
+        async function renderTables() {
             const tablesGrid = document.getElementById('tablesGrid');
-            tablesGrid.innerHTML = [1,2,3,4,5,6,7,8,9,10,11,12].map(num => `
-                <div class="table-card" onclick="viewTable(${num})">
-                    <div class="table-number">Table ${num}</div>
-                    <div class="table-status">Available</div>
-                </div>
-            `).join('');
+
+            try {
+                // Fetch active orders to determine table occupancy
+                const response = await fetch(`${API_BASE}/orders?status=confirmed,preparing,ready`, {
+                    headers: { 'X-User-ID': currentUserId }
+                });
+                const data = await response.json();
+                const orders = data.orders || data || [];
+
+                // Extract occupied table numbers
+                const occupiedTables = orders
+                    .filter(o => o.table_number)
+                    .map(o => o.table_number);
+
+                // Render tables with real status
+                tablesGrid.innerHTML = [1,2,3,4,5,6,7,8,9,10,11,12].map(num => {
+                    const isOccupied = occupiedTables.includes(num);
+                    return `
+                        <div class="table-card ${isOccupied ? 'occupied' : ''}" onclick="viewTable(${num})">
+                            <div class="table-number">Table ${num}</div>
+                            <div class="table-status">${isOccupied ? 'Occupied' : 'Available'}</div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading tables:', error);
+                // Fallback to showing all tables as available
+                tablesGrid.innerHTML = [1,2,3,4,5,6,7,8,9,10,11,12].map(num => `
+                    <div class="table-card" onclick="viewTable(${num})">
+                        <div class="table-number">Table ${num}</div>
+                        <div class="table-status">Available</div>
+                    </div>
+                `).join('');
+            }
         }
 
         function showTab(tab) {
@@ -225,16 +253,20 @@
                     headers: { 'X-User-ID': currentUserId }
                 });
                 const data = await response.json();
-                renderOrders(data.orders);
+                allOrders = data.orders || data || [];
+                renderOrders(allOrders);
             } catch (error) {
                 console.error('Error:', error);
+                allOrders = [];
             }
         }
+
+        let allOrders = [];
 
         function renderOrders(orders) {
             const container = document.getElementById('ordersList');
 
-            const activeOrders = orders.filter(o => ['pending', 'preparing', 'ready'].includes(o.status));
+            const activeOrders = orders.filter(o => ['pending', 'confirmed', 'preparing', 'ready'].includes(o.status));
 
             if (activeOrders.length === 0) {
                 container.innerHTML = '<p style="color: #a0a0b8; text-align: center; padding: 40px;">No active orders</p>';
@@ -242,23 +274,77 @@
             }
 
             container.innerHTML = activeOrders.map(order => `
-                <div class="order-item">
-                    <div>
-                        <div style="font-weight: 600; margin-bottom: 4px;">Order #${order.id}</div>
-                        <div style="font-size: 14px; color: #a0a0b8;">
-                            ${order.order_type || 'Dine-in'}
-                            ${order.table_number ? `• Table ${order.table_number}` : ''}
+                <div class="order-item" style="flex-direction: column; align-items: stretch;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: 4px;">Order #${order.id}</div>
+                            <div style="font-size: 14px; color: #a0a0b8;">
+                                ${order.order_type || 'Dine-in'}
+                                ${order.table_number ? `• Table ${order.table_number}` : ''}
+                            </div>
+                        </div>
+                        <div>
+                            <span class="badge badge-${order.status}">${order.status}</span>
                         </div>
                     </div>
-                    <div>
-                        <span class="badge badge-${order.status}">${order.status}</span>
+
+                    <div style="display: flex; gap: 12px; margin-top: 8px;">
+                        ${order.status === 'preparing' ? `
+                            <button onclick="updateOrderStatus(${order.id}, 'ready')"
+                                    style="flex: 1; padding: 10px 20px; background: #ff6b35; color: white;
+                                           border: none; border-radius: 8px; cursor: pointer; font-weight: 600;
+                                           font-size: 14px; transition: opacity 0.2s;">
+                                ✓ Mark Ready
+                            </button>
+                        ` : ''}
+                        ${order.status === 'ready' ? `
+                            <button onclick="updateOrderStatus(${order.id}, 'completed')"
+                                    style="flex: 1; padding: 10px 20px; background: #10b981; color: white;
+                                           border: none; border-radius: 8px; cursor: pointer; font-weight: 600;
+                                           font-size: 14px; transition: opacity 0.2s;">
+                                ✓ Mark Completed
+                            </button>
+                        ` : ''}
                     </div>
                 </div>
             `).join('');
         }
 
+        async function updateOrderStatus(orderId, status) {
+            try {
+                const response = await fetch(`${API_BASE}/orders`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-User-ID': currentUserId
+                    },
+                    body: JSON.stringify({ id: orderId, status })
+                });
+
+                if (response.ok) {
+                    // Refresh both orders and table status
+                    await loadOrders();
+                    await renderTables();
+                } else {
+                    const error = await response.json();
+                    alert('Failed to update order status: ' + (error.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error updating order:', error);
+                alert('Error updating order status. Please try again.');
+            }
+        }
+
         function viewTable(tableNum) {
-            alert(`Table ${tableNum} - Feature coming soon!`);
+            const tableOrders = allOrders.filter(o => o.table_number === tableNum && ['pending', 'confirmed', 'preparing', 'ready'].includes(o.status));
+
+            if (tableOrders.length === 0) {
+                alert(`Table ${tableNum} is currently available`);
+            } else {
+                // Switch to orders tab and show only this table's orders
+                showTab('orders');
+                renderOrders(tableOrders);
+            }
         }
 
         // Initialize

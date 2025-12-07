@@ -1,9 +1,10 @@
 <!DOCTYPE html>
+<!-- REBUILT 2025-12-07 15:00 UTC - Fresh staff authentication portal -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Staff Login - Gourmet Bites</title>
@@ -18,222 +19,267 @@
 
         body {
             font-family: 'Outfit', sans-serif;
-            background: #0a0a0f;
-            color: #e8e8f0;
+            background: linear-gradient(135deg, #0a0a0f 0%, #16161f 100%);
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            padding: 20px;
+            padding: 24px;
         }
 
-        .login-container {
+        .auth-wrapper {
             background: #16161f;
-            padding: 48px;
-            border-radius: 16px;
             border: 2px solid #2a2a3a;
-            max-width: 420px;
+            border-radius: 20px;
+            padding: 56px;
+            max-width: 440px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .auth-header h1 {
+            font-size: 36px;
+            color: #ff6b35;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .auth-header p {
+            color: #a0a0b8;
+            font-size: 15px;
+        }
+
+        .auth-form {
             width: 100%;
         }
 
-        .logo {
-            text-align: center;
-            margin-bottom: 32px;
+        .form-field {
+            margin-bottom: 24px;
         }
 
-        .logo h1 {
-            color: #ff6b35;
-            font-size: 32px;
-            margin-bottom: 8px;
-        }
-
-        .logo p {
-            color: #a0a0b8;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-group label {
+        .form-field label {
             display: block;
-            margin-bottom: 8px;
             color: #a0a0b8;
             font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 10px;
         }
 
-        .input-group input {
+        .form-field input {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             background: #0a0a0f;
             border: 2px solid #2a2a3a;
-            border-radius: 8px;
+            border-radius: 10px;
             color: #e8e8f0;
             font-size: 16px;
             font-family: 'Outfit', sans-serif;
+            transition: border-color 0.3s;
         }
 
-        .input-group input:focus {
+        .form-field input:focus {
             outline: none;
             border-color: #ff6b35;
         }
 
-        .btn-login {
+        .auth-btn {
             width: 100%;
-            padding: 16px;
-            background: #ff6b35;
+            padding: 18px;
+            background: linear-gradient(135deg, #ff6b35 0%, #ff5722 100%);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-weight: 600;
-            font-size: 16px;
+            font-size: 17px;
             cursor: pointer;
-            margin-top: 10px;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: transform 0.2s;
         }
 
-        .btn-login:hover {
-            background: #ff5722;
+        .auth-btn:hover {
+            transform: translateY(-2px);
         }
 
-        .btn-login:disabled {
+        .auth-btn:disabled {
             background: #666;
             cursor: not-allowed;
+            transform: none;
         }
 
-        .error {
+        .alert-error {
             background: #ef4444;
             color: white;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            margin-bottom: 24px;
             display: none;
+            font-size: 15px;
         }
 
-        .success {
+        .alert-success {
             background: #10b981;
             color: white;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            margin-bottom: 24px;
             display: none;
+            font-size: 15px;
         }
 
-        .links {
+        .auth-footer {
             text-align: center;
-            margin-top: 24px;
-            padding-top: 24px;
+            margin-top: 32px;
+            padding-top: 28px;
             border-top: 1px solid #2a2a3a;
         }
 
-        .links a {
-            color: #ff6b35;
-            text-decoration: none;
-        }
-
-        .links a:hover {
-            text-decoration: underline;
+        .auth-footer p {
+            color: #a0a0b8;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="logo">
+    <div class="auth-wrapper">
+        <div class="auth-header">
             <h1>🍽️ Gourmet Bites</h1>
-            <p>Staff Portal Login</p>
+            <p>Staff Portal Authentication</p>
         </div>
 
-        <div id="errorMsg" class="error"></div>
-        <div id="successMsg" class="success"></div>
+        <div id="errorAlert" class="alert-error"></div>
+        <div id="successAlert" class="alert-success"></div>
 
-        <form id="loginForm">
-            <div class="input-group">
-                <label>Username</label>
-                <input type="text" id="username" placeholder="Enter your username" required autocomplete="username">
+        <form id="authForm" class="auth-form">
+            <div class="form-field">
+                <label for="usernameInput">Username</label>
+                <input
+                    type="text"
+                    id="usernameInput"
+                    name="username"
+                    placeholder="Enter your username"
+                    required
+                    autocomplete="username"
+                >
             </div>
 
-            <div class="input-group">
-                <label>Password</label>
-                <input type="password" id="password" placeholder="Enter your password" required autocomplete="current-password">
+            <div class="form-field">
+                <label for="passwordInput">Password</label>
+                <input
+                    type="password"
+                    id="passwordInput"
+                    name="password"
+                    placeholder="Enter your password"
+                    required
+                    autocomplete="current-password"
+                >
             </div>
 
-            <button type="submit" class="btn-login" id="loginBtn">
-                <span class="material-icons-round" style="vertical-align: middle; margin-right: 8px;">login</span>
-                Login
+            <button type="submit" class="auth-btn" id="submitBtn">
+                <span class="material-icons-round">login</span>
+                <span>Sign In</span>
             </button>
         </form>
 
-        <div class="links">
-            <p style="color: #a0a0b8; font-size: 14px;">
-                Need help? Contact your administrator
-            </p>
+        <div class="auth-footer">
+            <p>Need assistance? Contact your administrator</p>
         </div>
     </div>
 
     <script>
-        const API_BASE = 'https://gourmet-bites.vercel.app/api';
+        const API_ENDPOINT = 'https://gourmet-bites.vercel.app/api';
 
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        document.getElementById('authForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
 
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const loginBtn = document.getElementById('loginBtn');
-            const errorMsg = document.getElementById('errorMsg');
-            const successMsg = document.getElementById('successMsg');
+            const usernameField = document.getElementById('usernameInput');
+            const passwordField = document.getElementById('passwordInput');
+            const submitButton = document.getElementById('submitBtn');
+            const errorAlert = document.getElementById('errorAlert');
+            const successAlert = document.getElementById('successAlert');
 
-            errorMsg.style.display = 'none';
-            successMsg.style.display = 'none';
+            const username = usernameField.value.trim();
+            const password = passwordField.value;
 
-            loginBtn.disabled = true;
-            loginBtn.textContent = 'Logging in...';
+            // Hide alerts
+            errorAlert.style.display = 'none';
+            successAlert.style.display = 'none';
+
+            // Disable button
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="material-icons-round">hourglass_empty</span><span>Authenticating...</span>';
 
             try {
-                const response = await fetch(`${API_BASE}/auth/login`, {
+                const response = await fetch(`${API_ENDPOINT}/auth/login`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify({ username, password })
                 });
 
-                const data = await response.json();
+                const result = await response.json();
 
-                if (response.ok && data.user) {
-                    localStorage.setItem('currentUserId', data.user.id);
-                    localStorage.setItem('userRole', data.user.role);
-                    localStorage.setItem('userName', data.user.display_name);
+                if (response.ok && result.user) {
+                    // Store authentication data
+                    localStorage.setItem('currentUserId', result.user.id);
+                    localStorage.setItem('userRole', result.user.role);
+                    localStorage.setItem('userName', result.user.display_name);
 
-                    if (data.user.role === 'owner') {
-                        localStorage.setItem('ownerId', data.user.id);
-                    } else if (data.user.role === 'chef') {
-                        localStorage.setItem('chefId', data.user.id);
-                    } else if (data.user.role === 'waiter') {
-                        localStorage.setItem('waiterId', data.user.id);
+                    // Set role-specific IDs for backward compatibility
+                    if (result.user.role === 'owner') {
+                        localStorage.setItem('ownerId', result.user.id);
+                    } else if (result.user.role === 'chef') {
+                        localStorage.setItem('chefId', result.user.id);
+                    } else if (result.user.role === 'waiter') {
+                        localStorage.setItem('waiterId', result.user.id);
                     }
 
-                    successMsg.textContent = `✅ Welcome, ${data.user.display_name}!`;
-                    successMsg.style.display = 'block';
+                    // Show success message
+                    successAlert.textContent = `✅ Welcome back, ${result.user.display_name}!`;
+                    successAlert.style.display = 'block';
 
+                    // Redirect based on role
                     setTimeout(() => {
-                        if (data.user.role === 'owner') {
-                            window.location.href = 'dashboard.html';
-                        } else if (data.user.role === 'chef') {
-                            window.location.href = 'chef.html';
-                        } else if (data.user.role === 'waiter') {
-                            window.location.href = 'waiter.html';
-                        } else {
-                            window.location.href = 'index.html';
+                        switch (result.user.role) {
+                            case 'owner':
+                                window.location.href = 'dashboard.html';
+                                break;
+                            case 'chef':
+                                window.location.href = 'chef.html';
+                                break;
+                            case 'waiter':
+                                window.location.href = 'waiter.html';
+                                break;
+                            default:
+                                window.location.href = 'index.html';
                         }
                     }, 1000);
                 } else {
-                    errorMsg.textContent = data.error || 'Invalid username or password';
-                    errorMsg.style.display = 'block';
-                    loginBtn.disabled = false;
-                    loginBtn.innerHTML = '<span class="material-icons-round" style="vertical-align: middle; margin-right: 8px;">login</span>Login';
+                    // Show error
+                    errorAlert.textContent = result.error || 'Invalid credentials. Please try again.';
+                    errorAlert.style.display = 'block';
+
+                    // Re-enable button
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = '<span class="material-icons-round">login</span><span>Sign In</span>';
                 }
             } catch (error) {
-                errorMsg.textContent = 'Login failed. Please try again.';
-                errorMsg.style.display = 'block';
-                loginBtn.disabled = false;
-                loginBtn.innerHTML = '<span class="material-icons-round" style="vertical-align: middle; margin-right: 8px;">login</span>Login';
+                console.error('Authentication error:', error);
+                errorAlert.textContent = 'Connection failed. Please check your internet and try again.';
+                errorAlert.style.display = 'block';
+
+                // Re-enable button
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<span class="material-icons-round">login</span><span>Sign In</span>';
             }
         });
     </script>
