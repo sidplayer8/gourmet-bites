@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
     permissions JSONB DEFAULT '{}'::jsonb,
     is_active BOOLEAN DEFAULT true,
     notes TEXT,
+    last_login TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
