@@ -36,7 +36,11 @@
                 <span>Menu</span>
             </button>
             <button class="nav-btn" onclick="showView('cart')">
-                <span>🛒</span>
+                <span style="position:relative;">
+                    🛒
+                    <span class="cart-badge"
+                        style="position:absolute; top:-8px; right:-12px; background:#ff6600; color:white; border-radius:50%; width:20px; height:20px; font-size:11px; display:flex; align-items:center; justify-content:center; font-weight:bold;">0</span>
+                </span>
                 <span>Cart</span>
             </button>
         </div>

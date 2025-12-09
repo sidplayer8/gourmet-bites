@@ -5,7 +5,7 @@ function logout() { localStorage.removeItem('user'); localStorage.removeItem('ca
 // Toast notification function
 function showToast(message, type = 'success') {
     const toast = document.createElement('div');
-    toast.style.cssText = `position:fixed; top:20px; right:20px; background:${type === 'error' ? '#ef4444' : '#10b981'}; color:white; padding:16px 24px; border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,0.3); z-index:10000; animation:slideIn 0.3s ease;`;
+    toast.className = `toast-notification ${type === 'error' ? 'error' : type === 'info' ? 'info' : ''}`;
     toast.textContent = message;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
@@ -170,10 +170,7 @@ function renderCart() {
     document.getElementById('cartTotal').textContent = '$' + total.toFixed(2);
 }
 
-function updateCartCount() {
-    const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-    document.getElementById('cartCount').textContent = count;
-}
+
 
 function showView(view) {
     document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));

@@ -280,7 +280,7 @@ body {
     border-top: 2px solid #ff6600;
     display: flex;
     justify-content: space-around;
-    padding: 16px 0;
+    padding: 14px 0 18px 0;
     z-index: 1000;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
 }
@@ -290,12 +290,12 @@ body {
     background: none;
     border: none;
     color: #888;
-    padding: 12px;
+    padding: 8px 12px;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     font-size: 13px;
     font-weight: 600;
     transition: all 0.3s;
@@ -306,24 +306,47 @@ body {
     color: #ff6600;
 }
 
-.nav-btn.active::before {
+.nav-btn.active::after {
     content: '';
     position: absolute;
-    top: -2px;
-    left: 20%;
-    right: 20%;
+    bottom: -18px;
+    left: 25%;
+    right: 25%;
     height: 3px;
     background: #ff6600;
-    border-radius: 0 0 3px 3px;
+    border-radius: 3px 3px 0 0;
 }
 
 .nav-btn:hover {
-    color: #ff6600;
+    color: #ff9933;
     transform: translateY(-2px);
 }
 
 .nav-btn span:first-child {
-    font-size: 26px;
+    font-size: 24px;
+}
+
+/* Toast Notifications - moved down to avoid blocking header */
+.toast-notification {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: #10b981;
+    color: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    max-width: 350px;
+    animation: slideIn 0.3s ease;
+}
+
+.toast-notification.error {
+    background: #ef4444;
+}
+
+.toast-notification.info {
+    background: #3b82f6;
 }
 
 .cart-page {
