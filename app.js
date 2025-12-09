@@ -92,8 +92,8 @@ function openCustomizeModal(itemId) {
                 <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">×</button>
             </div>
             <div class="modal-body">
-                <img src="${item.img}" alt="${item.name}" style="width:100%; height:200px; object-fit:cover; border-radius:12px; margin-bottom:20px;">
-                <p style="color:#999; margin-bottom:20px;">${item.desc}</p>
+                <img src="${item.image_url || item.img}" alt="${item.name}" style="width:100%; height:200px; object-fit:cover; border-radius:12px; margin-bottom:20px;">
+                <p style="color:#999; margin-bottom:20px;">${item.description || item.desc}</p>
                 
                 <h3 style="margin-bottom:10px;">Ingredients</h3>
                 <div class="ingredients-list">
@@ -199,7 +199,7 @@ function renderCart() {
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     cartDiv.innerHTML = cart.map((item, idx) => `
         <div class="cart-item">
-            <img src="${item.img}" alt="${item.name}">
+            <img src="${item.image_url || item.img}" alt="${item.name}">
             <div class="cart-item-details">
                 <h4>${item.name}</h4>
                 <p>$${item.price.toFixed(2)} each</p>
