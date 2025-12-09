@@ -1,8 +1,6 @@
-// Import shared codes storage
-const { codes } = require('./send-sms');
+const codes = require('./_codeStore');
 
 module.exports = async (req, res) => {
-    // Enable CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -24,6 +22,7 @@ module.exports = async (req, res) => {
     const stored = codes[phoneNumber];
 
     if (!stored) {
+        console.log(`No code found for ${phoneNumber}`);
         return res.status(400).json({ success: false, error: 'No code found for this number' });
     }
 
@@ -38,5 +37,6 @@ module.exports = async (req, res) => {
         return res.status(200).json({ success: true });
     }
 
+    console.log(`Invalid code for ${phoneNumber}. Expected: ${stored.code}, Got: ${code}`);
     res.status(400).json({ success: false, error: 'Invalid code' });
 };

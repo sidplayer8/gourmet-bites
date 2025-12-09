@@ -115,64 +115,6 @@
         .verify-section {
             display: none;
         }
-
-        /* Toast Notification Styles */
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: white;
-            color: #1a1a2e;
-            padding: 16px 24px;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            z-index: 10000;
-            max-width: 350px;
-            animation: slideIn 0.3s ease;
-        }
-
-        .toast.success {
-            background: #10b981;
-            color: white;
-        }
-
-        .toast.error {
-            background: #ef4444;
-            color: white;
-        }
-
-        .toast.info {
-            background: #3b82f6;
-            color: white;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideOut {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-
-            to {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-        }
-
-        .toast.hiding {
-            animation: slideOut 0.3s ease;
-        }
     </style>
 </head>
 
@@ -185,14 +127,14 @@
         <div id="phoneSection">
             <div class="phone-input">
                 <select id="countryCode">
-                    <option value="+1">🇺🇸 +1</option>
-                    <option value="+44">🇬🇧 +44</option>
-                    <option value="+65" selected>🇸🇬 +65</option>
-                    <option value="+91">🇮🇳 +91</option>
-                    <option value="+86">🇨🇳 +86</option>
-                    <option value="+81">🇯🇵 +81</option>
-                    <option value="+82">🇰🇷 +82</option>
-                    <option value="+61">🇦🇺 +61</option>
+                    <option value="+1"> +1</option>
+                    <option value="+44"> +44</option>
+                    <option value="+65" selected> +65</option>
+                    <option value="+91"> +91</option>
+                    <option value="+86"> +86</option>
+                    <option value="+81"> +81</option>
+                    <option value="+82"> +82</option>
+                    <option value="+61"> +61</option>
                 </select>
                 <input type="tel" id="phoneNumber" placeholder="Enter phone number" />
             </div>
@@ -218,19 +160,6 @@
 
         firebase.initializeApp(firebaseConfig);
 
-        // Toast notification function
-        function showToast(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = message;
-            document.body.appendChild(toast);
-
-            setTimeout(() => {
-                toast.classList.add('hiding');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
         function googleLogin() {
             const provider = new firebase.auth.GoogleAuthProvider();
             firebase.auth().signInWithPopup(provider)
@@ -240,11 +169,11 @@
                         email: result.user.email,
                         photoURL: result.user.photoURL
                     }));
-                    showToast('Login successful! Redirecting...', 'success');
-                    setTimeout(() => window.location.href = 'menu.html', 1000);
+                    alert(' Login successful!');
+                    window.location.href = 'menu.html';
                 })
                 .catch(err => {
-                    showToast('Google login error: ' + err.message, 'error');
+                    alert(' Google login error: ' + err.message);
                 });
         }
 
@@ -254,7 +183,7 @@
             const fullPhone = countryCode + phoneNumber;
 
             if (!phoneNumber || phoneNumber.length < 8) {
-                showToast('Please enter a valid phone number', 'error');
+                alert('Please enter a valid phone number');
                 return;
             }
 
@@ -268,13 +197,13 @@
                     if (data.success) {
                         document.getElementById('phoneSection').style.display = 'none';
                         document.getElementById('verifySection').style.display = 'block';
-                        showToast('✓ Code sent to ' + fullPhone, 'success');
+                        alert(' Code sent to ' + fullPhone);
                     } else {
-                        showToast('Failed to send SMS: ' + data.error, 'error');
+                        alert(' Failed to send SMS: ' + data.error);
                     }
                 })
                 .catch(error => {
-                    showToast('Error: Unable to connect to server', 'error');
+                    alert(' Error: Backend server not running. Start server with: node sms-server.js');
                 });
         }
 
@@ -285,7 +214,7 @@
             const code = document.getElementById('verificationCode').value;
 
             if (!code || code.length !== 6) {
-                showToast('Please enter the 6-digit code', 'error');
+                alert('Please enter the 6-digit code');
                 return;
             }
 
@@ -305,14 +234,14 @@
                             phone: fullPhone,
                             verified: true
                         }));
-                        showToast('✓ Phone verified successfully!', 'success');
-                        setTimeout(() => window.location.href = 'menu.html', 1000);
+                        alert(' Phone verified successfully!');
+                        window.location.href = 'menu.html';
                     } else {
-                        showToast('Invalid code. Please try again.', 'error');
+                        alert(' Invalid code. Please try again.');
                     }
                 })
                 .catch(error => {
-                    showToast('Verification error', 'error');
+                    alert(' Verification error');
                 });
         }
 

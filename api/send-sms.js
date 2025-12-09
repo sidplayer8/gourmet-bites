@@ -1,10 +1,7 @@
 const twilio = require('twilio');
-
-// In-memory storage for verification codes (use Redis in production)
-const codes = {};
+const codes = require('./_codeStore');
 
 module.exports = async (req, res) => {
-    // Enable CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -23,7 +20,6 @@ module.exports = async (req, res) => {
         return res.status(400).json({ success: false, error: 'Phone number required' });
     }
 
-    // Generate 6-digit code
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
     try {
@@ -38,19 +34,15 @@ module.exports = async (req, res) => {
             to: phoneNumber
         });
 
-        // Store code (expires in 5 minutes)
         codes[phoneNumber] = {
             code: code,
             expires: Date.now() + 300000
         };
 
-        console.log(`SMS sent to ${phoneNumber}`);
-        res.status(200).json({ success: true });
+        console.log(`SMS sent to ${phoneNumber}, code: ${code}`);
+        res.status(200).json({ success: true, code: code }); // Return code for debugging
     } catch (error) {
         console.error('Twilio error:', error.message);
         res.status(500).json({ success: false, error: error.message });
     }
 };
-
-// Export codes for verify function
-module.exports.codes = codes;
