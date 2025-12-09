@@ -29,7 +29,15 @@ let cart = JSON.parse(localStorage.getItem('cart') || '[]');
 
 async function loadMenu() {
     try {
-        menuItems = await getMenuItems();
+        let rawMenuItems = await getMenuItems();
+
+        // Normalize data from Supabase - ensure ingredients and allergens are always arrays
+        menuItems = rawMenuItems.map(item => ({
+            ...item,
+            ingredients: Array.isArray(item.ingredients) ? item.ingredients : (item.ingredients ? [item.ingredients] : []),
+            allergens: Array.isArray(item.allergens) ? item.allergens : (item.allergens ? [item.allergens] : [])
+        }));
+
         if (menuItems.length === 0) {
             // Fallback to hardcoded menu if database is empty
             menuItems = [
@@ -43,6 +51,8 @@ async function loadMenu() {
                 { id: 8, name: 'Buffalo Wings', price: 10.99, description: 'Spicy chicken wings with hot sauce', image_url: 'https://images.unsplash.com/photo-1608039755401-742074f0548d?w=400', allergens: [], ingredients: ['Chicken Wings', 'Buffalo Sauce', 'Celery', 'Blue Cheese Dip'] }
             ];
         }
+
+        console.log('Menu loaded:', menuItems.length, 'items');
         renderMenu();
         updateCartCount(); // Initialize cart badge on page load
     } catch (error) {
@@ -93,6 +103,16 @@ function renderMenu() {
 
 function openCustomizeModal(itemId) {
     const item = menuItems.find(i => i.id === itemId);
+    if (!item) {
+        console.error('Item not found:', itemId);
+        showToast('Error: Item not found', 'error');
+        return;
+    }
+
+    // Ensure ingredients and allergens are arrays
+    const ingredients = Array.isArray(item.ingredients) ? item.ingredients : [];
+    const allergens = Array.isArray(item.allergens) ? item.allergens : [];
+
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
     modal.innerHTML = `
@@ -107,20 +127,20 @@ function openCustomizeModal(itemId) {
                 
                 <h3 style="margin-bottom:10px;">Ingredients</h3>
                 <div class="ingredients-list">
-                    ${item.ingredients.map((ing, idx) => `
+                    ${ingredients.length > 0 ? ingredients.map((ing, idx) => `
                         <label class="ingredient-item" style="display:flex; align-items:center; padding:10px; margin-bottom:8px; background:#2a2a3e; border-radius:8px;">
                             <input type="checkbox" checked data-ingredient="${idx}" style="margin-right:12px; width:20px; height:20px;">
                             <span style="flex:1;">${ing}</span>
                         </label>
-                    `).join('')}
+                    `).join('') : '<p style="color:#999;">No customization available</p>'}
                 </div>
                 
                 <h3 style="margin-top:20px; margin-bottom:10px;">Special Instructions</h3>
                 <textarea id="specialNotes" placeholder="E.g., No onions, extra sauce..." style="width:100%; padding:12px; background:#2a2a3e; border:1px solid #444; border-radius:8px; color:#fff; min-height:80px; resize:vertical;"></textarea>
                 
-                ${item.allergens.length > 0 ? `
+                ${allergens.length > 0 ? `
                     <div class="allergen-warning" style="background:#ef4444; color:white; padding:12px; border-radius:8px; margin-top:20px;">
-                        <strong>⚠️ Allergens:</strong> ${item.allergens.join(', ')}
+                        <strong>⚠️ Allergens:</strong> ${allergens.join(', ')}
                     </div>
                 ` : ''}
             </div>
@@ -141,48 +161,80 @@ function openCustomizeModal(itemId) {
 }
 
 function addCustomizedItem(itemId) {
-    const item = menuItems.find(i => i.id === itemId);
-    const modal = document.querySelector('.modal-overlay');
-    const checkboxes = modal.querySelectorAll('input[type="checkbox"]');
-    const notes = document.getElementById('specialNotes').value.trim();
+    console.log('Adding item to cart:', itemId);
 
-    const removedIngredients = Array.from(checkboxes)
-        .filter(cb => !cb.checked)
-        .map(cb => item.ingredients[cb.dataset.ingredient]);
+    try {
+        const item = menuItems.find(i => i.id === itemId);
+        if (!item) {
+            console.error('Item not found in menuItems:', itemId);
+            showToast('Error: Item not found', 'error');
+            return;
+        }
 
-    // Check if identical item exists (same item, same customizations)
-    const existingItem = cart.find(cartItem =>
-        cartItem.id === itemId &&
-        JSON.stringify(cartItem.customizations?.removed || []) === JSON.stringify(removedIngredients) &&
-        (cartItem.customizations?.notes || '') === notes
-    );
+        const modal = document.querySelector('.modal-overlay');
+        if (!modal) {
+            console.error('Modal not found');
+            showToast('Error: Modal not found', 'error');
+            return;
+        }
 
-    if (existingItem) {
-        // Merge: increment quantity
-        existingItem.quantity++;
-    } else {
-        // Add new item with customizations
-        const customItem = {
-            ...item,
-            quantity: 1,
-            customizations: {
-                removed: removedIngredients,
-                notes: notes
-            }
-        };
-        cart.push(customItem);
+        const checkboxes = modal.querySelectorAll('input[type="checkbox"]');
+        const notesElement = document.getElementById('specialNotes');
+        const notes = notesElement ? notesElement.value.trim() : '';
+
+        // Safely get ingredients array
+        const ingredients = Array.isArray(item.ingredients) ? item.ingredients : [];
+
+        const removedIngredients = Array.from(checkboxes)
+            .filter(cb => !cb.checked)
+            .map(cb => ingredients[cb.dataset.ingredient])
+            .filter(ing => ing); // Remove undefined values
+
+        // Check if identical item exists (same item, same customizations)
+        const existingItem = cart.find(cartItem =>
+            cartItem.id === itemId &&
+            JSON.stringify(cartItem.customizations?.removed || []) === JSON.stringify(removedIngredients) &&
+            (cartItem.customizations?.notes || '') === notes
+        );
+
+        if (existingItem) {
+            // Merge: increment quantity
+            existingItem.quantity++;
+            console.log('Incremented existing item quantity');
+        } else {
+            // Add new item with customizations
+            const customItem = {
+                ...item,
+                quantity: 1,
+                customizations: {
+                    removed: removedIngredients,
+                    notes: notes
+                }
+            };
+            cart.push(customItem);
+            console.log('Added new item to cart');
+        }
+
+        localStorage.setItem('cart', JSON.stringify(cart));
+        console.log('Cart saved to localStorage. Total items:', cart.length);
+
+        // Update cart badge with animation first
+        updateCartCount();
+
+        // Show success toast
+        showToast(`✓ ${item.name} added to cart!`);
+
+        // Close modal last
+        modal.remove();
+
+    } catch (error) {
+        console.error('Error adding item to cart:', error);
+        showToast('Error adding item to cart', 'error');
+
+        // Try to close modal even if there was an error
+        const modal = document.querySelector('.modal-overlay');
+        if (modal) modal.remove();
     }
-
-    localStorage.setItem('cart', JSON.stringify(cart));
-
-    // Update cart badge with animation first
-    updateCartCount();
-
-    // Show success toast
-    showToast(`✓ ${item.name} added to cart!`);
-
-    // Close modal last
-    modal.remove();
 }
 
 // Expose functions to global scope for inline onclick handlers
@@ -284,5 +336,4 @@ function checkout() {
     updateCartCount();
 }
 
-renderMenu();
-updateCartCount();
+// Note: renderMenu() and updateCartCount() are now called from loadMenu() in menu.html
