@@ -19,6 +19,26 @@
             </div>
         </div>
 
+        <div class="category-nav"
+            style="position:sticky; top:0; background:#1a1a2e; z-index:100; padding:10px 0; overflow-x:auto; white-space:nowrap; border-bottom:1px solid #333; margin-bottom:20px;">
+            <button class="cat-btn active" onclick="filterMenu('All')"
+                style="background:none; border:none; color:white; padding:8px 16px; margin-right:8px; border-radius:20px; cursor:pointer; font-weight:bold;">All</button>
+            <button class="cat-btn" onclick="filterMenu('Burgers')"
+                style="background:none; border:none; color:#999; padding:8px 16px; margin-right:8px; border-radius:20px; cursor:pointer;">Burgers</button>
+            <button class="cat-btn" onclick="filterMenu('Pizza')"
+                style="background:none; border:none; color:#999; padding:8px 16px; margin-right:8px; border-radius:20px; cursor:pointer;">Pizza</button>
+            <button class="cat-btn" onclick="filterMenu('Mains')"
+                style="background:none; border:none; color:#999; padding:8px 16px; margin-right:8px; border-radius:20px; cursor:pointer;">Mains</button>
+            <button class="cat-btn" onclick="filterMenu('Salads')"
+                style="background:none; border:none; color:#999; padding:8px 16px; margin-right:8px; border-radius:20px; cursor:pointer;">Salads</button>
+            <button class="cat-btn" onclick="filterMenu('Appetizers')"
+                style="background:none; border:none; color:#999; padding:8px 16px; margin-right:8px; border-radius:20px; cursor:pointer;">Sides</button>
+            <button class="cat-btn" onclick="filterMenu('Drinks')"
+                style="background:none; border:none; color:#999; padding:8px 16px; margin-right:8px; border-radius:20px; cursor:pointer;">Drinks</button>
+            <button class="cat-btn" onclick="filterMenu('Dessert')"
+                style="background:none; border:none; color:#999; padding:8px 16px; margin-right:8px; border-radius:20px; cursor:pointer;">Dessert</button>
+        </div>
+
         <div id="menuView" class="menu-grid"></div>
 
         <div id="cartView" class="cart-page" style="display:none;">

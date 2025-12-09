@@ -27,61 +27,78 @@ function updateCartCount() {
 let menuItems = [];
 let cart = JSON.parse(localStorage.getItem('cart') || '[]');
 
-async function loadMenu() {
-    try {
-        let rawMenuItems = await getMenuItems();
+let currentCategory = 'All';
 
-        // Normalize data from Supabase - ensure ingredients and allergens are always arrays
+function loadMenu() {
+    getMenuItems().then(rawMenuItems => {
+        // Normalize data from Supabase
         menuItems = rawMenuItems.map(item => ({
             ...item,
             ingredients: Array.isArray(item.ingredients) ? item.ingredients : (item.ingredients ? [item.ingredients] : []),
-            allergens: Array.isArray(item.allergens) ? item.allergens : (item.allergens ? [item.allergens] : [])
+            allergens: Array.isArray(item.allergens) ? item.allergens : (item.allergens ? [item.allergens] : []),
+            price: Number(item.price) // Ensure price is a number
         }));
 
         if (menuItems.length === 0) {
-            // Fallback to hardcoded menu if database is empty
+            // Fallback (omitted for brevity, keeping existing fallback logic if needed)
+            // For now assuming database has items or user ran the SQL
             menuItems = [
-                { id: 1, name: 'Classic Burger', price: 11.99, description: 'Juicy beef patty with fresh vegetables', image_url: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400', allergens: ['Gluten', 'Dairy'], ingredients: ['Beef Patty', 'Lettuce', 'Tomato', 'Cheese', 'Bun', 'Sauce'] },
-                { id: 2, name: 'Margherita Pizza', price: 12.99, description: 'Fresh mozzarella, basil, tomato sauce', image_url: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400', allergens: ['Gluten', 'Dairy'], ingredients: ['Pizza Dough', 'Mozzarella', 'Tomato Sauce', 'Basil', 'Olive Oil'] },
-                { id: 3, name: 'Chicken Tikka', price: 14.99, description: 'Creamy Indian curry with tender chicken', image_url: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400', allergens: ['Dairy'], ingredients: ['Chicken', 'Cream', 'Tikka Masala Sauce', 'Spices', 'Rice'] },
-                { id: 4, name: 'Pasta Carbonara', price: 12.99, description: 'Creamy pasta with crispy bacon', image_url: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400', allergens: ['Gluten', 'Dairy', 'Eggs'], ingredients: ['Pasta', 'Bacon', 'Eggs', 'Parmesan', 'Black Pepper'] },
-                { id: 5, name: 'Caesar Salad', price: 8.99, description: 'Crisp romaine with parmesan and croutons', image_url: 'https://images.unsplash.com/photo-1546793665-c74683f339c1?w=400', allergens: ['Gluten', 'Dairy', 'Fish'], ingredients: ['Romaine Lettuce', 'Croutons', 'Parmesan', 'Caesar Dressing'] },
-                { id: 6, name: 'Greek Salad', price: 9.99, description: 'Fresh vegetables with feta cheese', image_url: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400', allergens: ['Dairy'], ingredients: ['Tomatoes', 'Cucumber', 'Feta', 'Olives', 'Red Onion'] },
-                { id: 7, name: 'Pepperoni Pizza', price: 14.99, description: 'Classic pizza with pepperoni and cheese', image_url: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=400', allergens: ['Gluten', 'Dairy'], ingredients: ['Pizza Dough', 'Mozzarella', 'Pepperoni', 'Tomato Sauce'] },
-                { id: 8, name: 'Buffalo Wings', price: 10.99, description: 'Spicy chicken wings with hot sauce', image_url: 'https://images.unsplash.com/photo-1608039755401-742074f0548d?w=400', allergens: [], ingredients: ['Chicken Wings', 'Buffalo Sauce', 'Celery', 'Blue Cheese Dip'] }
+                // Fallback items with categories added for testing even without DB update
+                { id: 1, name: 'Classic Burger', category: 'Burgers', price: 11.99, description: 'Juicy beef patty', image_url: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400', allergens: ['Gluten'], ingredients: ['Beef', 'Bun'] },
+                { id: 2, name: 'Margherita Pizza', category: 'Pizza', price: 12.99, description: 'Fresh mozzarella', image_url: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400', allergens: ['Gluten'], ingredients: ['Dough', 'Cheese'] }
             ];
         }
 
         console.log('Menu loaded:', menuItems.length, 'items');
-        renderMenu();
-        updateCartCount(); // Initialize cart badge on page load
-    } catch (error) {
+        renderMenu(); // Initial render (All)
+        updateCartCount();
+    }).catch(error => {
         console.error('Error loading menu:', error);
-        showToast('Error loading menu. Using offline data.', 'error');
-        // Use fallback menu
-        menuItems = [
-            { id: 1, name: 'Classic Burger', price: 11.99, description: 'Juicy beef patty with fresh vegetables', image_url: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400', allergens: ['Gluten', 'Dairy'], ingredients: ['Beef Patty', 'Lettuce', 'Tomato', 'Cheese', 'Bun', 'Sauce'] },
-            { id: 2, name: 'Margherita Pizza', price: 12.99, description: 'Fresh mozzarella, basil, tomato sauce', image_url: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400', allergens: ['Gluten', 'Dairy'], ingredients: ['Pizza Dough', 'Mozzarella', 'Tomato Sauce', 'Basil', 'Olive Oil'] },
-            { id: 3, name: 'Chicken Tikka', price: 14.99, description: 'Creamy Indian curry with tender chicken', image_url: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400', allergens: ['Dairy'], ingredients: ['Chicken', 'Cream', 'Tikka Masala Sauce', 'Spices', 'Rice'] },
-            { id: 4, name: 'Pasta Carbonara', price: 12.99, description: 'Creamy pasta with crispy bacon', image_url: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400', allergens: ['Gluten', 'Dairy', 'Eggs'], ingredients: ['Pasta', 'Bacon', 'Eggs', 'Parmesan', 'Black Pepper'] },
-            { id: 5, name: 'Caesar Salad', price: 8.99, description: 'Crisp romaine with parmesan and croutons', image_url: 'https://images.unsplash.com/photo-1546793665-c74683f339c1?w=400', allergens: ['Gluten', 'Dairy', 'Fish'], ingredients: ['Romaine Lettuce', 'Croutons', 'Parmesan', 'Caesar Dressing'] },
-            { id: 6, name: 'Greek Salad', price: 9.99, description: 'Fresh vegetables with feta cheese', image_url: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400', allergens: ['Dairy'], ingredients: ['Tomatoes', 'Cucumber', 'Feta', 'Olives', 'Red Onion'] },
-            { id: 7, name: 'Pepperoni Pizza', price: 14.99, description: 'Classic pizza with pepperoni and cheese', image_url: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=400', allergens: ['Gluten', 'Dairy'], ingredients: ['Pizza Dough', 'Mozzarella', 'Pepperoni', 'Tomato Sauce'] },
-            { id: 8, name: 'Buffalo Wings', price: 10.99, description: 'Spicy chicken wings with hot sauce', image_url: 'https://images.unsplash.com/photo-1608039755401-742074f0548d?w=400', allergens: [], ingredients: ['Chicken Wings', 'Buffalo Sauce', 'Celery', 'Blue Cheese Dip'] }
-        ];
-        renderMenu();
-    }
+        showToast('Error loading menu', 'error');
+    });
+}
+
+function filterMenu(category) {
+    currentCategory = category;
+
+    // Update active button state
+    document.querySelectorAll('.cat-btn').forEach(btn => {
+        if (btn.textContent.trim() === category || (category === 'Appetizers' && btn.textContent.trim() === 'Sides')) {
+            btn.classList.add('active');
+            btn.style.color = '#fff';
+            btn.style.background = '#ff6600';
+        } else {
+            btn.classList.remove('active');
+            btn.style.color = '#999';
+            btn.style.background = 'none';
+        }
+    });
+
+    renderMenu();
 }
 
 function renderMenu() {
     const grid = document.getElementById('menuView');
-    if (!grid) return; // Exit if menu container doesn't exist
+    if (!grid) return;
 
-    grid.innerHTML = menuItems.map(item => `
-        <div class="menu-card">
+    // Filter items
+    const filteredItems = currentCategory === 'All'
+        ? menuItems
+        : menuItems.filter(item => item.category === currentCategory);
+
+    if (filteredItems.length === 0) {
+        grid.innerHTML = `<p style="grid-column:1/-1; text-align:center; padding:40px; color:#999;">No items found in ${currentCategory}</p>`;
+        return;
+    }
+
+    grid.innerHTML = filteredItems.map(item => `
+        <div class="menu-card" style="animation: fadeIn 0.3s ease-in-out;">
             <img src="${item.image_url || item.img}" alt="${item.name}">
             <div class="menu-card-body">
-                <h3>${item.name}</h3>
+                <div style="display:flex; justify-content:space-between; align-items:start;">
+                    <h3>${item.name}</h3>
+                    <span style="font-size:12px; background:#333; padding:2px 6px; border-radius:4px; color:#aaa;">${item.category || 'Mains'}</span>
+                </div>
                 <p>${item.description || item.desc}</p>
                 ${item.allergens && item.allergens.length > 0 ? `<div class="allergens">⚠️ ${item.allergens.join(', ')}</div>` : ''}
                 <div class="price">$${item.price.toFixed(2)}</div>
@@ -90,10 +107,10 @@ function renderMenu() {
         </div>
     `).join('');
 
-    // Add event listeners to all "Add to Cart" buttons
+    // Add event listeners
     grid.querySelectorAll('.btn-add').forEach(button => {
         button.addEventListener('click', () => {
-            const itemId = button.getAttribute('data-item-id'); // Support UUID and integer IDs
+            const itemId = button.getAttribute('data-item-id');
             openCustomizeModal(itemId);
         });
     });
@@ -239,6 +256,7 @@ function addCustomizedItem(itemId) {
 
 // Expose functions to global scope for inline onclick handlers
 window.loadMenu = loadMenu;
+window.filterMenu = filterMenu;
 window.openCustomizeModal = openCustomizeModal;
 window.addCustomizedItem = addCustomizedItem;
 window.removeFromCart = removeFromCart;

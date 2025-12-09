@@ -49,14 +49,21 @@
             window.location.href = 'login.html';
         }
 
-        // Set profile picture
+        // Set profile picture with robust fallback
         const user = JSON.parse(localStorage.getItem('user'));
         if (user) {
             const profilePic = document.getElementById('profilePic');
-            if (user.photoURL) {
+            const fallbackUrl = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name || user.phone || 'User') + '&background=ff6600&color=fff&size=256';
+
+            profilePic.onerror = function () {
+                this.onerror = null; // Prevent infinite loop
+                this.src = fallbackUrl;
+            };
+
+            if (user.photoURL && user.photoURL.trim() !== '') {
                 profilePic.src = user.photoURL;
             } else {
-                profilePic.src = 'https://ui-avatars.com/api/?name=' + (user.name || 'User') + '&background=ff6600&color=fff&size=256';
+                profilePic.src = fallbackUrl;
             }
         }
     </script>
