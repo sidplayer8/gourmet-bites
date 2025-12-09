@@ -89,15 +89,22 @@
             const profilePic = document.getElementById('profilePic');
             const userName = document.getElementById('userName');
 
-            if (user.photoURL) {
+            // Construct fallback URL based on name or phone
+            const displayName = user.name || user.phone || 'User';
+            const fallbackUrl = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(displayName) + '&background=ff6600&color=fff&size=128';
+
+            profilePic.onerror = function () {
+                this.onerror = null;
+                this.src = fallbackUrl;
+            };
+
+            if (user.photoURL && user.photoURL.trim() !== '') {
                 profilePic.src = user.photoURL;
-                userName.textContent = user.name || 'User';
             } else {
-                const phoneNum = user.phone || 'User';
-                const avatarName = phoneNum.replace(/\+/g, '').slice(-4);
-                profilePic.src = 'https://ui-avatars.com/api/?name=' + avatarName + '&background=ff6600&color=fff&size=128';
-                userName.textContent = phoneNum;
+                profilePic.src = fallbackUrl;
             }
+
+            userName.textContent = displayName;
         }
     </script>
 </body>
