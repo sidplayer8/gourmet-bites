@@ -2,6 +2,9 @@
 if (!localStorage.getItem('user')) { window.location.href = 'login.html'; }
 function logout() { localStorage.removeItem('user'); localStorage.removeItem('cart'); localStorage.removeItem('orders'); window.location.href = 'login.html'; }
 
+// Import Supabase client
+import { getMenuItems } from './lib/supabase.js';
+
 // Toast notification function
 function showToast(message, type = 'success') {
     const toast = document.createElement('div');
@@ -23,28 +26,53 @@ function updateCartCount() {
 }
 
 
-const menuItems = [
-    { id: 1, name: 'Classic Burger', price: 11.99, desc: 'Juicy beef patty with fresh vegetables', img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400', allergens: ['Gluten', 'Dairy'], ingredients: ['Beef Patty', 'Lettuce', 'Tomato', 'Cheese', 'Bun', 'Sauce'] },
-    { id: 2, name: 'Margherita Pizza', price: 12.99, desc: 'Fresh mozzarella, basil, tomato sauce', img: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400', allergens: ['Gluten', 'Dairy'], ingredients: ['Pizza Dough', 'Mozzarella', 'Tomato Sauce', 'Basil', 'Olive Oil'] },
-    { id: 3, name: 'Chicken Tikka', price: 14.99, desc: 'Creamy Indian curry with tender chicken', img: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400', allergens: ['Dairy'], ingredients: ['Chicken', 'Cream', 'Tikka Masala Sauce', 'Spices', 'Rice'] },
-    { id: 4, name: 'Pasta Carbonara', price: 12.99, desc: 'Creamy pasta with crispy bacon', img: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400', allergens: ['Gluten', 'Dairy', 'Eggs'], ingredients: ['Pasta', 'Bacon', 'Eggs', 'Parmesan', 'Black Pepper'] },
-    { id: 5, name: 'Caesar Salad', price: 8.99, desc: 'Crisp romaine with parmesan and croutons', img: 'https://images.unsplash.com/photo-1546793665-c74683f339c1?w=400', allergens: ['Gluten', 'Dairy', 'Fish'], ingredients: ['Romaine Lettuce', 'Croutons', 'Parmesan', 'Caesar Dressing'] },
-    { id: 6, name: 'Greek Salad', price: 9.99, desc: 'Fresh vegetables with feta cheese', img: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400', allergens: ['Dairy'], ingredients: ['Tomatoes', 'Cucumber', 'Feta', 'Olives', 'Red Onion'] },
-    { id: 7, name: 'Pepperoni Pizza', price: 14.99, desc: 'Classic pizza with pepperoni and cheese', img: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=400', allergens: ['Gluten', 'Dairy'], ingredients: ['Pizza Dough', 'Mozzarella', 'Pepperoni', 'Tomato Sauce'] },
-    { id: 8, name: 'Buffalo Wings', price: 10.99, desc: 'Spicy chicken wings with hot sauce', img: 'https://images.unsplash.com/photo-1608039755401-742074f0548d?w=400', allergens: [], ingredients: ['Chicken Wings', 'Buffalo Sauce', 'Celery', 'Blue Cheese Dip'] }
-];
-
+let menuItems = [];
 let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+async function loadMenu() {
+    try {
+        menuItems = await getMenuItems();
+        if (menuItems.length === 0) {
+            // Fallback to hardcoded menu if database is empty
+            menuItems = [
+                { id: 1, name: 'Classic Burger', price: 11.99, description: 'Juicy beef patty with fresh vegetables', image_url: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400', allergens: ['Gluten', 'Dairy'], ingredients: ['Beef Patty', 'Lettuce', 'Tomato', 'Cheese', 'Bun', 'Sauce'] },
+                { id: 2, name: 'Margherita Pizza', price: 12.99, description: 'Fresh mozzarella, basil, tomato sauce', image_url: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400', allergens: ['Gluten', 'Dairy'], ingredients: ['Pizza Dough', 'Mozzarella', 'Tomato Sauce', 'Basil', 'Olive Oil'] },
+                { id: 3, name: 'Chicken Tikka', price: 14.99, description: 'Creamy Indian curry with tender chicken', image_url: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400', allergens: ['Dairy'], ingredients: ['Chicken', 'Cream', 'Tikka Masala Sauce', 'Spices', 'Rice'] },
+                { id: 4, name: 'Pasta Carbonara', price: 12.99, description: 'Creamy pasta with crispy bacon', image_url: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400', allergens: ['Gluten', 'Dairy', 'Eggs'], ingredients: ['Pasta', 'Bacon', 'Eggs', 'Parmesan', 'Black Pepper'] },
+                { id: 5, name: 'Caesar Salad', price: 8.99, description: 'Crisp romaine with parmesan and croutons', image_url: 'https://images.unsplash.com/photo-1546793665-c74683f339c1?w=400', allergens: ['Gluten', 'Dairy', 'Fish'], ingredients: ['Romaine Lettuce', 'Croutons', 'Parmesan', 'Caesar Dressing'] },
+                { id: 6, name: 'Greek Salad', price: 9.99, description: 'Fresh vegetables with feta cheese', image_url: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400', allergens: ['Dairy'], ingredients: ['Tomatoes', 'Cucumber', 'Feta', 'Olives', 'Red Onion'] },
+                { id: 7, name: 'Pepperoni Pizza', price: 14.99, description: 'Classic pizza with pepperoni and cheese', image_url: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=400', allergens: ['Gluten', 'Dairy'], ingredients: ['Pizza Dough', 'Mozzarella', 'Pepperoni', 'Tomato Sauce'] },
+                { id: 8, name: 'Buffalo Wings', price: 10.99, description: 'Spicy chicken wings with hot sauce', image_url: 'https://images.unsplash.com/photo-1608039755401-742074f0548d?w=400', allergens: [], ingredients: ['Chicken Wings', 'Buffalo Sauce', 'Celery', 'Blue Cheese Dip'] }
+            ];
+        }
+        renderMenu();
+    } catch (error) {
+        console.error('Error loading menu:', error);
+        showToast('Error loading menu. Using offline data.', 'error');
+        // Use fallback menu
+        menuItems = [
+            { id: 1, name: 'Classic Burger', price: 11.99, description: 'Juicy beef patty with fresh vegetables', image_url: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400', allergens: ['Gluten', 'Dairy'], ingredients: ['Beef Patty', 'Lettuce', 'Tomato', 'Cheese', 'Bun', 'Sauce'] },
+            { id: 2, name: 'Margherita Pizza', price: 12.99, description: 'Fresh mozzarella, basil, tomato sauce', image_url: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400', allergens: ['Gluten', 'Dairy'], ingredients: ['Pizza Dough', 'Mozzarella', 'Tomato Sauce', 'Basil', 'Olive Oil'] },
+            { id: 3, name: 'Chicken Tikka', price: 14.99, description: 'Creamy Indian curry with tender chicken', image_url: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400', allergens: ['Dairy'], ingredients: ['Chicken', 'Cream', 'Tikka Masala Sauce', 'Spices', 'Rice'] },
+            { id: 4, name: 'Pasta Carbonara', price: 12.99, description: 'Creamy pasta with crispy bacon', image_url: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400', allergens: ['Gluten', 'Dairy', 'Eggs'], ingredients: ['Pasta', 'Bacon', 'Eggs', 'Parmesan', 'Black Pepper'] },
+            { id: 5, name: 'Caesar Salad', price: 8.99, description: 'Crisp romaine with parmesan and croutons', image_url: 'https://images.unsplash.com/photo-1546793665-c74683f339c1?w=400', allergens: ['Gluten', 'Dairy', 'Fish'], ingredients: ['Romaine Lettuce', 'Croutons', 'Parmesan', 'Caesar Dressing'] },
+            { id: 6, name: 'Greek Salad', price: 9.99, description: 'Fresh vegetables with feta cheese', image_url: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400', allergens: ['Dairy'], ingredients: ['Tomatoes', 'Cucumber', 'Feta', 'Olives', 'Red Onion'] },
+            { id: 7, name: 'Pepperoni Pizza', price: 14.99, description: 'Classic pizza with pepperoni and cheese', image_url: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=400', allergens: ['Gluten', 'Dairy'], ingredients: ['Pizza Dough', 'Mozzarella', 'Pepperoni', 'Tomato Sauce'] },
+            { id: 8, name: 'Buffalo Wings', price: 10.99, description: 'Spicy chicken wings with hot sauce', image_url: 'https://images.unsplash.com/photo-1608039755401-742074f0548d?w=400', allergens: [], ingredients: ['Chicken Wings', 'Buffalo Sauce', 'Celery', 'Blue Cheese Dip'] }
+        ];
+        renderMenu();
+    }
+}
 
 function renderMenu() {
     const grid = document.getElementById('menuView');
     grid.innerHTML = menuItems.map(item => `
         <div class="menu-card">
-            <img src="${item.img}" alt="${item.name}">
+            <img src="${item.image_url || item.img}" alt="${item.name}">
             <div class="menu-card-body">
                 <h3>${item.name}</h3>
-                <p>${item.desc}</p>
-                ${item.allergens.length > 0 ? `<div class="allergens">⚠️ ${item.allergens.join(', ')}</div>` : ''}
+                <p>${item.description || item.desc}</p>
+                ${item.allergens && item.allergens.length > 0 ? `<div class="allergens">⚠️ ${item.allergens.join(', ')}</div>` : ''}
                 <div class="price">$${item.price.toFixed(2)}</div>
                 <button class="btn-add" onclick="openCustomizeModal(${item.id})">Add to Cart</button>
             </div>

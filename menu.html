@@ -45,27 +45,9 @@
             </button>
         </div>
     </div>
-    <script src="app.js"></script>
-    <script>
-        // Set profile picture and name
-        const user = JSON.parse(localStorage.getItem('user'));
-        if (user) {
-            const profilePic = document.getElementById('profilePic');
-            const userName = document.getElementById('userName');
-
-            if (user.photoURL) {
-                // Google login - use Google profile picture
-                profilePic.src = user.photoURL;
-                userName.textContent = user.name || 'User';
-            } else {
-                // Phone login - use phone number for both avatar and display
-                const phoneNum = user.phone || 'User';
-                // Use just the last 4 digits for avatar to avoid "+6" showing
-                const avatarName = phoneNum.replace(/\+/g, '').slice(-4);
-                profilePic.src = 'https://ui-avatars.com/api/?name=' + avatarName + '&background=ff6600&color=fff&size=128';
-                userName.textContent = phoneNum;
-            }
-        }
+    userName.textContent = phoneNum;
+    }
+    }
     </script>
 </body>
 
