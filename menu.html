@@ -45,9 +45,34 @@
             </button>
         </div>
     </div>
-    userName.textContent = phoneNum;
-    }
-    }
+
+    <script type="module">
+        // Import and call loadMenu
+        import './app.js';
+
+        // Load menu on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof loadMenu !== 'undefined') {
+                loadMenu();
+            }
+        });
+
+        // Set profile picture and name
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (user) {
+            const profilePic = document.getElementById('profilePic');
+            const userName = document.getElementById('userName');
+
+            if (user.photoURL) {
+                profilePic.src = user.photoURL;
+                userName.textContent = user.name || 'User';
+            } else {
+                const phoneNum = user.phone || 'User';
+                const avatarName = phoneNum.replace(/\+/g, '').slice(-4);
+                profilePic.src = 'https://ui-avatars.com/api/?name=' + avatarName + '&background=ff6600&color=fff&size=128';
+                userName.textContent = phoneNum;
+            }
+        }
     </script>
 </body>
 
