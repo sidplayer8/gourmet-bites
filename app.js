@@ -169,6 +169,12 @@ function addCustomizedItem(itemId) {
     modal.remove();
 }
 
+// Expose functions to global scope for inline onclick handlers
+window.openCustomizeModal = openCustomizeModal;
+window.addCustomizedItem = addCustomizedItem;
+window.removeFromCart = removeFromCart;
+window.updateQuantity = updateQuantity;
+
 function removeFromCart(idx) {
     cart.splice(idx, 1);
     localStorage.setItem('cart', JSON.stringify(cart));
