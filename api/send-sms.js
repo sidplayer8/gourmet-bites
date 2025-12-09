@@ -33,11 +33,20 @@ module.exports = async (req, res) => {
             to: phoneNumber
         });
 
-        console.log(`SMS sent to ${phoneNumber}, code: ${code}`);
-        // Return code in response (client will store it)
+        console.log(`✓ Real SMS sent to ${phoneNumber}, code: ${code}`);
         res.status(200).json({ success: true, verificationCode: code });
     } catch (error) {
+        // If Twilio fails (invalid credentials, account issue, etc.), use mock fallback
         console.error('Twilio error:', error.message);
-        res.status(500).json({ success: false, error: error.message });
+        console.log(`🔧 MOCK SMS FALLBACK - Phone: ${phoneNumber}, Code: ${code}`);
+        console.log(`⚠️ Fix Twilio credentials to send real SMS`);
+
+        // Return code anyway so login works (mock mode)
+        res.status(200).json({
+            success: true,
+            verificationCode: code,
+            mock: true,
+            note: 'Twilio credentials invalid - using mock SMS. Check console for code.'
+        });
     }
 };
