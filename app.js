@@ -75,10 +75,19 @@ function renderMenu() {
                 <p>${item.description || item.desc}</p>
                 ${item.allergens && item.allergens.length > 0 ? `<div class="allergens">⚠️ ${item.allergens.join(', ')}</div>` : ''}
                 <div class="price">$${item.price.toFixed(2)}</div>
-                <button class="btn-add" onclick="openCustomizeModal(${item.id})">Add to Cart</button>
+                <button class="btn-add" data-item-id="${item.id}">Add to Cart</button>
             </div>
         </div>
     `).join('');
+
+    // Add event listeners to all "Add to Cart" buttons
+    grid.querySelectorAll('.btn-add').forEach(button => {
+        button.addEventListener('click', () => {
+            const itemId = parseInt(button.getAttribute('data-item-id'));
+            openCustomizeModal(itemId);
+        });
+    });
+
     updateCartCount();
 }
 
@@ -90,7 +99,7 @@ function openCustomizeModal(itemId) {
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Customize ${item.name}</h2>
-                <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">×</button>
+                <button class="modal-close" data-action="close">×</button>
             </div>
             <div class="modal-body">
                 <img src="${item.image_url || item.img}" alt="${item.name}" style="width:100%; height:200px; object-fit:cover; border-radius:12px; margin-bottom:20px;">
@@ -116,12 +125,19 @@ function openCustomizeModal(itemId) {
                 ` : ''}
             </div>
             <div class="modal-footer">
-                <button class="btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
-                <button class="btn-primary" onclick="addCustomizedItem(${itemId})">Add to Cart - $${item.price.toFixed(2)}</button>
+                <button class="btn-secondary" data-action="cancel">Cancel</button>
+                <button class="btn-primary" data-action="add" data-item-id="${itemId}">Add to Cart - $${item.price.toFixed(2)}</button>
             </div>
         </div>
     `;
     document.body.appendChild(modal);
+
+    // Add event listeners to modal buttons
+    modal.querySelector('[data-action="close"]').addEventListener('click', () => modal.remove());
+    modal.querySelector('[data-action="cancel"]').addEventListener('click', () => modal.remove());
+    modal.querySelector('[data-action="add"]').addEventListener('click', () => {
+        addCustomizedItem(itemId);
+    });
 }
 
 function addCustomizedItem(itemId) {
