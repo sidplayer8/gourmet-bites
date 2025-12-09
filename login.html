@@ -187,7 +187,7 @@
                 return;
             }
 
-            fetch('http://localhost:3000/api/send-sms', {
+            fetch('https://gourmet-bites.vercel.app/api/send-sms', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ phoneNumber: fullPhone })
@@ -218,7 +218,7 @@
                 return;
             }
 
-            fetch('http://localhost:3000/api/verify-sms', {
+            fetch('https://gourmet-bites.vercel.app/api/verify-sms', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
