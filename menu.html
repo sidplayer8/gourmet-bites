@@ -1,0 +1,62 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Menu - Gourmet Bites</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="menu-page">
+        <div class="menu-header">
+            <h1>Menu</h1>
+            <div class="header-actions">
+                <a href="profile.html" class="btn-profile">
+                    <img id="profilePic" src="" alt="Profile" class="profile-pic">
+                    <span id="userName">Profile</span>
+                </a>
+                <button class="btn-logout" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        
+        <div id="menuView" class="menu-grid"></div>
+        
+        <div id="cartView" class="cart-page" style="display:none;">
+            <h2>Your Cart</h2>
+            <div id="cartItems"></div>
+            <div class="cart-total">
+                <h3>Total: <span id="cartTotal">$0.00</span></h3>
+                <button class="btn-checkout" onclick="checkout()">Place Order</button>
+            </div>
+        </div>
+        
+        <div class="bottom-nav">
+            <button class="nav-btn active" onclick="showView('menu')">
+                <span></span>
+                <span>Menu</span>
+            </button>
+            <button class="nav-btn" onclick="showView('cart')">
+                <span></span>
+                <span>Cart (<span id="cartCount">0</span>)</span>
+            </button>
+        </div>
+    </div>
+    <script src="app.js"></script>
+    <script>
+        // Set profile picture and name
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (user) {
+            const profilePic = document.getElementById('profilePic');
+            const userName = document.getElementById('userName');
+            
+            if (user.photoURL) {
+                // Google login - use Google profile picture
+                profilePic.src = user.photoURL;
+            } else {
+                // Phone login - use default avatar
+                profilePic.src = 'https://ui-avatars.com/api/?name=' + (user.name || 'User') + '&background=ff6600&color=fff&size=128';
+            }
+            
+            userName.textContent = user.name || 'User';
+        }
+    </script>
+</body>
+</html>

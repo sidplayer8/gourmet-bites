@@ -1,0 +1,255 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Gourmet Bites</title>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-box {
+            background: rgba(30, 30, 50, 0.95);
+            padding: 50px 40px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 40px;
+            text-align: center;
+            color: #fff;
+        }
+
+        .btn-google {
+            width: 100%;
+            padding: 16px;
+            background: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .btn-google:hover {
+            background: #357ae8;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 25px 0;
+            color: #999;
+            font-size: 14px;
+        }
+
+        .phone-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        select {
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 15px;
+        }
+
+        select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
+
+        input {
+            flex: 1;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 15px;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .btn-sms {
+            width: 100%;
+            padding: 16px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-sms:hover {
+            background: #059669;
+        }
+
+        .verify-section {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-box">
+        <h1>Login</h1>
+        <button class="btn-google" onclick="googleLogin()">CONTINUE WITH GOOGLE</button>
+        <div class="divider">OR</div>
+
+        <div id="phoneSection">
+            <div class="phone-input">
+                <select id="countryCode">
+                    <option value="+1"> +1</option>
+                    <option value="+44"> +44</option>
+                    <option value="+65" selected> +65</option>
+                    <option value="+91"> +91</option>
+                    <option value="+86"> +86</option>
+                    <option value="+81"> +81</option>
+                    <option value="+82"> +82</option>
+                    <option value="+61"> +61</option>
+                </select>
+                <input type="tel" id="phoneNumber" placeholder="Enter phone number" />
+            </div>
+            <button class="btn-sms" onclick="sendSMS()">SEND SMS CODE</button>
+        </div>
+
+        <div id="verifySection" class="verify-section">
+            <input type="text" id="verificationCode" placeholder="Enter 6-digit code" maxlength="6"
+                style="width:100%; margin-bottom:15px;" />
+            <button class="btn-sms" onclick="verifySMS()">VERIFY CODE</button>
+            <button class="btn-sms" onclick="backToPhone()" style="background:#666; margin-top:10px;">Back</button>
+        </div>
+    </div>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD8merF44ASnRsd8GyWcbueH7qtg50EBZ4",
+            authDomain: "gourmet-bites-225a1.firebaseapp.com",
+            projectId: "gourmet-bites-225a1",
+            storageBucket: "gourmet-bites-225a1.firebasestorage.app",
+            messagingSenderId: "659456972768",
+            appId: "1:659456972768:web:413f3efc766eb533d85"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+
+        function googleLogin() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            firebase.auth().signInWithPopup(provider)
+                .then(result => {
+                    localStorage.setItem('user', JSON.stringify({
+                        name: result.user.displayName,
+                        email: result.user.email,
+                        photoURL: result.user.photoURL
+                    }));
+                    alert(' Login successful!');
+                    window.location.href = 'menu.html';
+                })
+                .catch(err => {
+                    alert(' Google login error: ' + err.message);
+                });
+        }
+
+        function sendSMS() {
+            const countryCode = document.getElementById('countryCode').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const fullPhone = countryCode + phoneNumber;
+
+            if (!phoneNumber || phoneNumber.length < 8) {
+                alert('Please enter a valid phone number');
+                return;
+            }
+
+            fetch('http://localhost:3000/api/send-sms', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phoneNumber: fullPhone })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('phoneSection').style.display = 'none';
+                        document.getElementById('verifySection').style.display = 'block';
+                        alert(' Code sent to ' + fullPhone);
+                    } else {
+                        alert(' Failed to send SMS: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    alert(' Error: Backend server not running. Start server with: node sms-server.js');
+                });
+        }
+
+        function verifySMS() {
+            const countryCode = document.getElementById('countryCode').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const fullPhone = countryCode + phoneNumber;
+            const code = document.getElementById('verificationCode').value;
+
+            if (!code || code.length !== 6) {
+                alert('Please enter the 6-digit code');
+                return;
+            }
+
+            fetch('http://localhost:3000/api/verify-sms', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    phoneNumber: fullPhone,
+                    code: code
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        localStorage.setItem('user', JSON.stringify({
+                            name: 'User',
+                            phone: fullPhone,
+                            verified: true
+                        }));
+                        alert(' Phone verified successfully!');
+                        window.location.href = 'menu.html';
+                    } else {
+                        alert(' Invalid code. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    alert(' Verification error');
+                });
+        }
+
+        function backToPhone() {
+            document.getElementById('phoneSection').style.display = 'block';
+            document.getElementById('verifySection').style.display = 'none';
+        }
+    </script>
+</body>
+
+</html>

@@ -1,14 +1,15 @@
 {
     "version": 2,
-    "headers": [
+    "builds": [
         {
-            "source": "/(.*)",
-            "headers": [
-                {
-                    "key": "Cross-Origin-Opener-Policy",
-                    "value": "same-origin-allow-popups"
-                }
-            ]
+            "src": "api/**/*.js",
+            "use": "@vercel/node"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/api/(.*)",
+            "dest": "/api/$1"
         }
     ]
 }

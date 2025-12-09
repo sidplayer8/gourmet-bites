@@ -1,6 +1,0 @@
-{
-    "name": "gourmet-bites-admin",
-    "version": "1.0.0",
-    "description": "Admin portal for Gourmet Bites",
-    "buildCommand": "echo 'Static site, no build needed'"
-}

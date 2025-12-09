@@ -1,0 +1,10 @@
+﻿{
+  "projectId": "gourmet-bites-225a1",
+  "appId": "1:659456972768:web:363ef2d3efc766eb533d85",
+  "storageBucket": "gourmet-bites-225a1.firebasestorage.app",
+  "apiKey": "AIzaSyD8merF44ASnRsd8GyWcbueH7qtg50EBZ4",
+  "authDomain": "gourmet-bites-225a1.firebaseapp.com",
+  "messagingSenderId": "659456972768",
+  "projectNumber": "659456972768",
+  "version": "2"
+}

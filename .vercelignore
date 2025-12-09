@@ -1,0 +1,8 @@
+node_modules
+.env
+.env.example
+sms-server.js
+server.js
+*.md
+!README.md
+.git
