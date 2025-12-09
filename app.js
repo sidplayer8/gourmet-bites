@@ -143,7 +143,7 @@ function removeFromCart(idx) {
     cart.splice(idx, 1);
     localStorage.setItem('cart', JSON.stringify(cart));
     renderCart();
-    updateCartCount();
+    updateCartCount(); // Update badge when item removed
 }
 
 function updateQuantity(idx, delta) {
@@ -154,6 +154,7 @@ function updateQuantity(idx, delta) {
         } else {
             localStorage.setItem('cart', JSON.stringify(cart));
             renderCart();
+            updateCartCount(); // Update badge when quantity changes
         }
     }
 }
