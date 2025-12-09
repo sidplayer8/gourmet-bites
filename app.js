@@ -85,7 +85,7 @@ function openCustomizeModal(itemId) {
 function addCustomizedItem(itemId) {
     const item = menuItems.find(i => i.id === itemId);
     const modal = document.querySelector('.modal-overlay');
-    const checkboxes = modal.querySelectorAll('input[type="checkbox']');
+    const checkboxes = modal.querySelectorAll('input[type="checkbox"]');
     const notes = document.getElementById('specialNotes').value.trim();
 
     const removedIngredients = Array.from(checkboxes)
