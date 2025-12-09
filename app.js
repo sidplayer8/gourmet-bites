@@ -44,6 +44,7 @@ async function loadMenu() {
             ];
         }
         renderMenu();
+        updateCartCount(); // Initialize cart badge on page load
     } catch (error) {
         console.error('Error loading menu:', error);
         showToast('Error loading menu. Using offline data.', 'error');
@@ -158,14 +159,14 @@ function addCustomizedItem(itemId) {
 
     localStorage.setItem('cart', JSON.stringify(cart));
 
-    // Close modal first
-    modal.remove();
-
-    // Update cart badge with animation
+    // Update cart badge with animation first
     updateCartCount();
 
     // Show success toast
     showToast(`✓ ${item.name} added to cart!`);
+
+    // Close modal last
+    modal.remove();
 }
 
 function removeFromCart(idx) {
