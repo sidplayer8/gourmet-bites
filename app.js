@@ -116,9 +116,15 @@ function addCustomizedItem(itemId) {
     }
 
     localStorage.setItem('cart', JSON.stringify(cart));
-    updateCartCount();
+
+    // Close modal first
     modal.remove();
-    showToast(`✓ Added ${item.name} to cart!`);
+
+    // Update cart badge with animation
+    updateCartCount();
+
+    // Show success toast
+    showToast(`✓ ${item.name} added to cart!`);
 }
 
 function removeFromCart(idx) {
