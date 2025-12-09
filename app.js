@@ -2,8 +2,6 @@
 if (!localStorage.getItem('user')) { window.location.href = 'login.html'; }
 function logout() { localStorage.removeItem('user'); localStorage.removeItem('cart'); localStorage.removeItem('orders'); window.location.href = 'login.html'; }
 
-// Import Supabase client
-import { getMenuItems } from './lib/supabase.js';
 
 // Toast notification function
 function showToast(message, type = 'success') {
