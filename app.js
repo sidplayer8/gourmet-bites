@@ -64,6 +64,8 @@ async function loadMenu() {
 
 function renderMenu() {
     const grid = document.getElementById('menuView');
+    if (!grid) return; // Exit if menu container doesn't exist
+
     grid.innerHTML = menuItems.map(item => `
         <div class="menu-card">
             <img src="${item.image_url || item.img}" alt="${item.name}">
@@ -76,6 +78,7 @@ function renderMenu() {
             </div>
         </div>
     `).join('');
+    updateCartCount();
 }
 
 function openCustomizeModal(itemId) {
