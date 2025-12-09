@@ -31,7 +31,11 @@
                 <span>Menu</span>
             </button>
             <button class="nav-btn" onclick="window.location.href='menu.html'">
-                <span>🛒</span>
+                <span style="position:relative;">
+                    🛒
+                    <span class="cart-badge" id="profileCartBadge"
+                        style="position:absolute; top:-8px; right:-12px; background:#ff6600; color:white; border-radius:50%; width:20px; height:20px; font-size:11px; display:flex; align-items:center; justify-content:center; font-weight:bold;">0</span>
+                </span>
                 <span>Cart</span>
             </button>
         </div>
@@ -54,6 +58,15 @@
             } else {
                 profilePic.src = 'https://ui-avatars.com/api/?name=' + (user.name || 'User') + '&background=ff6600&color=fff&size=256';
             }
+        }
+    </script>
+    <script>
+        // Update cart badge on profile page
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+        const badge = document.getElementById('profileCartBadge');
+        if (badge) {
+            badge.textContent = count;
         }
     </script>
 </body>
