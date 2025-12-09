@@ -1,5 +1,4 @@
 const twilio = require('twilio');
-const codes = require('./_codeStore');
 
 module.exports = async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -34,13 +33,9 @@ module.exports = async (req, res) => {
             to: phoneNumber
         });
 
-        codes[phoneNumber] = {
-            code: code,
-            expires: Date.now() + 300000
-        };
-
         console.log(`SMS sent to ${phoneNumber}, code: ${code}`);
-        res.status(200).json({ success: true, code: code }); // Return code for debugging
+        // Return code in response (client will store it)
+        res.status(200).json({ success: true, verificationCode: code });
     } catch (error) {
         console.error('Twilio error:', error.message);
         res.status(500).json({ success: false, error: error.message });
