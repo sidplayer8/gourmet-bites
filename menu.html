@@ -1,9 +1,11 @@
 ﻿<!DOCTYPE html>
 <html>
+
 <head>
     <title>Menu - Gourmet Bites</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div class="menu-page">
         <div class="menu-header">
@@ -16,9 +18,9 @@
                 <button class="btn-logout" onclick="logout()">Logout</button>
             </div>
         </div>
-        
+
         <div id="menuView" class="menu-grid"></div>
-        
+
         <div id="cartView" class="cart-page" style="display:none;">
             <h2>Your Cart</h2>
             <div id="cartItems"></div>
@@ -27,7 +29,7 @@
                 <button class="btn-checkout" onclick="checkout()">Place Order</button>
             </div>
         </div>
-        
+
         <div class="bottom-nav">
             <button class="nav-btn active" onclick="showView('menu')">
                 <span></span>
@@ -46,17 +48,19 @@
         if (user) {
             const profilePic = document.getElementById('profilePic');
             const userName = document.getElementById('userName');
-            
+
             if (user.photoURL) {
                 // Google login - use Google profile picture
                 profilePic.src = user.photoURL;
+                userName.textContent = user.name || 'User';
             } else {
-                // Phone login - use default avatar
-                profilePic.src = 'https://ui-avatars.com/api/?name=' + (user.name || 'User') + '&background=ff6600&color=fff&size=128';
+                // Phone login - use default avatar with phone number
+                const displayName = user.phone || user.name || 'User';
+                profilePic.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(displayName) + '&background=ff6600&color=fff&size=128';
+                userName.textContent = user.phone || user.name || 'User';
             }
-            
-            userName.textContent = user.name || 'User';
         }
     </script>
 </body>
+
 </html>
