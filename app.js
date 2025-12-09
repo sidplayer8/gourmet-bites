@@ -186,6 +186,7 @@ function addCustomizedItem(itemId) {
 }
 
 // Expose functions to global scope for inline onclick handlers
+window.loadMenu = loadMenu;
 window.openCustomizeModal = openCustomizeModal;
 window.addCustomizedItem = addCustomizedItem;
 window.removeFromCart = removeFromCart;
