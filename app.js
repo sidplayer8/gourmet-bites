@@ -93,7 +93,7 @@ function renderMenu() {
     // Add event listeners to all "Add to Cart" buttons
     grid.querySelectorAll('.btn-add').forEach(button => {
         button.addEventListener('click', () => {
-            const itemId = parseInt(button.getAttribute('data-item-id'));
+            const itemId = button.getAttribute('data-item-id'); // Support UUID and integer IDs
             openCustomizeModal(itemId);
         });
     });
@@ -102,7 +102,7 @@ function renderMenu() {
 }
 
 function openCustomizeModal(itemId) {
-    const item = menuItems.find(i => i.id === itemId);
+    const item = menuItems.find(i => i.id == itemId); // Use == to support UUID strings and integers
     if (!item) {
         console.error('Item not found:', itemId);
         showToast('Error: Item not found', 'error');
@@ -164,7 +164,7 @@ function addCustomizedItem(itemId) {
     console.log('Adding item to cart:', itemId);
 
     try {
-        const item = menuItems.find(i => i.id === itemId);
+        const item = menuItems.find(i => i.id == itemId); // Use == to support UUID strings and integers
         if (!item) {
             console.error('Item not found in menuItems:', itemId);
             showToast('Error: Item not found', 'error');
@@ -192,7 +192,7 @@ function addCustomizedItem(itemId) {
 
         // Check if identical item exists (same item, same customizations)
         const existingItem = cart.find(cartItem =>
-            cartItem.id === itemId &&
+            cartItem.id == itemId && // Use == to support UUID strings and integers
             JSON.stringify(cartItem.customizations?.removed || []) === JSON.stringify(removedIngredients) &&
             (cartItem.customizations?.notes || '') === notes
         );
