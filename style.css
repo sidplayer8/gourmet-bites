@@ -276,39 +276,54 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
-    background: #1a1a1a;
-    border-top: 1px solid #333;
+    background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
+    border-top: 2px solid #ff6600;
     display: flex;
     justify-content: space-around;
-    padding: 12px 0;
+    padding: 16px 0;
     z-index: 1000;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
 }
 
 .nav-btn {
     flex: 1;
     background: none;
     border: none;
-    color: #999;
-    padding: 10px;
+    color: #888;
+    padding: 12px;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 5px;
-    font-size: 12px;
-    transition: color 0.2s;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s;
+    position: relative;
 }
 
 .nav-btn.active {
     color: #ff6600;
 }
 
+.nav-btn.active::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 20%;
+    right: 20%;
+    height: 3px;
+    background: #ff6600;
+    border-radius: 0 0 3px 3px;
+}
+
 .nav-btn:hover {
     color: #ff6600;
+    transform: translateY(-2px);
 }
 
 .nav-btn span:first-child {
-    font-size: 24px;
+    font-size: 26px;
 }
 
 .cart-page {

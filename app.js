@@ -85,23 +85,36 @@ function openCustomizeModal(itemId) {
 function addCustomizedItem(itemId) {
     const item = menuItems.find(i => i.id === itemId);
     const modal = document.querySelector('.modal-overlay');
-    const checkboxes = modal.querySelectorAll('input[type="checkbox"]');
-    const notes = document.getElementById('specialNotes').value;
+    const checkboxes = modal.querySelectorAll('input[type="checkbox']');
+    const notes = document.getElementById('specialNotes').value.trim();
 
     const removedIngredients = Array.from(checkboxes)
         .filter(cb => !cb.checked)
         .map(cb => item.ingredients[cb.dataset.ingredient]);
 
-    const customItem = {
-        ...item,
-        quantity: 1,
-        customizations: {
-            removed: removedIngredients,
-            notes: notes
-        }
-    };
+    // Check if identical item exists (same item, same customizations)
+    const existingItem = cart.find(cartItem =>
+        cartItem.id === itemId &&
+        JSON.stringify(cartItem.customizations?.removed || []) === JSON.stringify(removedIngredients) &&
+        (cartItem.customizations?.notes || '') === notes
+    );
 
-    cart.push(customItem);
+    if (existingItem) {
+        // Merge: increment quantity
+        existingItem.quantity++;
+    } else {
+        // Add new item with customizations
+        const customItem = {
+            ...item,
+            quantity: 1,
+            customizations: {
+                removed: removedIngredients,
+                notes: notes
+            }
+        };
+        cart.push(customItem);
+    }
+
     localStorage.setItem('cart', JSON.stringify(cart));
     updateCartCount();
     modal.remove();
