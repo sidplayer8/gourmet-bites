@@ -11,6 +11,18 @@ function showToast(message, type = 'success') {
     setTimeout(() => toast.remove(), 3000);
 }
 
+// Update cart count with animation
+function updateCartCount() {
+    const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+    const badge = document.querySelector('.cart-badge');
+    if (badge) {
+        badge.textContent = count;
+        badge.style.transform = 'scale(1.4)';
+        setTimeout(() => badge.style.transform = 'scale(1)', 200);
+    }
+}
+
+
 const menuItems = [
     { id: 1, name: 'Classic Burger', price: 11.99, desc: 'Juicy beef patty with fresh vegetables', img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400', allergens: ['Gluten', 'Dairy'], ingredients: ['Beef Patty', 'Lettuce', 'Tomato', 'Cheese', 'Bun', 'Sauce'] },
     { id: 2, name: 'Margherita Pizza', price: 12.99, desc: 'Fresh mozzarella, basil, tomato sauce', img: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400', allergens: ['Gluten', 'Dairy'], ingredients: ['Pizza Dough', 'Mozzarella', 'Tomato Sauce', 'Basil', 'Olive Oil'] },
