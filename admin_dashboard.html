@@ -202,35 +202,19 @@
                 <div id="ordersList" style="margin-top:20px; color:#999;">Loading orders... (Feature coming soon)</div>
             </div>
         </div>
-
-        <!-- SECTION: MENU -->
-        <div id="menu-section" class="content-section" style="display:none;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-                <h3>Menu Items</h3>
-                <button onclick="alert('Feature coming nicely!')"
-                    style="background:var(--primary); border:none; color:white; padding:10px 20px; border-radius:8px; cursor:pointer;">+
-                    Add New Item</button>
-            </div>
-            <div class="stat-card">
-                <p style="color:#999;">Menu management interface will appear here.</p>
-            </div>
+        <div class="stat-card">
+            <h3>Staff Management</h3>
+            <p style="color:#999;">Manage staff roles and access.</p>
         </div>
+    </div>
 
-        <!-- SECTION: STAFF -->
-        <div id="staff-section" class="content-section" style="display:none;">
-            <div class="stat-card">
-                <h3>Staff Management</h3>
-                <p style="color:#999;">Manage staff roles and access.</p>
-            </div>
+    <!-- SECTION: TABLES -->
+    <div id="tables-section" class="content-section" style="display:none;">
+        <div class="stat-card">
+            <h3>Table Management</h3>
+            <p style="color:#999;">QR Codes and Table Status.</p>
         </div>
-
-        <!-- SECTION: TABLES -->
-        <div id="tables-section" class="content-section" style="display:none;">
-            <div class="stat-card">
-                <h3>Table Management</h3>
-                <p style="color:#999;">QR Codes and Table Status.</p>
-            </div>
-        </div>
+    </div>
     </div>
 
     <!-- Supabase (Unpkg) -->
@@ -500,72 +484,6 @@
         }
 
             async function logout() {
-                await _supabase.auth.signOut();
-            localStorage.clear();
-            window.location.href = 'login.html';
-        }
-
-            // Navigation Logic
-            function showSection(sectionId) {
-                // Update Sidebar Active State
-                document.querySelectorAll('.nav-item').forEach(item => {
-                    item.classList.remove('active');
-                    if (item.textContent.toLowerCase().includes(sectionId) ||
-                        (sectionId === 'dashboard' && item.textContent.includes('Dashboard'))) {
-                        item.classList.add('active');
-                    }
-                });
-
-            // Hide all sections
-            document.querySelectorAll('.content-section').forEach(el => el.style.display = 'none');
-
-            // Show target section
-            document.getElementById(`${sectionId}-section`).style.display = 'block';
-
-            // Update Title
-            const titles = {
-                'dashboard': 'Dashboard',
-            'orders': 'Calls (Orders)',
-            'menu': 'Menu Management',
-            'staff': 'Staff',
-            'tables': 'Tables'
-            };
-            document.getElementById('pageTitle').textContent = titles[sectionId];
-
-            // Load Section Data
-            if (sectionId === 'orders') fetchOrders();
-        }
-
-            // --- ORDER MANAGEMENT ---
-            async function fetchOrders() {
-            const container = document.getElementById('ordersList');
-            container.innerHTML = '<p style="color:#999;">Loading real-time orders...</p>';
-
-            try {
-                // Fetch Orders (descending time)
-                const {data: orders, error } = await _supabase
-            .from('orders')
-            .select('*')
-            .order('created_at', {ascending: false });
-
-            if (error) throw error;
-
-            // Also fetch users to map names (optional optimization: join query)
-            // For now, we'll just show the user_id or handle it simply
-
-            renderOrders(orders);
-
-            } catch (err) {
-                console.error('Error fetching orders:', err);
-            container.innerHTML = `<p style="color:red;">Failed to load orders: ${err.message}</p>`;
-            }
-        }
-
-            function renderOrders(orders) {
-            const container = document.getElementById('ordersList');
-            if (!orders || orders.length === 0) {
-                container.innerHTML = '<p style="color:#999;">No orders found.</p>';
-            return;
             }
 
             container.innerHTML = orders.map(order => {
