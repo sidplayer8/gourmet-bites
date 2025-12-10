@@ -310,16 +310,211 @@
             window.location.href = 'login.html';
         }
 
-        // Navigation Logic
-        function showSection(sectionId) {
-            // Update Sidebar Active State
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-                if (item.textContent.toLowerCase().includes(sectionId) ||
-                    (sectionId === 'dashboard' && item.textContent.includes('Dashboard'))) {
-                    item.classList.add('active');
+        border - radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat - value {
+            font - size: 24px;
+            font - weight: bold;
+            color: white;
+            margin: 10px 0;
+        }
+
+        .stat - label {
+            color: #888;
+            font - size: 14px;
+        }
+
+        .content - section {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style >
+</head >
+
+            <body>
+
+    <!-- Sidebar -->
+                <div class="sidebar">
+                    <div class="logo">🍴 Gourmet Admin</div>
+                    <div class="nav-item active" onclick="showSection('dashboard')">📊 Dashboard</div>
+                    <div class="nav-item" onclick="showSection('orders')">📦 Calls (Orders)</div>
+                    <div class="nav-item" onclick="showSection('menu')">🍔 Menu Management</div>
+                    <div class="nav-item" onclick="showSection('staff')">👥 Staff</div>
+                    <div class="nav-item" onclick="showSection('tables')">🪑 Tables</div>
+                    <div style="flex:1"></div>
+                    <div class="nav-item" onclick="logout()">🚪 Logout</div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="main-content">
+                    <div class="header">
+                        <h1 id="pageTitle">Dashboard</h1>
+                        <div class="user-profile">
+                            <span id="adminName">Loading...</span>
+                            <div class="avatar">A</div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION: DASHBOARD -->
+                    <div id="dashboard-section" class="content-section">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-label">Total Orders</div>
+                                <div class="stat-value">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Active Tables</div>
+                                <div class="stat-value">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Today's Revenue</div>
+                                <div class="stat-value">$0.00</div>
+                            </div>
+                        </div>
+                        <div class="stat-card" style="min-height: 300px;">
+                            <h3>Recent Activity</h3>
+                            <p style="color:#666; margin-top:20px;">No recent activity</p>
+                        </div>
+                    </div>
+
+                    <!-- SECTION: ORDERS -->
+                    <div id="orders-section" class="content-section" style="display:none;">
+                        <div class="stat-card">
+                            <h3>Incoming Orders</h3>
+                            <div id="ordersList" style="margin-top:20px; color:#999;">Loading orders... (Feature coming soon)</div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION: MENU -->
+                    <div id="menu-section" class="content-section" style="display:none;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                            <h3>Menu Items</h3>
+                            <button onclick="alert('Feature coming nicely!')"
+                                style="background:var(--primary); border:none; color:white; padding:10px 20px; border-radius:8px; cursor:pointer;">+
+                                Add New Item</button>
+                        </div>
+                        <div class="stat-card">
+                            <p style="color:#999;">Menu management interface will appear here.</p>
+                        </div>
+                    </div>
+
+                    <!-- SECTION: STAFF -->
+                    <div id="staff-section" class="content-section" style="display:none;">
+                        <div class="stat-card">
+                            <h3>Staff Management</h3>
+                            <p style="color:#999;">Manage staff roles and access.</p>
+                        </div>
+                    </div>
+
+                    <!-- SECTION: TABLES -->
+                    <div id="tables-section" class="content-section" style="display:none;">
+                        <div class="stat-card">
+                            <h3>Table Management</h3>
+                            <p style="color:#999;">QR Codes and Table Status.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Supabase (Unpkg) -->
+                <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+            const supabaseUrl = 'https://pklaofjfpcrlgevxkozy.supabase.co';
+            const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBrbGFvZmpmcGNybGdldnhrb3p5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyNjY1MDcsImV4cCI6MjA4MDg0MjUwN30.sNg6OVLocM1D-bG9LXTlDSsy6s74oW1SQ89QWCMbOKE';
+
+            // Initialize
+            let _supabase = null;
+            if (typeof window.supabase !== 'undefined') {
+                _supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+        } else {
+                alert('System Error: Supabase not loaded. Check internet.');
+            window.location.href = 'menu.html';
+        }
+
+            // Security Check
+            checkAdminAccess();
+
+            async function checkAdminAccess() {
+            // 1. Get Session
+            const {data: {session} } = await _supabase.auth.getSession();
+            let user = session?.user;
+
+            // 2. Fallback to LocalStorage (Legacy/Sync)
+            if (!user) {
+                const localAdmin = JSON.parse(localStorage.getItem('adminUser'));
+            if (localAdmin) user = {id: localAdmin.id, email: localAdmin.email };
+            else {
+                    const data = JSON.parse(localStorage.getItem('user'));
+            if (data && data.id) user = data;
                 }
-            });
+            }
+
+            if (!user || !user.id) {
+                window.location.href = 'login.html';
+            return;
+            }
+
+            // === 3. ALLOWLIST BYPASS (Email & Phone) ===
+            const allowedAdmins = ['sapsinfocomm22@gmail.com', '+6590214181'];
+            // Check top-level email/phone OR user object properties
+            const uEmail = user.email || (user.user && user.user.email);
+            const uPhone = user.phone || (user.user && user.user.phone);
+
+            if (allowedAdmins.includes(uEmail) || allowedAdmins.includes(uPhone)) {
+                console.log('Allowlist Access Granted');
+            document.getElementById('adminName').textContent = `Owner (${uEmail || uPhone})`;
+            return; // Access Granted!
+            }
+
+            // 4. Strict DB Check (If not in allowlist)
+            try {
+                const {data: staffMember, error } = await _supabase
+            .from('staff')
+            .select('*, roles(name)')
+            .eq('user_id', user.id)
+            .single();
+
+            if (error || !staffMember) {
+                // Not valid staff? Bye.
+                window.location.href = 'menu.html';
+                } else {
+                document.getElementById('adminName').textContent = `${staffMember.roles.name} (${user.email || 'Staff'})`;
+                }
+
+            } catch (err) {
+                console.error('Security Check Error:', err);
+            window.location.href = 'menu.html';
+            }
+        }
+
+            async function logout() {
+                await _supabase.auth.signOut();
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+            // Navigation Logic
+            function showSection(sectionId) {
+                // Update Sidebar Active State
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                    if (item.textContent.toLowerCase().includes(sectionId) ||
+                        (sectionId === 'dashboard' && item.textContent.includes('Dashboard'))) {
+                        item.classList.add('active');
+                    }
+                });
 
             // Hide all sections
             document.querySelectorAll('.content-section').forEach(el => el.style.display = 'none');
@@ -330,12 +525,108 @@
             // Update Title
             const titles = {
                 'dashboard': 'Dashboard',
-                'orders': 'Calls (Orders)',
-                'menu': 'Menu Management',
-                'staff': 'Staff',
-                'tables': 'Tables'
+            'orders': 'Calls (Orders)',
+            'menu': 'Menu Management',
+            'staff': 'Staff',
+            'tables': 'Tables'
             };
             document.getElementById('pageTitle').textContent = titles[sectionId];
+
+            // Load Section Data
+            if (sectionId === 'orders') fetchOrders();
+        }
+
+            // --- ORDER MANAGEMENT ---
+            async function fetchOrders() {
+            const container = document.getElementById('ordersList');
+            container.innerHTML = '<p style="color:#999;">Loading real-time orders...</p>';
+
+            try {
+                // Fetch Orders (descending time)
+                const {data: orders, error } = await _supabase
+            .from('orders')
+            .select('*')
+            .order('created_at', {ascending: false });
+
+            if (error) throw error;
+
+            // Also fetch users to map names (optional optimization: join query)
+            // For now, we'll just show the user_id or handle it simply
+
+            renderOrders(orders);
+
+            } catch (err) {
+                console.error('Error fetching orders:', err);
+            container.innerHTML = `<p style="color:red;">Failed to load orders: ${err.message}</p>`;
+            }
+        }
+
+            function renderOrders(orders) {
+            const container = document.getElementById('ordersList');
+            if (!orders || orders.length === 0) {
+                container.innerHTML = '<p style="color:#999;">No orders found.</p>';
+            return;
+            }
+
+            container.innerHTML = orders.map(order => {
+                const date = new Date(order.created_at).toLocaleString();
+            const total = typeof order.total_price === 'number' ? order.total_price.toFixed(2) : order.total_price;
+            const statusColor = order.status === 'completed' ? '#10b981' :
+            order.status === 'cancelled' ? '#ef4444' : '#ffb020'; // Pending/Processing
+
+            // Parse items if string
+            let items = order.items;
+            if (typeof items === 'string') {
+                    try {items = JSON.parse(items); } catch(e) {items = []; }
+                }
+
+                const itemsHtml = Array.isArray(items) ? items.map(i =>
+            `<div>${i.quantity}x ${i.name} ${i.customizations?.removed?.length ? `<small style="color:#f87171">(-${i.customizations.removed.join(',')})</small>` : ''}</div>`
+            ).join('') : '<i>No items data</i>';
+
+            return `
+            <div class="stat-card" style="margin-bottom:15px; border-left: 4px solid ${statusColor};">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <h4 style="margin-bottom:5px;">Order #${order.id.toString().slice(0, 8)}</h4>
+                        <div style="font-size:12px; color:#888; margin-bottom:10px;">${date} • User: ${order.user_id.slice(0, 6)}...</div>
+                        <div style="color:#ddd; margin-bottom:10px;">${itemsHtml}</div>
+                        ${order.custom_notes ? `<div style="background:#334; padding:5px; font-size:12px; border-radius:4px; margin-bottom:10px;">📝 Note: ${order.custom_notes}</div>` : ''}
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:18px; font-weight:bold; color:var(--primary); margin-bottom:10px;">$${total}</div>
+                        <div style="display:flex; gap:5px; flex-direction:column;">
+                            ${order.status === 'pending' ? `
+                                    <button onclick="updateOrderStatus(${order.id}, 'completed')" style="background:#10b981; border:none; color:white; padding:5px 10px; border-radius:4px; cursor:pointer;">Mark Complete</button>
+                                    <button onclick="updateOrderStatus(${order.id}, 'cancelled')" style="background:#ef4444; border:none; color:white; padding:5px 10px; border-radius:4px; cursor:pointer;">Cancel</button>
+                                ` : `
+                                    <span style="background:${statusColor}20; color:${statusColor}; padding:4px 8px; border-radius:4px; font-size:12px; text-transform:uppercase; font-weight:bold;">${order.status}</span>
+                                `}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `;
+            }).join('');
+        }
+
+            async function updateOrderStatus(orderId, newStatus) {
+            if(!confirm(`Mark order as ${newStatus}?`)) return;
+
+            try {
+                const {error} = await _supabase
+            .from('orders')
+            .update({status: newStatus })
+            .eq('id', orderId);
+
+            if (error) throw error;
+
+            // Refresh
+            fetchOrders();
+
+            } catch (err) {
+                alert('Error updating order: ' + err.message);
+            }
         }
     </script>
 </body>
