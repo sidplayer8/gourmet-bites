@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Admin Profile - Gourmet Bites</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: #111;
+            color: white;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #1a1a2e;
+            height: 100vh;
+            padding: 20px;
+            border-right: 1px solid #333;
+            position: fixed;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            flex: 1;
+            padding: 40px;
+        }
+
+        .profile-card {
+            background: #1a1a2e;
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid #333;
+            max-width: 600px;
+        }
+
+        .field-group {
+            margin-bottom: 25px;
+        }
+
+        .field-label {
+            color: #999;
+            margin-bottom: 8px;
+            display: block;
+            font-size: 14px;
+        }
+
+        .field-value {
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .badge {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            margin-left: 10px;
+            font-weight: normal;
+        }
+
+        .badge-verified {
+            background: rgba(0, 255, 0, 0.2);
+            color: #00ff00;
+            border: 1px solid #00ff00;
+        }
+
+        .badge-unverified {
+            background: rgba(255, 0, 0, 0.2);
+            color: #ff4444;
+            border: 1px solid #ff4444;
+        }
+
+        .btn-verify {
+            background: #ff6600;
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .btn-verify:hover {
+            background: #e65c00;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar (Same as Dashboard) -->
+    <div class="sidebar">
+        <h2 style="color:white; margin-bottom:40px; padding-left:10px;">👨‍🍳 Admin</h2>
+        <a href="admin_dashboard.html" class="nav-item"
+            style="display:block; padding:15px; color:#999; text-decoration:none;">&larr; Back to Dashboard</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1 style="margin-bottom:30px;">Admin Profile</h1>
+
+        <div class="profile-card">
+            <div class="field-group">
+                <span class="field-label">Full Name</span>
+                <div class="field-value" id="adminName">Loading...</div>
+            </div>
+
+            <div class="field-group">
+                <span class="field-label">Email Address</span>
+                <div class="field-value">
+                    <span id="adminEmail">Loading...</span>
+                    <span id="emailBadge" class="badge badge-unverified">Unverified</span>
+                </div>
+                <button class="btn-verify" id="btnVerifyEmail" onclick="verifyEmail()">Resend Verification
+                    Email</button>
+            </div>
+
+            <div class="field-group">
+                <span class="field-label">Phone Number</span>
+                <div class="field-value">
+                    <span id="adminPhone">Not set</span>
+                    <span id="phoneBadge" class="badge badge-unverified">Unverified</span>
+                </div>
+                <button class="btn-verify" id="btnVerifyPhone" onclick="startPhoneVerification()">Verify Phone</button>
+            </div>
+
+            <hr style="border-color:#333; margin:30px 0;">
+
+            <button onclick="logout()"
+                style="background:none; border:1px solid #ff4444; color:#ff4444; padding:10px 20px; border-radius:8px; cursor:pointer;">Logout</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-inline.js"></script>
+    <script>
+        const adminUser = JSON.parse(localStorage.getItem('adminUser'));
+        if (!adminUser) window.location.href = 'admin_login.html';
+
+        // Populate Data
+        document.getElementById('adminName').textContent = adminUser.user_metadata?.full_name || 'Admin';
+        document.getElementById('adminEmail').textContent = adminUser.email;
+
+        // Email Verification Status
+        if (adminUser.email_confirmed_at) {
+            document.getElementById('emailBadge').className = 'badge badge-verified';
+            document.getElementById('emailBadge').textContent = 'Verified';
+            document.getElementById('btnVerifyEmail').style.display = 'none';
+        }
+
+        // Phone Status (Mock logic for now until DB update)
+        if (adminUser.phone) {
+            document.getElementById('adminPhone').textContent = adminUser.phone;
+            if (adminUser.phone_confirmed_at) {
+                document.getElementById('phoneBadge').className = 'badge badge-verified';
+                document.getElementById('phoneBadge').textContent = 'Verified';
+                document.getElementById('btnVerifyPhone').style.display = 'none';
+            }
+        }
+
+        async function verifyEmail() {
+            // Trigger Supabase Resend
+            alert('Verification email sent to ' + adminUser.email);
+            // supabase.auth.resend({ type: 'signup', email: adminUser.email });
+        }
+
+        async function startPhoneVerification() {
+            // New logic to add phone number if missing, then verify
+            const phone = prompt("Enter your phone number (+65...):", adminUser.phone || "");
+            if (phone) {
+                // TODO: Call API to send SMS code
+                alert("Sending code to " + phone + "... (Implementation coming next)");
+                // 1. Update user phone in Supabase Auth
+                // 2. Trigger SMS
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('adminUser');
+            window.location.href = 'admin_login.html';
+        }
+    </script>
+</body>
+
+</html>
