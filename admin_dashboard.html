@@ -396,8 +396,8 @@
                             <div style="font-size:18px; font-weight:bold;">$${Number(o.total_price || 0).toFixed(2)}</div>
                             <div style="margin-top:5px;">
                                 ${o.status === 'pending' ? `
-                                <button style="background:var(--success); color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;" onclick="updateOrder(${o.id}, 'completed')">Done</button>
-                                <button style="background:var(--danger); color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;" onclick="updateOrder(${o.id}, 'cancelled')">Cancel</button>
+                                <button style="background:var(--success); color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;" onclick="updateOrder('${o.id}', 'completed')">Done</button>
+                                <button style="background:var(--danger); color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;" onclick="updateOrder('${o.id}', 'cancelled')">Cancel</button>
                                 ` : `<span style="color:${color}; text-transform:uppercase; font-size:12px; font-weight:bold;">${o.status}</span>`}
                             </div>
                         </div>
