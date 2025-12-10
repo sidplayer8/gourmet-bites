@@ -368,37 +368,46 @@
         async function fetchOrders() {
             const container = document.getElementById('ordersList');
             container.innerHTML = 'Loading...';
+            // Fetch all, but we will filter client-side for now or we can filter DB side.
+            // Keeping select(*) allows us to calc revenue correctly from ALL orders.
             const { data, error } = await _supabase.from('orders').select('*').order('created_at', { ascending: false });
             if (error) { container.textContent = 'Error: ' + error.message; return; }
 
             if (!data.length) { container.innerHTML = '<p>No orders.</p>'; return; }
 
-            // Calc Stats
+            // Calc Stats (Keep calculating from ALL data)
             document.getElementById('stat-total-orders').textContent = data.length;
             const revenue = data.reduce((acc, o) => acc + (o.total_price || 0), 0);
             document.getElementById('stat-revenue').textContent = '$' + revenue.toFixed(2);
 
-            container.innerHTML = data.map(o => {
+            // Filter for Display: Only show PENDING orders in the "Incoming" list
+            const activeOrders = data.filter(o => o.status === 'pending');
+
+            if (activeOrders.length === 0) {
+                container.innerHTML = '<p style="padding:20px; color:#aaa;">No pending orders. All caught up! 🎉</p>';
+                return;
+            }
+
+            container.innerHTML = activeOrders.map(o => {
                 let items = [];
                 try { items = typeof o.items === 'string' ? JSON.parse(o.items) : o.items; } catch (e) { }
                 const itemsStr = Array.isArray(items) ? items.map(i => `${i.quantity}x ${i.name}`).join(', ') : '';
-                const color = o.status === 'completed' ? 'var(--success)' : o.status === 'cancelled' ? 'var(--danger)' : '#ffb020';
+                // Since we only show pending, color is always generic or specific for pending
+                const color = '#ffb020';
 
                 return `
                 <div class="stat-card" style="margin-bottom:10px; border-left:4px solid ${color};">
                     <div style="display:flex; justify-content:space-between;">
                         <div>
-                            <strong>#${o.id}</strong> <small>${new Date(o.created_at).toLocaleString()}</small><br>
-                            ${itemsStr}
+                            <strong>#${o.id.slice(0, 8)}...</strong> <small>${new Date(o.created_at).toLocaleTimeString()}</small><br>
+                            <div style="margin-top:5px; font-size:15px; color:white;">${itemsStr}</div>
                             ${o.custom_notes ? `<div style="margin-top:5px; font-size:12px; color:#aaa;">📝 ${o.custom_notes}</div>` : ''}
                         </div>
                         <div style="text-align:right;">
                             <div style="font-size:18px; font-weight:bold;">$${Number(o.total_price || 0).toFixed(2)}</div>
-                            <div style="margin-top:5px;">
-                                ${o.status === 'pending' ? `
-                                <button style="background:var(--success); color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;" onclick="updateOrder('${o.id}', 'completed')">Done</button>
-                                <button style="background:var(--danger); color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;" onclick="updateOrder('${o.id}', 'cancelled')">Cancel</button>
-                                ` : `<span style="color:${color}; text-transform:uppercase; font-size:12px; font-weight:bold;">${o.status}</span>`}
+                            <div style="margin-top:10px;">
+                                <button style="background:var(--success); color:white; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; font-weight:bold;" onclick="updateOrder('${o.id}', 'completed')">DONE</button>
+                                <button style="background:var(--card-bg); border:1px solid #444; color:#aaa; padding:8px 12px; border-radius:4px; cursor:pointer;" onclick="updateOrder('${o.id}', 'cancelled')">Cancel</button>
                             </div>
                         </div>
                     </div>
@@ -407,9 +416,10 @@
         }
 
         async function updateOrder(id, status) {
-            if (!confirm(`Mark as ${status}?`)) return;
+            // REMOVED 'confirm' dialog (The "Black Box")
+            // Instant update
             await _supabase.from('orders').update({ status }).eq('id', id);
-            fetchOrders();
+            fetchOrders(); // Refresh list -> Order will disappear
         }
 
         // --- MENU ---
