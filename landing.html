@@ -88,51 +88,98 @@
     <script src="supabase-inline.js"></script>
 
     <script>
-        // Check Auth
-        const user = JSON.parse(localStorage.getItem('user'));
-        if (!user) {
+        // Check Auth using Supabase Session (Handles OAuth Redirects)
+        handleSession();
+
+        async function handleSession() {
+            // 1. Check if we just came back from Google Login (URL hash)
+            const { data: { session }, error } = await _supabase.auth.getSession();
+
+            if (session) {
+                // We have a live session! Update localStorage for legacy app compatibility
+                const user = session.user;
+                const legacyUser = {
+                    id: user.id,
+                    email: user.email,
+                    phone: user.phone,
+                    name: user.user_metadata.full_name || user.email
+                };
+                localStorage.setItem('user', JSON.stringify(legacyUser));
+
+                // Update UI
+                renderUser(legacyUser);
+                checkUserRole(user.id);
+            } else {
+                // No session? Check localStorage fallback or redirect
+                const local = JSON.parse(localStorage.getItem('user'));
+                if (local) {
+                    renderUser(local);
+                    checkUserRole(local.id);
+                } else {
+                    window.location.href = 'login.html';
+                }
+            }
+
+            // Listen for auth changes (Logout, etc.)
+            _supabase.auth.onAuthStateChange((event, session) => {
+                if (event === 'SIGNED_OUT') {
+                    localStorage.removeItem('user');
+                    window.location.href = 'login.html';
+                }
+            });
+        }
+
+        function renderUser(user) {
+            document.getElementById('welcomeName').innerHTML = `
+                ${user.name || user.email || user.phone} <br>
+                <small style="font-size:12px; color:#555; background:#111; padding:2px 6px; border-radius:4px; user-select:all; cursor:pointer;" onclick="navigator.clipboard.writeText('${user.id}'); alert('Copied ID!')" title="Click to Copy ID">
+                    ID: ${user.id} (Click to Copy)
+                </small>
+            `;
+        }
+
+        // Renamed logout to use Supabase
+        async function logout() {
+            await _supabase.auth.signOut();
+            localStorage.clear();
             window.location.href = 'login.html';
         }
 
-        // Display Name
-        document.getElementById('welcomeName').textContent = user.name || user.email || user.phone;
-
-        // Check Role (Simulated until DB is connected via SQL)
-        checkUserRole(user.id);
-
         async function checkUserRole(userId) {
-            // TODO: Replace with real Supabase query once 'staff' table exists
-            // const { data, error } = await supabase.from('staff').select('role_id').eq('user_id', userId).single();
-
-            // For now, we'll auto-show it if the user is the specific admin/owner (temporary logic)
-            // Or if they set a localStorage flag for testing
-            const isAdmin = localStorage.getItem('isAdmin') === 'true' || user.email?.includes('admin');
-
-            if (isAdmin) {
-                document.getElementById('staffLink').style.display = 'flex';
-            } else {
-                // If not staff, auto-redirect to menu after a brief moment? 
-                // Or let them choose? Let's just show menu option.
-            }
-
-            // Real implementation will be:
-            /*
             try {
-                const { data: staff, error } = await _supabase
+                // Query the 'staff' table to see if this user is a staff member
+                // Also fetch the related role name
+                const { data: staffMember, error } = await _supabase
                     .from('staff')
-                    .select('*, roles(*)')
+                    .select('*, roles(name)')
                     .eq('user_id', userId)
                     .single();
-                
-                if (staff && !error) {
-                    document.getElementById('staffLink').style.display = 'flex';
-                    // Optional: Update text based on role (Chef, Waiter, Owner)
-                    document.querySelector('#staffLink .role-title').textContent = staff.roles.name + ' Dashboard';
+
+                if (error) {
+                    // console.log('User is not staff or error:', error.message);
+                    return;
                 }
-            } catch (e) {
-                console.error('Role check failed', e);
+
+                if (staffMember) {
+                    // User IS staff! Show the dashboard link.
+                    const staffLink = document.getElementById('staffLink');
+                    staffLink.style.display = 'flex';
+
+                    // Update text with their specific role (e.g. "Owner Dashboard")
+                    const roleName = staffMember.roles?.name || 'Staff';
+                    staffLink.querySelector('.role-title').textContent = roleName + ' Dashboard';
+
+                    // Allow click
+                    staffLink.onclick = () => {
+                        // Store staff info for the dashboard to use
+                        localStorage.setItem('staffInfo', JSON.stringify(staffMember));
+                        window.location.href = 'admin_dashboard.html';
+                    };
+                }
+
+            } catch (err) {
+                console.error('Unexpected error checking role:', err);
             }
-            */
         }
 
         function logout() {
