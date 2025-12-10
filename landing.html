@@ -22,6 +22,8 @@
             width: 100%;
             max-width: 600px;
             padding: 20px;
+            display: none;
+            /* KEY CHANGE: Hidden by default so 'Checking...' is not seen */
         }
 
         h1 {
@@ -81,36 +83,30 @@
 </head>
 
 <body>
-    <div class="landing-container">
-        <!-- Checking State -->
-        <h1 id="checkingMsg">Checking access...</h1>
+    <div class="landing-container" id="contentArea">
+        <h1>Welcome Back</h1>
+        <p style="color:#999; margin-bottom:40px;" id="welcomeName">User</p>
 
-        <!-- User Welcome (Hidden Initially) -->
-        <div id="contentArea" style="display:none;">
-            <h1>Welcome Back</h1>
-            <p style="color:#999; margin-bottom:40px;" id="welcomeName">User</p>
-
-            <!-- Customer Option -->
-            <a href="menu.html" class="role-card">
-                <div class="role-icon">🍔</div>
-                <div class="role-info">
-                    <div class="role-title">Customer View</div>
-                    <div class="role-desc">Browse menu, place orders, and track status.</div>
-                </div>
-            </a>
-
-            <!-- Staff Option -->
-            <div id="staffLink" class="role-card" style="border-color:#ff6600;">
-                <div class="role-icon">👨‍🍳</div>
-                <div class="role-info">
-                    <div class="role-title">Staff Dashboard</div>
-                    <div class="role-desc">Manage orders, update menu, and view reports.</div>
-                </div>
+        <!-- Customer Option -->
+        <a href="menu.html" class="role-card">
+            <div class="role-icon">🍔</div>
+            <div class="role-info">
+                <div class="role-title">Customer View</div>
+                <div class="role-desc">Browse menu, place orders, and track status.</div>
             </div>
+        </a>
 
-            <button onclick="logout()"
-                style="margin-top:20px; background:none; border:none; color:#666; cursor:pointer; text-decoration:underline;">Logout</button>
+        <!-- Staff Option -->
+        <div id="staffLink" class="role-card" style="border-color:#ff6600;">
+            <div class="role-icon">👨‍🍳</div>
+            <div class="role-info">
+                <div class="role-title">Staff Dashboard</div>
+                <div class="role-desc">Manage orders, update menu, and view reports.</div>
+            </div>
         </div>
+
+        <button onclick="logout()"
+            style="margin-top:20px; background:none; border:none; color:#666; cursor:pointer; text-decoration:underline;">Logout</button>
     </div>
 
     <script>
@@ -133,7 +129,16 @@
                 return;
             }
 
-            // Check Role against DB
+            // === 1. HARDCODED ADMIN CHECK (FAILSAFE) ===
+            const adminEmail = 'sapsinfocomm22@gmail.com';
+            if (user.email === adminEmail || (user.user && user.user.email === adminEmail)) {
+                // Force Admin Access
+                console.log('Admin Email Match! Access Granted.');
+                showStaffUI({ roles: { name: 'Owner' }, name: 'Admin' });
+                return;
+            }
+
+            // === 2. DATABASE ROLE CHECK ===
             if (user.id && _supabase) {
                 try {
                     const { data: staffMember, error } = await _supabase
@@ -143,39 +148,42 @@
                         .single();
 
                     if (staffMember) {
-                        // === IS STAFF ===
-                        // Reveal the UI
-                        document.getElementById('checkingMsg').style.display = 'none';
-                        document.getElementById('contentArea').style.display = 'block';
-                        renderUser(user);
-
-                        const staffLink = document.getElementById('staffLink');
-                        const roleName = staffMember.roles?.name || 'Staff';
-                        staffLink.querySelector('.role-title').textContent = roleName + ' Dashboard';
-
-                        staffLink.onclick = () => {
-                            localStorage.setItem('staffInfo', JSON.stringify(staffMember));
-                            window.location.href = 'admin_dashboard.html';
-                        };
+                        showStaffUI(staffMember);
                     } else {
-                        // === NOT STAFF ===
-                        // INSTANT REDIRECT
+                        // NOT STAFF -> INSTANT REDIRECT
                         window.location.replace('menu.html');
                     }
                 } catch (err) {
-                    // Error? Default to customer
+                    console.error(err);
                     window.location.replace('menu.html');
                 }
             } else {
-                // No DB connection or ID? Default to customer
+                // No DB/ID -> Customer
                 window.location.replace('menu.html');
             }
         }
 
-        function renderUser(user) {
-            document.getElementById('welcomeName').innerHTML = `
-                ${user.name || user.email || user.phone}
-            `;
+        function showStaffUI(staffMember) {
+            // Retrieve user name for display
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (user) {
+                document.getElementById('welcomeName').innerHTML = `
+                    ${user.name || user.email || user.phone}
+                `;
+            }
+
+            // Show Container
+            document.getElementById('contentArea').style.display = 'block';
+
+            // Configure Staff Link
+            const staffLink = document.getElementById('staffLink');
+            const roleName = staffMember.roles?.name || 'Staff';
+            staffLink.querySelector('.role-title').textContent = roleName + ' Dashboard';
+
+            staffLink.onclick = () => {
+                localStorage.setItem('staffInfo', JSON.stringify(staffMember));
+                window.location.href = 'admin_dashboard.html';
+            };
         }
 
         function logout() {
