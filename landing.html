@@ -150,16 +150,17 @@
                     if (staffMember) {
                         showStaffUI(staffMember);
                     } else {
-                        // NOT STAFF -> INSTANT REDIRECT
-                        window.location.replace('menu.html');
+                        // NOT STAFF -> INSTANT REDIRECT WITH ID
+                        window.location.replace(`menu.html?user=${user.id}`);
                     }
                 } catch (err) {
                     console.error(err);
-                    window.location.replace('menu.html');
+                    window.location.replace(`menu.html?user=${user.id}`);
                 }
             } else {
-                // No DB/ID -> Customer
-                window.location.replace('menu.html');
+                // No DB/ID -> Customer (id might be null/undefined, handle gracefully)
+                const target = user.id ? `menu.html?user=${user.id}` : 'menu.html';
+                window.location.replace(target);
             }
         }
 
