@@ -37,6 +37,9 @@
             display: flex;
             flex-direction: column;
             border-right: 1px solid rgba(255, 255, 255, 0.1);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
         }
 
         .logo {
@@ -72,6 +75,8 @@
         .main-content {
             flex: 1;
             padding: 30px;
+            margin-left: 250px;
+            /* Offset for fixed sidebar */
             overflow-y: auto;
         }
 
@@ -125,6 +130,22 @@
             color: #888;
             font-size: 14px;
         }
+
+        .content-section {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 
@@ -133,11 +154,11 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="logo">🍴 Gourmet Admin</div>
-        <a href="#" class="nav-item active">📊 Dashboard</a>
-        <a href="#" class="nav-item">📦 Calls (Orders)</a>
-        <a href="#" class="nav-item">🍔 Menu Management</a>
-        <a href="#" class="nav-item">👥 Staff</a>
-        <a href="#" class="nav-item">🪑 Tables</a>
+        <div class="nav-item active" onclick="showSection('dashboard')">📊 Dashboard</div>
+        <div class="nav-item" onclick="showSection('orders')">📦 Calls (Orders)</div>
+        <div class="nav-item" onclick="showSection('menu')">🍔 Menu Management</div>
+        <div class="nav-item" onclick="showSection('staff')">👥 Staff</div>
+        <div class="nav-item" onclick="showSection('tables')">🪑 Tables</div>
         <div style="flex:1"></div>
         <div class="nav-item" onclick="logout()">🚪 Logout</div>
     </div>
@@ -145,32 +166,70 @@
     <!-- Main Content -->
     <div class="main-content">
         <div class="header">
-            <h1>Dashboard</h1>
+            <h1 id="pageTitle">Dashboard</h1>
             <div class="user-profile">
                 <span id="adminName">Loading...</span>
                 <div class="avatar">A</div>
             </div>
         </div>
 
-        <!-- Stats -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">Total Orders</div>
-                <div class="stat-value">0</div> <!-- Dynamic later -->
+        <!-- SECTION: DASHBOARD -->
+        <div id="dashboard-section" class="content-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Orders</div>
+                    <div class="stat-value">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Active Tables</div>
+                    <div class="stat-value">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Today's Revenue</div>
+                    <div class="stat-value">$0.00</div>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">Active Tables</div>
-                <div class="stat-value">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Today's Revenue</div>
-                <div class="stat-value">$0.00</div>
+            <div class="stat-card" style="min-height: 300px;">
+                <h3>Recent Activity</h3>
+                <p style="color:#666; margin-top:20px;">No recent activity</p>
             </div>
         </div>
 
-        <div class="stat-card" style="min-height: 300px;">
-            <h3>Recent Activity</h3>
-            <p style="color:#666; margin-top:20px;">No recent activity</p>
+        <!-- SECTION: ORDERS -->
+        <div id="orders-section" class="content-section" style="display:none;">
+            <div class="stat-card">
+                <h3>Incoming Orders</h3>
+                <div id="ordersList" style="margin-top:20px; color:#999;">Loading orders... (Feature coming soon)</div>
+            </div>
+        </div>
+
+        <!-- SECTION: MENU -->
+        <div id="menu-section" class="content-section" style="display:none;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                <h3>Menu Items</h3>
+                <button onclick="alert('Feature coming nicely!')"
+                    style="background:var(--primary); border:none; color:white; padding:10px 20px; border-radius:8px; cursor:pointer;">+
+                    Add New Item</button>
+            </div>
+            <div class="stat-card">
+                <p style="color:#999;">Menu management interface will appear here.</p>
+            </div>
+        </div>
+
+        <!-- SECTION: STAFF -->
+        <div id="staff-section" class="content-section" style="display:none;">
+            <div class="stat-card">
+                <h3>Staff Management</h3>
+                <p style="color:#999;">Manage staff roles and access.</p>
+            </div>
+        </div>
+
+        <!-- SECTION: TABLES -->
+        <div id="tables-section" class="content-section" style="display:none;">
+            <div class="stat-card">
+                <h3>Table Management</h3>
+                <p style="color:#999;">QR Codes and Table Status.</p>
+            </div>
         </div>
     </div>
 
@@ -249,6 +308,34 @@
             await _supabase.auth.signOut();
             localStorage.clear();
             window.location.href = 'login.html';
+        }
+
+        // Navigation Logic
+        function showSection(sectionId) {
+            // Update Sidebar Active State
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.textContent.toLowerCase().includes(sectionId) ||
+                    (sectionId === 'dashboard' && item.textContent.includes('Dashboard'))) {
+                    item.classList.add('active');
+                }
+            });
+
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(el => el.style.display = 'none');
+
+            // Show target section
+            document.getElementById(`${sectionId}-section`).style.display = 'block';
+
+            // Update Title
+            const titles = {
+                'dashboard': 'Dashboard',
+                'orders': 'Calls (Orders)',
+                'menu': 'Menu Management',
+                'staff': 'Staff',
+                'tables': 'Tables'
+            };
+            document.getElementById('pageTitle').textContent = titles[sectionId];
         }
     </script>
 </body>
