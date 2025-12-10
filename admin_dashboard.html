@@ -234,7 +234,12 @@
         <!-- SECTION: ORDERS -->
         <div id="orders-section" class="content-section">
             <div class="stat-card">
-                <h3>Incoming Orders</h3>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3>Incoming Orders</h3>
+                    <label style="color:#aaa; font-size:14px; cursor:pointer;">
+                        <input type="checkbox" id="showHistoryCb" onchange="fetchOrders()"> Show History
+                    </label>
+                </div>
                 <div id="ordersList" style="margin-top:20px; color:#999;">Loading orders...</div>
             </div>
         </div>
@@ -380,11 +385,16 @@
             const revenue = data.reduce((acc, o) => acc + (o.total_price || 0), 0);
             document.getElementById('stat-revenue').textContent = '$' + revenue.toFixed(2);
 
-            // Filter for Display: Only show PENDING orders in the "Incoming" list
-            const activeOrders = data.filter(o => o.status === 'pending');
+            // Filter for Display
+            const showingHistory = document.getElementById('showHistoryCb').checked;
+            const activeOrders = data.filter(o => {
+                if (showingHistory) return o.status === 'completed' || o.status === 'cancelled';
+                return o.status === 'pending';
+            });
 
             if (activeOrders.length === 0) {
-                container.innerHTML = '<p style="padding:20px; color:#aaa;">No pending orders. All caught up! 🎉</p>';
+                const msg = showingHistory ? "No history yet." : "No pending orders. All caught up! 🎉";
+                container.innerHTML = `<p style="padding:20px; color:#aaa;">${msg}</p>`;
                 return;
             }
 
