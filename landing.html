@@ -82,44 +82,47 @@
 
 <body>
     <div class="landing-container">
-        <h1>Welcome Back</h1>
-        <p style="color:#999; margin-bottom:40px;" id="welcomeName">User</p>
+        <!-- Checking State -->
+        <h1 id="checkingMsg">Checking access...</h1>
 
-        <!-- Customer Option -->
-        <a href="menu.html" class="role-card">
-            <div class="role-icon">🍔</div>
-            <div class="role-info">
-                <div class="role-title">Customer View</div>
-                <div class="role-desc">Browse menu, place orders, and track status.</div>
-            </div>
-        </a>
+        <!-- User Welcome (Hidden Initially) -->
+        <div id="contentArea" style="display:none;">
+            <h1>Welcome Back</h1>
+            <p style="color:#999; margin-bottom:40px;" id="welcomeName">User</p>
 
-        <!-- Staff Option (Hidden by default) -->
-        <div id="staffLink" class="role-card" style="display:none; border-color:#ff6600;">
-            <div class="role-icon">👨‍🍳</div>
-            <div class="role-info">
-                <div class="role-title">Staff Dashboard</div>
-                <div class="role-desc">Manage orders, update menu, and view reports.</div>
+            <!-- Customer Option -->
+            <a href="menu.html" class="role-card">
+                <div class="role-icon">🍔</div>
+                <div class="role-info">
+                    <div class="role-title">Customer View</div>
+                    <div class="role-desc">Browse menu, place orders, and track status.</div>
+                </div>
+            </a>
+
+            <!-- Staff Option -->
+            <div id="staffLink" class="role-card" style="border-color:#ff6600;">
+                <div class="role-icon">👨‍🍳</div>
+                <div class="role-info">
+                    <div class="role-title">Staff Dashboard</div>
+                    <div class="role-desc">Manage orders, update menu, and view reports.</div>
+                </div>
             </div>
+
+            <button onclick="logout()"
+                style="margin-top:20px; background:none; border:none; color:#666; cursor:pointer; text-decoration:underline;">Logout</button>
         </div>
-
-        <button onclick="logout()"
-            style="margin-top:20px; background:none; border:none; color:#666; cursor:pointer; text-decoration:underline;">Logout</button>
     </div>
 
-    <!-- Supabase Inline (Updated to use unpkg just in case) -->
-    <!-- We need this to check the 'staff' table -->
     <script>
         const supabaseUrl = 'https://pklaofjfpcrlgevxkozy.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBrbGFvZmpmcGNybGdldnhrb3p5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyNjY1MDcsImV4cCI6MjA4MDg0MjUwN30.sNg6OVLocM1D-bG9LXTlDSsy6s74oW1SQ89QWCMbOKE';
 
-        // Init Supabase
         let _supabase = null;
         if (window.supabase) {
             _supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
         }
 
-        // Check Auth using LocalStorage (Populated by Login Sync)
+        // Check Auth immediately
         checkAuth();
 
         async function checkAuth() {
@@ -130,66 +133,49 @@
                 return;
             }
 
-            // Display Name & ID
-            renderUser(user);
-
-            // Check Role (Using the ID we synced to DB)
+            // Check Role against DB
             if (user.id && _supabase) {
-                checkUserRole(user.id);
+                try {
+                    const { data: staffMember, error } = await _supabase
+                        .from('staff')
+                        .select('*, roles(name)')
+                        .eq('user_id', user.id)
+                        .single();
+
+                    if (staffMember) {
+                        // === IS STAFF ===
+                        // Reveal the UI
+                        document.getElementById('checkingMsg').style.display = 'none';
+                        document.getElementById('contentArea').style.display = 'block';
+                        renderUser(user);
+
+                        const staffLink = document.getElementById('staffLink');
+                        const roleName = staffMember.roles?.name || 'Staff';
+                        staffLink.querySelector('.role-title').textContent = roleName + ' Dashboard';
+
+                        staffLink.onclick = () => {
+                            localStorage.setItem('staffInfo', JSON.stringify(staffMember));
+                            window.location.href = 'admin_dashboard.html';
+                        };
+                    } else {
+                        // === NOT STAFF ===
+                        // INSTANT REDIRECT
+                        window.location.replace('menu.html');
+                    }
+                } catch (err) {
+                    // Error? Default to customer
+                    window.location.replace('menu.html');
+                }
             } else {
-                // Not staff, or no DB connection -> Customers go to menu automatically?
-                // User said: "people who dont have admin they will just land to menu"
-                // So let's auto-redirect if NOT staff check
-                if (!user.id) window.location.href = 'menu.html';
+                // No DB connection or ID? Default to customer
+                window.location.replace('menu.html');
             }
         }
 
         function renderUser(user) {
             document.getElementById('welcomeName').innerHTML = `
-                ${user.name || user.email || user.phone} <br>
-                <small style="font-size:12px; color:#555; background:#111; padding:2px 6px; border-radius:4px; user-select:all; cursor:pointer;" onclick="navigator.clipboard.writeText('${user.id}'); alert('Copied ID!')" title="Click to Copy ID">
-                    ID: ${user.id} (Click to Copy)
-                </small>
+                ${user.name || user.email || user.phone}
             `;
-        }
-
-        async function checkUserRole(userId) {
-            try {
-                // Query the 'staff' table
-                const { data: staffMember, error } = await _supabase
-                    .from('staff')
-                    .select('*, roles(name)')
-                    .eq('user_id', userId)
-                    .single();
-
-                if (staffMember) {
-                    // IS STAFF: Show options
-                    const staffLink = document.getElementById('staffLink');
-                    staffLink.style.display = 'flex';
-                    const roleName = staffMember.roles?.name || 'Staff';
-                    staffLink.querySelector('.role-title').textContent = roleName + ' Dashboard';
-
-                    staffLink.onclick = () => {
-                        localStorage.setItem('staffInfo', JSON.stringify(staffMember));
-                        window.location.href = 'admin_dashboard.html';
-                    };
-                } else {
-                    // NOT STAFF: Auto-redirect to Menu
-                    console.log('Non-staff user, redirecting to menu...');
-
-                    const container = document.querySelector('.landing-container');
-                    container.innerHTML = '<h2 style="color:white;">Redirecting to Menu...</h2>';
-
-                    setTimeout(() => {
-                        window.location.href = 'menu.html';
-                    }, 800);
-                }
-
-            } catch (err) {
-                console.error('Unexpected error checking role:', err);
-                // Fallback to menu on error
-                window.location.href = 'menu.html';
-            }
         }
 
         function logout() {

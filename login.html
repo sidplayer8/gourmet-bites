@@ -185,9 +185,7 @@
             <button class="btn-sms" onclick="backToPhone()" style="background:#666; margin-top:10px;">Back</button>
         </div>
 
-        <div style="margin-top:30px; text-align:center;">
-            <a href="admin_login.html" style="color:#666; font-size:12px; text-decoration:none;">Admin Login</a>
-        </div>
+        <!-- NO ADMIN LOGIN BUTTON -->
     </div>
 
     <script>
@@ -255,7 +253,6 @@
 
             } catch (err) {
                 console.error('DB Sync Error:', err);
-                // Fallback: Use what we have
                 if (!user.id) user.id = 'temp_' + Date.now();
                 localStorage.setItem('user', JSON.stringify(user));
                 return false;
