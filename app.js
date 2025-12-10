@@ -328,6 +328,26 @@ function showView(view) {
     }
 }
 
+// Toggle Cart Modal/Page
+function toggleCart() {
+    const cartPage = document.getElementById('cart-page');
+    const menuContainer = document.getElementById('menu-container');
+    const categoryNav = document.querySelector('.category-nav'); // Select the nav
+
+    if (cartPage.classList.contains('hidden')) {
+        // Show Cart
+        cartPage.classList.remove('hidden');
+        menuContainer.classList.add('hidden');
+        if (categoryNav) categoryNav.style.display = 'none'; // Hide nav
+        renderCart();
+    } else {
+        // Show Menu
+        cartPage.classList.add('hidden');
+        menuContainer.classList.remove('hidden');
+        if (categoryNav) categoryNav.style.display = 'flex'; // Show nav again
+    }
+}
+
 // Checkout Logic
 async function checkout() {
     if (cart.length === 0) {
