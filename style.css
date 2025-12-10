@@ -66,6 +66,35 @@ body {
     border: 2px solid #fff;
 }
 
+.category-nav {
+    position: sticky;
+    top: 73px;
+    /* Height of menu-header (approx) so they stack nicely */
+    background: #1a1a2e;
+    z-index: 90;
+    padding: 10px 20px;
+    overflow-x: auto;
+    white-space: nowrap;
+    border-bottom: 1px solid #333;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    /* Added shadow for depth */
+}
+
+/* Hide scrollbar for category nav but keep functionality */
+.category-nav::-webkit-scrollbar {
+    height: 4px;
+}
+
+.category-nav::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+
+.category-nav::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 2px;
+}
+
 .menu-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));

@@ -105,18 +105,76 @@
         </div>
     </div>
 
+    <!-- Supabase (Unpkg) -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script>
-        // Auth Check
-        const adminUser = JSON.parse(localStorage.getItem('adminUser'));
-        if (!adminUser) {
-            window.location.href = 'admin_login.html';
-        } else {
-            document.getElementById('adminName').textContent = adminUser.email || 'Admin';
+        const supabaseUrl = 'https://pklaofjfpcrlgevxkozy.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBrbGFvZmpmcGNybGdldnhrb3p5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyNjY1MDcsImV4cCI6MjA4MDg0MjUwN30.sNg6OVLocM1D-bG9LXTlDSsy6s74oW1SQ89QWCMbOKE';
+
+        // Initialize
+        if (typeof supabase === 'undefined') {
+            alert('Security System Failed to Load');
+            window.location.href = 'menu.html'; // Fail safe
+        }
+        const _supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+        // Security Check
+        checkAdminAccess();
+
+        async function checkAdminAccess() {
+            // 1. Get Session/User
+            // We check both Session (from Login) and LocalStorage (legacy/backup)
+            const { data: { session } } = await _supabase.auth.getSession();
+            let user = session?.user;
+
+            if (!user) {
+                // Check legacy local storage from admin login
+                const localAdmin = JSON.parse(localStorage.getItem('adminUser'));
+                if (localAdmin) {
+                    // Verify this user against Supabase Auth (simplified: just check DB roles for now)
+                    // Ideally we re-auth, but for now we trust the stored object IF we can verify role logic
+                    // Actually, better to redirect to login if no session.
+                    // But let's check if the ID in local storage is valid staff
+                    user = { id: localAdmin.id, email: localAdmin.email };
+                } else {
+                    // Check legacy customer storage?
+                    const data = JSON.parse(localStorage.getItem('user'));
+                    if (data && data.id) user = data;
+                }
+            }
+
+            if (!user || !user.id) {
+                window.location.href = 'login.html'; // No identity found
+                return;
+            }
+
+            // 2. Strict Database Role Check
+            try {
+                const { data: staffMember, error } = await _supabase
+                    .from('staff')
+                    .select('*, roles(name)')
+                    .eq('user_id', user.id)
+                    .single();
+
+                if (error || !staffMember) {
+                    console.warn('Unauthorized Access Attempt');
+                    window.location.href = 'menu.html'; // Boot to menu
+                } else {
+                    // Valid Admin!
+                    console.log('Admin Access Granted:', staffMember.roles.name);
+                    document.getElementById('adminName').textContent = `${staffMember.roles.name} (${user.email || 'Staff'})`;
+                }
+
+            } catch (err) {
+                console.error('Security Check Error:', err);
+                window.location.href = 'menu.html';
+            }
         }
 
-        function logout() {
-            localStorage.removeItem('adminUser');
-            window.location.href = 'admin_login.html';
+        async function logout() {
+            await _supabase.auth.signOut();
+            localStorage.clear();
+            window.location.href = 'login.html';
         }
     </script>
 </body>

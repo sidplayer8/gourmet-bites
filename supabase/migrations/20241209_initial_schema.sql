@@ -57,13 +57,16 @@ ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE admins ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for menu_items (public read, admin write via service key)
+DROP POLICY IF EXISTS "Public can view menu items" ON menu_items;
 CREATE POLICY "Public can view menu items" ON menu_items
   FOR SELECT USING (available = true);
 
 -- RLS Policies for orders (users can create and view their own)
+DROP POLICY IF EXISTS "Users can create orders" ON orders;
 CREATE POLICY "Users can create orders" ON orders
   FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Users can view own orders" ON orders;
 CREATE POLICY "Users can view own orders" ON orders
   FOR SELECT USING (user_id = current_setting('request.jwt.claims', true)::json->>'sub' OR true);
 

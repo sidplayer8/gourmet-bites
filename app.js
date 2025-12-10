@@ -328,30 +328,69 @@ function showView(view) {
     }
 }
 
-function checkout() {
+// Checkout Logic
+async function checkout() {
     if (cart.length === 0) {
         showToast('Cart is empty!', 'error');
         return;
     }
 
+    // Get User
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user || !user.id) {
+        showToast('Please login to order', 'error');
+        // prompt login?
+        return;
+    }
+
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const order = {
-        id: Date.now(),
-        items: [...cart],
-        total: total,
-        date: new Date().toISOString(),
-        status: 'Placed'
+
+    // Prepare Order Payload
+    const orderData = {
+        user_id: user.id,
+        items: cart, // Supabase stores JSONB automatically
+        total_price: total,
+        status: 'pending',
+        type: 'takeaway', // Default for now
+        table_id: null,   // Default for now
+        custom_notes: document.getElementById('orderNotes')?.value || ''
     };
 
-    let orders = JSON.parse(localStorage.getItem('orders') || '[]');
-    orders.push(order);
-    localStorage.setItem('orders', JSON.stringify(orders));
+    document.querySelector('.btn-checkout')?.setAttribute('disabled', 'true');
+    showToast('Processing order...', 'info');
 
-    showToast(`✓ Order placed successfully! Total: $${total.toFixed(2)}`);
-    cart = [];
-    localStorage.setItem('cart', JSON.stringify(cart));
-    renderCart();
-    updateCartCount();
+    try {
+        // Use global _supabase (or window.supabase from CDN)
+        // We need to ensure client is ready. In app.js we might need to init it if not presenting landing/login.
+        // Assuming supabase-inline.js or equivalent loaded. 
+        // Wait, app.js doesn't import supabase. We need to add it to menu.html or init here.
+        // For now, let's assume it's available via window._supabase (if we add script to menu.html)
+
+        const client = window._supabase || window.supabase;
+        if (!client) throw new Error('System offline (DB connection missing)');
+
+        const { data, error } = await client
+            .from('orders')
+            .insert([orderData])
+            .select();
+
+        if (error) throw error;
+
+        // Success
+        showToast(`✓ Order #${data[0].id.slice(0, 8)} placed!`, 'success');
+        cart = [];
+        localStorage.setItem('cart', JSON.stringify(cart));
+        renderCart();
+        updateCartCount();
+
+        // Redirect to status page?
+        // window.location.href = `order_status.html?id=${data[0].id}`;
+
+    } catch (err) {
+        console.error('Checkout error:', err);
+        showToast('Failed to place order: ' + err.message, 'error');
+        document.querySelector('.btn-checkout')?.removeAttribute('disabled');
+    }
 }
 
 // Note: renderMenu() and updateCartCount() are now called from loadMenu() in menu.html

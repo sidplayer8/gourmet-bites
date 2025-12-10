@@ -7,6 +7,8 @@ let supabaseClient = null;
 if (typeof supabase !== 'undefined' && supabase.createClient) {
     const { createClient } = supabase;
     supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+    // Expose as global for other scripts to use
+    window._supabase = supabaseClient;
     console.log('Supabase client initialized successfully');
 } else {
     console.warn('Supabase CDN not loaded yet');
