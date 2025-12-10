@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Welcome - Gourmet Bites</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .landing-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .role-card {
+            background: #1a1a2e;
+            border: 1px solid #333;
+            border-radius: 16px;
+            padding: 24px;
+            margin: 12px 0;
+            width: 100%;
+            max-width: 320px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            text-decoration: none;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .role-card:active {
+            transform: scale(0.98);
+            background: #252540;
+        }
+
+        .role-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .role-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #ff6600;
+        }
+
+        .role-desc {
+            font-size: 14px;
+            color: #999;
+        }
+
+        .logout-link {
+            margin-top: 30px;
+            color: #666;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="landing-container">
+        <h1 style="margin-bottom: 10px;">Welcome Back!</h1>
+        <p style="color: #999; margin-bottom: 40px;" id="welcomeName">User</p>
+
+        <a href="menu.html" class="role-card">
+            <span class="role-icon">🍽️</span>
+            <span class="role-title">Customer View</span>
+            <span class="role-desc">Browse menu, order food, and dine-in</span>
+        </a>
+
+        <a href="admin_dashboard.html" class="role-card" id="staffLink" style="display:none; border-color: #ff6600;">
+            <span class="role-icon">⚡</span>
+            <span class="role-title">Staff Dashboard</span>
+            <span class="role-desc">Manage orders, tables, and menu</span>
+        </a>
+
+        <div onclick="logout()" class="logout-link">Logout</div>
+    </div>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-inline.js"></script>
+
+    <script>
+        // Check Auth
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) {
+            window.location.href = 'login.html';
+        }
+
+        // Display Name
+        document.getElementById('welcomeName').textContent = user.name || user.email || user.phone;
+
+        // Check Role (Simulated until DB is connected via SQL)
+        checkUserRole(user.id);
+
+        async function checkUserRole(userId) {
+            // TODO: Replace with real Supabase query once 'staff' table exists
+            // const { data, error } = await supabase.from('staff').select('role_id').eq('user_id', userId).single();
+
+            // For now, we'll auto-show it if the user is the specific admin/owner (temporary logic)
+            // Or if they set a localStorage flag for testing
+            const isAdmin = localStorage.getItem('isAdmin') === 'true' || user.email?.includes('admin');
+
+            if (isAdmin) {
+                document.getElementById('staffLink').style.display = 'flex';
+            } else {
+                // If not staff, auto-redirect to menu after a brief moment? 
+                // Or let them choose? Let's just show menu option.
+            }
+
+            // Real implementation will be:
+            /*
+            try {
+                const { data: staff, error } = await _supabase
+                    .from('staff')
+                    .select('*, roles(*)')
+                    .eq('user_id', userId)
+                    .single();
+                
+                if (staff && !error) {
+                    document.getElementById('staffLink').style.display = 'flex';
+                    // Optional: Update text based on role (Chef, Waiter, Owner)
+                    document.querySelector('#staffLink .role-title').textContent = staff.roles.name + ' Dashboard';
+                }
+            } catch (e) {
+                console.error('Role check failed', e);
+            }
+            */
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+
+</html>
