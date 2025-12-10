@@ -23,7 +23,7 @@
             max-width: 600px;
             padding: 20px;
             display: none;
-            /* KEY CHANGE: Hidden by default so 'Checking...' is not seen */
+            /* Hidden by default */
         }
 
         h1 {
@@ -88,7 +88,7 @@
         <p style="color:#999; margin-bottom:40px;" id="welcomeName">User</p>
 
         <!-- Customer Option -->
-        <a href="menu.html" class="role-card">
+        <a href="#" onclick="goCustomer()" class="role-card">
             <div class="role-icon">🍔</div>
             <div class="role-info">
                 <div class="role-title">Customer View</div>
@@ -129,11 +129,14 @@
                 return;
             }
 
-            // === 1. HARDCODED ADMIN CHECK (FAILSAFE) ===
-            const adminEmail = 'sapsinfocomm22@gmail.com';
-            if (user.email === adminEmail || (user.user && user.user.email === adminEmail)) {
+            // === 1. ALLOWLIST BYPASS (Email & Phone) ===
+            const allowedAdmins = ['sapsinfocomm22@gmail.com', '+6590214181'];
+            const uEmail = user.email || (user.user && user.user.email);
+            const uPhone = user.phone || (user.user && user.user.phone);
+
+            if (allowedAdmins.includes(uEmail) || allowedAdmins.includes(uPhone)) {
                 // Force Admin Access
-                console.log('Admin Email Match! Access Granted.');
+                console.log('Allowlist Access Granted.');
                 showStaffUI({ roles: { name: 'Owner' }, name: 'Admin' });
                 return;
             }
@@ -150,18 +153,23 @@
                     if (staffMember) {
                         showStaffUI(staffMember);
                     } else {
-                        // NOT STAFF -> INSTANT REDIRECT WITH ID
-                        window.location.replace(`menu.html?user=${user.id}`);
+                        // NOT STAFF -> INSTANT REDIRECT
+                        goCustomer();
                     }
                 } catch (err) {
                     console.error(err);
-                    window.location.replace(`menu.html?user=${user.id}`);
+                    goCustomer();
                 }
             } else {
-                // No DB/ID -> Customer (id might be null/undefined, handle gracefully)
-                const target = user.id ? `menu.html?user=${user.id}` : 'menu.html';
-                window.location.replace(target);
+                // No DB/ID -> Customer
+                goCustomer();
             }
+        }
+
+        function goCustomer() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            const target = user && user.id ? `menu.html?user=${user.id}` : 'menu.html';
+            window.location.replace(target);
         }
 
         function showStaffUI(staffMember) {
