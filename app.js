@@ -370,6 +370,7 @@ async function checkout() {
         user_id: user.id,
         items: cart, // Supabase stores JSONB automatically
         total_price: total,
+        total: total, // LEGACY/CONSTRAINT FIX: DB requires 'total' column
         status: 'pending',
         type: 'takeaway', // Default for now
         table_id: null,   // Default for now
