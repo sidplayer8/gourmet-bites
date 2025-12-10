@@ -4,8 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <title>Login - Gourmet Bites</title>
-    <!-- Use unpkg for Supabase to ensure UMD build loads correctly -->
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <!-- Supabase SDK (For Data Storage ONLY) -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
     <style>
         * {
             margin: 0;
@@ -54,7 +59,6 @@
         }
 
         .btn-google:hover {
-            background: linear-gradient(135deg, #ff7700 0%, #ff9944 100%);
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(255, 102, 0, 0.4);
         }
@@ -72,7 +76,8 @@
             margin-bottom: 15px;
         }
 
-        select {
+        select,
+        input {
             padding: 16px;
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -83,21 +88,10 @@
 
         select option {
             background: #1a1a2e;
-            color: #fff;
         }
 
         input {
             flex: 1;
-            padding: 16px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            color: #fff;
-            font-size: 15px;
-        }
-
-        input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
         }
 
         .btn-sms {
@@ -115,21 +109,14 @@
         }
 
         .btn-sms:hover {
-            background: linear-gradient(135deg, #ff7700 0%, #ff9944 100%);
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 102, 0, 0.4);
         }
 
         .verify-section {
             display: none;
         }
 
-        .loading {
-            opacity: 0.7;
-            pointer-events: none;
-        }
-
-        /* Toast Styles */
+        /* Toast */
         .toast {
             position: fixed;
             top: 20px;
@@ -204,88 +191,162 @@
     </div>
 
     <script>
-        // Initialize Supabase
+        // 1. Firebase Config (Original)
+        const firebaseConfig = {
+            apiKey: "AIzaSyD8merF44ASnRsd8GyWcbueH7qtg50EBZ4",
+            authDomain: "gourmet-bites-225a1.firebaseapp.com",
+            projectId: "gourmet-bites-225a1",
+            storageBucket: "gourmet-bites-225a1.firebasestorage.app",
+            messagingSenderId: "659456972768",
+            appId: "1:659456972768:web:413f3efc766eb533d85"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        // 2. Supabase Config (For Storage)
         const supabaseUrl = 'https://pklaofjfpcrlgevxkozy.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBrbGFvZmpmcGNybGdldnhrb3p5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyNjY1MDcsImV4cCI6MjA4MDg0MjUwN30.sNg6OVLocM1D-bG9LXTlDSsy6s74oW1SQ89QWCMbOKE';
 
-        let supabase = null;
+        let _supabase = null;
         if (typeof window.supabase !== 'undefined') {
-            supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
-        } else {
-            console.error('Supabase library not loaded!');
+            _supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
         }
 
-        function showToast(msg, type = 'info') {
-            const el = document.createElement('div');
-            el.className = 'toast ' + type;
-            el.textContent = msg;
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 3000);
+        // Toast Helper
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('hiding');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
 
-        async function googleLogin() {
-            if (!supabase) return showToast('Supabase not ready', 'error');
+        // --- NEW: Sync to Database Function ---
+        async function syncUserToDB(user) {
+            console.log('Syncing user to DB:', user);
+            if (!_supabase) return true; // Skip if offline
 
-            const { data, error } = await supabase.auth.signInWithOAuth({
-                provider: 'google',
-                options: {
-                    redirectTo: window.location.origin + '/landing.html' // Redirects back to app
-                }
-            });
+            try {
+                // Prepare payload
+                const payload = {};
+                if (user.email) payload.email = user.email;
+                if (user.phone) payload.phone = user.phone;
+                payload.name = user.name || 'User';
+                if (user.photoURL) payload.photoURL = user.photoURL;
 
-            if (error) showToast(error.message, 'error');
-        }
+                // Match on Email OR Phone (Upsert)
+                let matchKey = user.email ? 'email' : 'phone';
 
-        let currentPhone = '';
+                const { data, error } = await _supabase
+                    .from('users')
+                    .upsert(payload, { onConflict: matchKey })
+                    .select()
+                    .single();
 
-        async function sendSMS() {
-            if (!supabase) return;
-            const country = document.getElementById('countryCode').value;
-            const number = document.getElementById('phoneNumber').value;
-            if (!number) return showToast('Enter phone number', 'error');
+                if (error) throw error;
 
-            currentPhone = country + number;
-            document.getElementById('btnSendCode').classList.add('loading');
-            document.getElementById('btnSendCode').textContent = 'Sending...';
+                // Update LocalStorage with the REAL Database ID (UUID)
+                user.id = data.id;
+                localStorage.setItem('user', JSON.stringify(user));
+                console.log('Synced! DB ID:', user.id);
+                return true;
 
-            // Supabase OTP
-            const { data, error } = await supabase.auth.signInWithOtp({
-                phone: currentPhone
-            });
-
-            document.getElementById('btnSendCode').classList.remove('loading');
-            document.getElementById('btnSendCode').textContent = 'SEND SMS CODE';
-
-            if (error) {
-                showToast(error.message, 'error'); // Will fail if Provider not enabled
-            } else {
-                document.getElementById('phoneSection').style.display = 'none';
-                document.getElementById('verifySection').style.display = 'block';
-                document.getElementById('displayPhone').textContent = currentPhone;
-                showToast('Code sent!', 'success');
+            } catch (err) {
+                console.error('DB Sync Error:', err);
+                // Fallback: Use what we have
+                if (!user.id) user.id = 'temp_' + Date.now();
+                localStorage.setItem('user', JSON.stringify(user));
+                return false;
             }
         }
 
-        async function verifySMS() {
-            const token = document.getElementById('verificationCode').value;
-            if (!token) return showToast('Enter code', 'error');
+        // --- Original Google Login ---
+        function googleLogin() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            firebase.auth().signInWithPopup(provider)
+                .then(async result => {
+                    showToast('Login successful! Syncing...', 'success');
 
-            const { data, error } = await supabase.auth.verifyOtp({
-                phone: currentPhone,
-                token: token,
-                type: 'sms'
-            });
+                    const user = {
+                        name: result.user.displayName,
+                        email: result.user.email,
+                        photoURL: result.user.photoURL
+                    };
 
-            if (error) {
-                showToast(error.message, 'error');
+                    // Sync to DB -> Then Redirect
+                    await syncUserToDB(user);
+
+                    setTimeout(() => window.location.href = 'landing.html', 500);
+                })
+                .catch(err => {
+                    showToast('Google login error: ' + err.message, 'error');
+                });
+        }
+
+        let sentVerificationCode = '';
+        let currentFullPhone = '';
+
+        // --- Original SMS Logic ---
+        function sendSMS() {
+            const countryCode = document.getElementById('countryCode').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            currentFullPhone = countryCode + phoneNumber;
+
+            if (!phoneNumber || phoneNumber.length < 8) {
+                showToast('Please enter a valid phone number', 'error');
+                return;
+            }
+
+            document.getElementById('btnSendCode').textContent = 'Sending...';
+
+            fetch('https://gourmet-bites.vercel.app/api/send-sms', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phoneNumber: currentFullPhone })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('btnSendCode').textContent = 'SEND SMS CODE';
+                    if (data.success) {
+                        sentVerificationCode = data.verificationCode;
+                        document.getElementById('phoneSection').style.display = 'none';
+                        document.getElementById('verifySection').style.display = 'block';
+                        document.getElementById('displayPhone').textContent = currentFullPhone;
+                        showToast('✓ Code sent to ' + currentFullPhone, 'success');
+                    } else {
+                        showToast('Failed to send SMS: ' + data.error, 'error');
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('btnSendCode').textContent = 'SEND SMS CODE';
+                    showToast('Error: Unable to connect to server', 'error');
+                });
+        }
+
+        function verifySMS() {
+            const code = document.getElementById('verificationCode').value;
+            if (!code || code.length !== 6) {
+                showToast('Please enter the 6-digit code', 'error');
+                return;
+            }
+
+            if (code === sentVerificationCode) {
+                showToast('Verified! Syncing...', 'success');
+
+                const user = {
+                    name: 'User',
+                    phone: currentFullPhone,
+                    verified: true
+                };
+
+                // Sync to DB -> Then Redirect
+                syncUserToDB(user).then(() => {
+                    setTimeout(() => window.location.href = 'landing.html', 500);
+                });
             } else {
-                // Success! Save user and redirect
-                localStorage.setItem('user', JSON.stringify({
-                    id: data.user.id,
-                    phone: data.user.phone
-                }));
-                showToast('Verified!', 'success');
-                setTimeout(() => window.location.href = 'landing.html', 1000);
+                showToast('Invalid code. Please try again.', 'error');
             }
         }
 
