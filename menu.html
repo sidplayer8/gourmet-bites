@@ -8,6 +8,26 @@
 
 <body>
     <div class="menu-page">
+        <!-- Table Verification Modal -->
+        <div id="tableModal"
+            style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px;">
+            <div
+                style="background:#1f2940; padding:30px; border-radius:16px; border:1px solid #ff6600; max-width:90%; width:350px;">
+                <div style="font-size:40px; margin-bottom:15px;">🤳</div>
+                <h2 style="color:white; margin-bottom:10px;">Welcome!</h2>
+                <p style="color:#ccc; margin-bottom:20px;">Please <strong>scan the QR code</strong> on your table to
+                    view the menu and order.</p>
+
+                <div style="margin-top:20px; border-top:1px solid #333; padding-top:20px;">
+                    <p style="font-size:12px; color:#666; margin-bottom:10px;">Trouble scanning?</p>
+                    <input type="number" id="manualTableInput" placeholder="Enter Table No."
+                        style="padding:10px; border-radius:6px; border:1px solid #444; background:#111; color:white; width:120px; text-align:center;">
+                    <button onclick="setManualTable()"
+                        style="padding:10px 15px; background:#ff6600; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">Go</button>
+                </div>
+            </div>
+        </div>
+
         <div class="menu-header">
             <h1>Menu</h1>
             <div class="header-actions">

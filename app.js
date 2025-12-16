@@ -1,5 +1,30 @@
 ﻿// Check auth
-if (!localStorage.getItem('user')) { window.location.href = 'login.html'; }
+const urlParams = new URLSearchParams(window.location.search);
+const tableParam = urlParams.get('table');
+
+if (tableParam) {
+    sessionStorage.setItem('pendingTable', tableParam);
+}
+
+if (!localStorage.getItem('user')) {
+    window.location.href = 'login.html';
+} else {
+    // User is logged in. 
+    // If we have a pending table in session (from pre-login scan) or URL, ensure it persists
+    // If URL is missing table but we have it in storage, we might want to add it.
+
+    let currentTable = tableParam || sessionStorage.getItem('pendingTable') || localStorage.getItem('activeTable');
+
+    if (currentTable) {
+        localStorage.setItem('activeTable', currentTable);
+        // Ensure URL reflects it
+        if (!tableParam) {
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.set('table', currentTable);
+            window.history.replaceState({}, '', newUrl);
+        }
+    }
+}
 function logout() { localStorage.removeItem('user'); localStorage.removeItem('cart'); localStorage.removeItem('orders'); window.location.href = 'login.html'; }
 
 
@@ -348,6 +373,39 @@ function toggleCart() {
     }
 }
 
+// Table Check on Load
+function checkTableStatus() {
+    const activeTable = localStorage.getItem('activeTable');
+    if (!activeTable) {
+        document.getElementById('tableModal').style.display = 'flex';
+    } else {
+        document.getElementById('tableModal').style.display = 'none';
+        // Verify URL matches
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('table') !== activeTable) {
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.set('table', activeTable);
+            window.history.replaceState({}, '', newUrl);
+        }
+    }
+}
+
+function setManualTable() {
+    const val = document.getElementById('manualTableInput').value;
+    if (val) {
+        localStorage.setItem('activeTable', val);
+        window.location.href = `menu.html?table=${val}`;
+    }
+}
+window.setManualTable = setManualTable;
+
+// Call on init
+if (typeof window !== 'undefined') {
+    window.addEventListener('DOMContentLoaded', checkTableStatus);
+}
+
+// ... existing code ...
+
 // Checkout Logic
 async function checkout() {
     if (cart.length === 0) {
@@ -359,35 +417,29 @@ async function checkout() {
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user || !user.id) {
         showToast('Please login to order', 'error');
-        // prompt login?
         return;
     }
 
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-    // Dine-In Logic: Get Table Number
-    const urlParams = new URLSearchParams(window.location.search);
-    let tableNum = urlParams.get('table');
-
+    // Get Table (Should be set by now)
+    const tableNum = localStorage.getItem('activeTable');
     if (!tableNum) {
-        tableNum = prompt("Please enter your Table Number:");
-        if (!tableNum) {
-            showToast('Table number required for ordering', 'error');
-            document.querySelector('.btn-checkout')?.removeAttribute('disabled');
-            return;
-        }
+        // Fallback safety (shouldn't happen if modal blocks)
+        checkTableStatus();
+        return;
     }
 
     // Prepare Order Payload
     const orderData = {
         user_id: user.id,
-        items: cart, // Supabase stores JSONB automatically
+        items: cart,
         total_price: total,
-        total: total, // LEGACY/CONSTRAINT FIX: DB requires 'total' column
+        total: total,
         status: 'pending',
         type: 'dine_in',
-        table_number: tableNum, // Save table number
-        table_id: null,   // Could link to real ID later if needed
+        table_number: tableNum,
+        table_id: null,
         custom_notes: document.getElementById('orderNotes')?.value || ''
     };
 
@@ -395,12 +447,6 @@ async function checkout() {
     showToast('Processing order...', 'info');
 
     try {
-        // Use global _supabase (or window.supabase from CDN)
-        // We need to ensure client is ready. In app.js we might need to init it if not presenting landing/login.
-        // Assuming supabase-inline.js or equivalent loaded. 
-        // Wait, app.js doesn't import supabase. We need to add it to menu.html or init here.
-        // For now, let's assume it's available via window._supabase (if we add script to menu.html)
-
         const client = window._supabase || window.supabase;
         if (!client) throw new Error('System offline (DB connection missing)');
 
@@ -411,15 +457,11 @@ async function checkout() {
 
         if (error) throw error;
 
-        // Success
-        showToast(`✓ Order #${data[0].id.slice(0, 8)} placed!`, 'success');
+        showToast(`✓ Order #${data[0].id.slice(0, 8)} placed for Table ${tableNum}!`, 'success');
         cart = [];
         localStorage.setItem('cart', JSON.stringify(cart));
         renderCart();
         updateCartCount();
-
-        // Redirect to status page?
-        // window.location.href = `order_status.html?id=${data[0].id}`;
 
     } catch (err) {
         console.error('Checkout error:', err);

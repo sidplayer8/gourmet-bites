@@ -275,7 +275,10 @@
                     // Sync to DB -> Then Redirect
                     await syncUserToDB(user);
 
-                    setTimeout(() => window.location.href = 'landing.html', 500);
+                    const pendingTable = sessionStorage.getItem('pendingTable');
+                    setTimeout(() => {
+                        window.location.href = pendingTable ? `menu.html?table=${pendingTable}` : 'landing.html';
+                    }, 500);
                 })
                 .catch(err => {
                     showToast('Google login error: ' + err.message, 'error');
@@ -340,7 +343,10 @@
 
                 // Sync to DB -> Then Redirect
                 syncUserToDB(user).then(() => {
-                    setTimeout(() => window.location.href = 'landing.html', 500);
+                    const pendingTable = sessionStorage.getItem('pendingTable');
+                    setTimeout(() => {
+                        window.location.href = pendingTable ? `menu.html?table=${pendingTable}` : 'landing.html';
+                    }, 500);
                 });
             } else {
                 showToast('Invalid code. Please try again.', 'error');
