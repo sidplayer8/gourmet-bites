@@ -365,6 +365,19 @@ async function checkout() {
 
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
+    // Dine-In Logic: Get Table Number
+    const urlParams = new URLSearchParams(window.location.search);
+    let tableNum = urlParams.get('table');
+
+    if (!tableNum) {
+        tableNum = prompt("Please enter your Table Number:");
+        if (!tableNum) {
+            showToast('Table number required for ordering', 'error');
+            document.querySelector('.btn-checkout')?.removeAttribute('disabled');
+            return;
+        }
+    }
+
     // Prepare Order Payload
     const orderData = {
         user_id: user.id,
@@ -372,8 +385,9 @@ async function checkout() {
         total_price: total,
         total: total, // LEGACY/CONSTRAINT FIX: DB requires 'total' column
         status: 'pending',
-        type: 'takeaway', // Default for now
-        table_id: null,   // Default for now
+        type: 'dine_in',
+        table_number: tableNum, // Save table number
+        table_id: null,   // Could link to real ID later if needed
         custom_notes: document.getElementById('orderNotes')?.value || ''
     };
 
