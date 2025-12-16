@@ -275,9 +275,12 @@
                     // Sync to DB -> Then Redirect
                     await syncUserToDB(user);
 
+                    const pendingTableId = sessionStorage.getItem('pendingTableId');
                     const pendingTable = sessionStorage.getItem('pendingTable');
+
                     setTimeout(() => {
-                        window.location.href = pendingTable ? `menu.html?table=${pendingTable}` : 'landing.html';
+                        if (pendingTableId) window.location.href = `menu.html?table_id=${pendingTableId}`;
+                        else window.location.href = pendingTable ? `menu.html?table=${pendingTable}` : 'landing.html';
                     }, 500);
                 })
                 .catch(err => {
@@ -343,9 +346,12 @@
 
                 // Sync to DB -> Then Redirect
                 syncUserToDB(user).then(() => {
+                    const pendingTableId = sessionStorage.getItem('pendingTableId');
                     const pendingTable = sessionStorage.getItem('pendingTable');
+
                     setTimeout(() => {
-                        window.location.href = pendingTable ? `menu.html?table=${pendingTable}` : 'landing.html';
+                        if (pendingTableId) window.location.href = `menu.html?table_id=${pendingTableId}`;
+                        else window.location.href = pendingTable ? `menu.html?table=${pendingTable}` : 'landing.html';
                     }, 500);
                 });
             } else {

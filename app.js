@@ -1,8 +1,12 @@
 ﻿// Check auth
 const urlParams = new URLSearchParams(window.location.search);
 const tableParam = urlParams.get('table');
+const tableIdParam = urlParams.get('table_id');
 
-if (tableParam) {
+if (tableIdParam) {
+    sessionStorage.setItem('pendingTableId', tableIdParam);
+} else if (tableParam) {
+    // Legacy/Unsafe fallback? Or maybe we rely on strict check later.
     sessionStorage.setItem('pendingTable', tableParam);
 }
 
@@ -373,16 +377,60 @@ function toggleCart() {
     }
 }
 
-// Table Check on Load
-function checkTableStatus() {
+// Table Check on Load (Strict UUID)
+async function checkTableStatus() {
+    // 1. Check URL for Secure UUID
+    const urlParams = new URLSearchParams(window.location.search);
+    const codeId = urlParams.get('table_id');
+    const tableNumParam = urlParams.get('table');
+
+    if (codeId) {
+        // Verify this UUID against DB
+        try {
+            const client = window._supabase || window.supabase;
+            if (!client) throw new Error("DB offline");
+
+            const { data, error } = await client
+                .from('restaurant_tables')
+                .select('table_number, id')
+                .eq('id', codeId)
+                .single();
+
+            if (data) {
+                // VALID!
+                localStorage.setItem('activeTable', data.table_number);
+                localStorage.setItem('activeTableId', data.id); // Secure Proof
+
+                // Redirect/Clean URL to show nice number (but we have proof in storage)
+                const newUrl = new URL(window.location.href);
+                newUrl.searchParams.delete('table_id');
+                newUrl.searchParams.set('table', data.table_number);
+                window.history.replaceState({}, '', newUrl);
+
+                document.getElementById('tableModal').style.display = 'none';
+                return;
+            } else {
+                console.error("Invalid QR Code");
+                showToast("Invalid QR Code", "error");
+            }
+        } catch (e) {
+            console.error("Validation error", e);
+        }
+    }
+
+    // 2. Check Storage for Verified Session
     const activeTable = localStorage.getItem('activeTable');
-    if (!activeTable) {
+    const activeTableId = localStorage.getItem('activeTableId');
+
+    if (!activeTable || !activeTableId) {
+        // STRICT MODE: No verified ID? Block.
+        // Even if ?table=5 is in URL, we ignore it if we don't have the UUID proof.
         document.getElementById('tableModal').style.display = 'flex';
     } else {
         document.getElementById('tableModal').style.display = 'none';
-        // Verify URL matches
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('table') !== activeTable) {
+
+        // Ensure visual URL matches
+        if (urlParams.get('table') != activeTable) {
             const newUrl = new URL(window.location.href);
             newUrl.searchParams.set('table', activeTable);
             window.history.replaceState({}, '', newUrl);
@@ -390,14 +438,9 @@ function checkTableStatus() {
     }
 }
 
-function setManualTable() {
-    const val = document.getElementById('manualTableInput').value;
-    if (val) {
-        localStorage.setItem('activeTable', val);
-        window.location.href = `menu.html?table=${val}`;
-    }
-}
-window.setManualTable = setManualTable;
+// Remove Manual Entry (Strict Mode)
+// function setManualTable() { ... } 
+// window.setManualTable = setManualTable; // Disabled
 
 // Call on init
 if (typeof window !== 'undefined') {
