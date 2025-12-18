@@ -673,7 +673,6 @@
             const container = document.getElementById('ordersList');
             container.innerHTML = 'Loading...';
             // Fetch all, but we will filter client-side for now or we can filter DB side.
-            // Keeping select(*) allows us to calc revenue correctly from ALL orders.
             const { data, error } = await _supabase.from('orders').select('*').order('created_at', { ascending: false });
             if (error) { container.textContent = 'Error: ' + error.message; return; }
 
