@@ -1274,6 +1274,72 @@
             container.innerHTML = html;
         }
 
+        function openMenuModal(itemId = null) {
+            const modal = document.getElementById('menuModal');
+            const title = document.getElementById('menuModalTitle');
+
+            // Reset form
+            document.getElementById('menuItemId').value = '';
+            document.getElementById('menuName').value = '';
+            document.getElementById('menuPrice').value = '';
+            document.getElementById('menuDescription').value = '';
+            document.getElementById('menuImageUrl').value = '';
+            document.getElementById('menuIsPublic').checked = true;
+            document.getElementById('menuIsAvailable').checked = true;
+
+            // Populate category dropdown
+            const categorySelect = document.getElementById('menuCategory');
+            categorySelect.innerHTML = '';
+            window._categoriesData.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat.name;
+                option.textContent = cat.name;
+                categorySelect.appendChild(option);
+            });
+
+            if (itemId) {
+                // Edit mode
+                title.textContent = 'Edit Menu Item';
+                document.getElementById('menuItemId').value = itemId;
+
+                // Find item in cache
+                const item = window._menuData?.find(i => i.id == itemId);
+                if (item) {
+                    document.getElementById('menuName').value = item.name || '';
+                    document.getElementById('menuCategory').value = item.category || '';
+                    document.getElementById('menuPrice').value = item.price || '';
+                    document.getElementById('menuDescription').value = item.description || '';
+                    document.getElementById('menuImageUrl').value = item.image_url || '';
+                    document.getElementById('menuIsPublic').checked = item.is_public !== false;
+                    document.getElementById('menuIsAvailable').checked = item.is_available !== false;
+                }
+            } else {
+                // Add mode
+                title.textContent = 'Add Menu Item';
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        async function deleteMenuItem(itemId) {
+            showConfirmModal(
+                'Delete Menu Item',
+                'Are you sure you want to delete this menu item? This action cannot be undone.',
+                async () => {
+                    try {
+                        const { error } = await _supabase.from('menu_items').delete().eq('id', itemId);
+                        if (error) throw error;
+
+                        showToast('Menu item deleted', 'success');
+                        await fetchMenu();
+                    } catch (err) {
+                        console.error('Delete menu item error:', err);
+                        showToast('Failed to delete: ' + err.message, 'error');
+                    }
+                }
+            );
+        }
+
         // Expose globally for modal callbacks
         window.fetchMenuGlobal = fetchMenu;
 
