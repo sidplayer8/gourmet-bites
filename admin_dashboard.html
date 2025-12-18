@@ -1264,14 +1264,29 @@
                     <td>$${Number(item.price || 0).toFixed(2)}</td>
                     <td>${availBadge} ${publicBadge}</td>
                     <td>
-                        <button onclick="openMenuModal(${item.id})" style="color:var(--primary); background:none; border:none; cursor:pointer; margin-right:10px;">Edit</button>
-                        <button onclick="deleteMenuItem(${item.id})" style="color:var(--danger); background:none; border:none; cursor:pointer;">Delete</button>
+                        <button class="menu-edit-btn" data-id="${item.id}" style="color:var(--primary); background:none; border:none; cursor:pointer; margin-right:10px;">Edit</button>
+                        <button class="menu-del-btn" data-id="${item.id}" style="color:var(--danger); background:none; border:none; cursor:pointer;">Delete</button>
                     </td>
                 </tr>
             `;
             }).join('');
             html += '</tbody></table>';
             container.innerHTML = html;
+
+            // Attach event listeners to all edit/delete buttons
+            container.querySelectorAll('.menu-edit-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = parseInt(btn.dataset.id);
+                    openMenuModal(id);
+                });
+            });
+
+            container.querySelectorAll('.menu-del-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = parseInt(btn.dataset.id);
+                    deleteMenuItem(id);
+                });
+            });
         }
 
         function openMenuModal(itemId = null) {
