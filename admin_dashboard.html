@@ -244,6 +244,10 @@
             height: 100%;
             background: rgba(0, 0, 0, 0.7);
             z-index: 200;
+        }
+
+        .custom-modal.show {
+            display: flex;
             align-items: center;
             justify-content: center;
         }
@@ -876,11 +880,12 @@
                 title.textContent = 'Add Menu Item';
             }
 
-            modal.style.display = 'flex';
+            modal.classList.add('show');
         }
 
         function closeMenuModal() {
-            document.getElementById('menuModal').style.display = 'none';
+            const modal = document.getElementById('menuModal');
+            modal.classList.remove('show');
         }
 
         async function saveMenuItem() {
@@ -993,10 +998,20 @@
             container.innerHTML = html;
         }
 
-        async function deleteMenuItem(id) {
-            if (confirm('Delete item?')) {
-                await _supabase.from('menu_items').delete().eq('id', id);
-                fetchMenu();
+        async function deleteMenuItem(itemId) {
+            if (!confirm('Delete this menu item?')) return;
+
+            try {
+                const { error } = await _supabase
+                    .from('menu_items')
+                    .delete()
+                    .eq('id', itemId);
+
+                if (error) throw error;
+                fetchMenu(); // REFRESH MENU
+            } catch (err) {
+                console.error('Delete error:', err);
+                alert('Failed to delete: ' + err.message);
             }
         }
 
