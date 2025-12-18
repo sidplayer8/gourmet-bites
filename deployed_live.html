@@ -299,46 +299,6 @@
                 transform: translateY(0);
             }
         }
-
-        /* Toast Notifications */
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: var(--card-bg);
-            color: white;
-            padding: 16px 24px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            z-index: 9999;
-            animation: slideIn 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            max-width: 400px;
-        }
-
-        .toast.error {
-            border-left: 4px solid var(--danger);
-        }
-
-        .toast.success {
-            border-left: 4px solid var(--success);
-        }
-
-        .toast.warning {
-            border-left: 4px solid #ffb020;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
     </style>
 </head>
 
@@ -407,28 +367,11 @@
         <!-- SECTION: MENU -->
         <div id="menu-section" class="content-section">
             <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-                <h3>Menu Management</h3>
+                <h3>Menu Items</h3>
                 <button class="btn-primary" onclick="openMenuModal()">+ Add New Item</button>
             </div>
-
-            <!-- Two-column layout: Categories sidebar + Menu items -->
-            <div style="display:grid; grid-template-columns: 250px 1fr; gap:20px;">
-                <!-- Category Sidebar -->
-                <div class="stat-card" style="padding:15px; height:fit-content;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                        <h4 style="margin:0;">Categories</h4>
-                        <button onclick="openCategoryModal()" class="btn-primary"
-                            style="padding:6px 12px; font-size:13px;">+</button>
-                    </div>
-                    <div id="categorySidebar">
-                        <p style="color:#666; font-size:13px;">Loading categories...</p>
-                    </div>
-                </div>
-
-                <!-- Menu Items -->
-                <div class="stat-card table-container" id="menuTableContainer">
-                    <p>Loading menu...</p>
-                </div>
+            <div class="stat-card table-container" id="menuTableContainer">
+                <p>Loading menu...</p>
             </div>
         </div>
 
@@ -542,22 +485,6 @@
         </div>
     </div>
 
-    <!-- Category Modal (Add/Edit) -->
-    <div id="categoryModal" class="custom-modal">
-        <div class="modal-content" style="max-width:400px;">
-            <h2 id="categoryModalTitle">Add Category</h2>
-            <input type="hidden" id="categoryItemId">
-
-            <label>Category Name</label>
-            <input type="text" id="categoryName" placeholder="e.g. Burgers, Drinks, Desserts">
-
-            <div style="display:flex; gap:10px; margin-top:20px;">
-                <button onclick="saveCategoryItem()" class="btn-primary">Save</button>
-                <button onclick="closeCategoryModal()">Cancel</button>
-            </div>
-        </div>
-    </div>
-
     <!-- CUSTOM CONFIRM MODAL for Table Init -->
     <div id="confirmModal"
         style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:300; align-items:center; justify-content:center;">
@@ -643,20 +570,6 @@
             window.location.href = 'login.html';
         }
 
-        // Toast Notification Function
-        function showToast(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = message;
-            document.body.appendChild(toast);
-
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(400px)';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
         function toggleSidebar() {
             document.querySelector('.sidebar').classList.toggle('open');
             document.querySelector('.sidebar-overlay').classList.toggle('active');
@@ -687,10 +600,7 @@
             if (sectionId === 'dashboard') fetchStats();
             if (sectionId === 'orders') fetchOrders();
             if (sectionId === 'history') fetchHistory();
-            if (sectionId === 'menu') {
-                fetchCategories();
-                fetchMenu();
-            }
+            if (sectionId === 'menu') fetchMenu();
             if (sectionId === 'staff') fetchStaff();
             if (sectionId === 'roles') fetchRoles();
             if (sectionId === 'tables') fetchTables();
@@ -921,232 +831,6 @@
             fetchOrders(); // Refresh list -> Order will disappear
         }
 
-        // --- CATEGORIES ---
-        let selectedCategoryFilter = null;
-        window._categoriesData = [];
-
-        async function fetchCategories() {
-            const { data, error } = await _supabase.from('categories').select('*').order('display_order');
-            if (error) {
-                console.error('Error fetching categories:', error);
-                return;
-            }
-            window._categoriesData = data || [];
-            renderCategorySidebar();
-            return data;
-        }
-
-        function renderCategorySidebar() {
-            const container = document.getElementById('categorySidebar');
-            const categories = window._categoriesData;
-
-            if (!categories || categories.length === 0) {
-                container.innerHTML = '<p style="color:#666; font-size:13px; text-align:center;">No categories yet.</p>';
-                return;
-            }
-
-            let html = '<div style="display:flex; flex-direction:column; gap:5px;">';
-
-            // "All" filter button
-            html += `
-                <div onclick="filterMenuByCategory(null)" style="
-                    padding:10px 12px;
-                    background:${selectedCategoryFilter === null ? 'rgba(255,102,0,0.2)' : 'transparent'};
-                    border-left:3px solid ${selectedCategoryFilter === null ? 'var(--primary)' : 'transparent'};
-                    border-radius:6px;
-                    cursor:pointer;
-                    display:flex;
-                    justify-content:space-between;
-                    align-items:center;
-                    transition:all 0.2s;
-                    font-weight:${selectedCategoryFilter === null ? 'bold' : 'normal'};
-                " onmouseover="if(${selectedCategoryFilter !== null}) this.style.background='rgba(255,255,255,0.05)'" 
-                   onmouseout="if(${selectedCategoryFilter !== null}) this.style.background='transparent'">
-                    <span>📋 All Items</span>
-                </div>
-            `;
-
-            categories.forEach(cat => {
-                const isSelected = selectedCategoryFilter === cat.name;
-                html += `
-                    <div style="
-                        padding:10px 12px;
-                        background:${isSelected ? 'rgba(255,102,0,0.2)' : 'transparent'};
-                        border-left:3px solid ${isSelected ? 'var(--primary)' : 'transparent'};
-                        border-radius:6px;
-                        cursor:pointer;
-                        display:flex;
-                        justify-content:space-between;
-                        align-items:center;
-                        transition:all 0.2s;
-                        font-weight:${isSelected ? 'bold' : 'normal'};
-                    " onmouseover="if(!${isSelected}) this.style.background='rgba(255,255,255,0.05)'" 
-                       onmouseout="if(!${isSelected}) this.style.background='transparent'"
-                       onclick="filterMenuByCategory('${cat.name.replace(/'/g, "\\'")}')">
-                        <span>${cat.name}</span>
-                        <div style="display:flex; gap:8px;">
-                            <button onclick="event.stopPropagation(); openCategoryModal(${cat.id})" 
-                                style="background:none; border:none; color:#888; cursor:pointer; padding:2px;"
-                                title="Edit">✏️</button>
-                            <button onclick="event.stopPropagation(); deleteCategory(${cat.id}, '${cat.name.replace(/'/g, "\\'")}');" 
-                                style="background:none; border:none; color:var(--danger); cursor:pointer; padding:2px;"
-                                title="Delete">🗑️</button>
-                        </div>
-                    </div>
-                `;
-            });
-
-            html += '</div>';
-            container.innerHTML = html;
-        }
-
-        function openCategoryModal(id = null) {
-            const modal = document.getElementById('categoryModal');
-            const title = document.getElementById('categoryModalTitle');
-            const nameInput = document.getElementById('categoryName');
-            const idInput = document.getElementById('categoryItemId');
-
-            if (id) {
-                // Edit mode
-                const category = window._categoriesData.find(c => c.id === id);
-                if (category) {
-                    title.textContent = 'Edit Category';
-                    nameInput.value = category.name;
-                    idInput.value = id;
-                }
-            } else {
-                // Add mode
-                title.textContent = 'Add Category';
-                nameInput.value = '';
-                idInput.value = '';
-            }
-
-            modal.classList.add('show');
-            nameInput.focus();
-        }
-
-        function closeCategoryModal() {
-            document.getElementById('categoryModal').classList.remove('show');
-        }
-
-        async function saveCategoryItem() {
-            const id = document.getElementById('categoryItemId').value;
-            const name = document.getElementById('categoryName').value.trim();
-
-            if (!name) {
-                showToast('Please enter a category name', 'error');
-                return;
-            }
-
-            try {
-                if (id) {
-                    // Update existing
-                    const { error } = await _supabase
-                        .from('categories')
-                        .update({ name })
-                        .eq('id', id);
-                    if (error) throw error;
-                    showToast('Category updated successfully', 'success');
-                } else {
-                    // Insert new
-                    const maxOrder = Math.max(...window._categoriesData.map(c => c.display_order || 0), 0);
-                    const { error } = await _supabase
-                        .from('categories')
-                        .insert({ name, display_order: maxOrder + 1 });
-                    if (error) throw error;
-                    showToast('Category added successfully', 'success');
-                }
-
-                closeCategoryModal();
-                await fetchCategories();
-                await fetchMenu(); // Refresh menu to update dropdowns
-            } catch (err) {
-                console.error('Save category error:', err);
-                showToast('Failed to save category: ' + err.message, 'error');
-            }
-        }
-
-        async function deleteCategory(id, name) {
-            if (!confirm(`Delete category "${name}"?\n\nMenu items in this category will remain but show as uncategorized.`)) {
-                return;
-            }
-
-            try {
-                const { error } = await _supabase.from('categories').delete().eq('id', id);
-                if (error) throw error;
-
-                showToast('Category deleted successfully', 'success');
-                await fetchCategories();
-            } catch (err) {
-                console.error('Delete category error:', err);
-                showToast('Failed to delete category: ' + err.message, 'error');
-            }
-        }
-
-        function filterMenuByCategory(categoryName) {
-            selectedCategoryFilter = categoryName;
-            renderCategorySidebar();
-            fetchMenu();
-        }
-
-        // --- MENU ---
-
-        async function fetchMenu() {
-            const container = document.getElementById('menuTableContainer');
-            let query = _supabase.from('menu_items').select('*').order('category');
-
-            // Apply category filter if selected
-            if (selectedCategoryFilter) {
-                query = query.eq('category', selectedCategoryFilter);
-            }
-
-            const { data, error } = await query;
-
-            if (error) {
-                container.innerHTML = `<p style="color:red">Error: ${error.message}</p>`;
-                return;
-            }
-
-            // Cache for edit modal
-            window._menuData = data;
-
-            if (!data || data.length === 0) {
-                const msg = selectedCategoryFilter
-                    ? `No items in "${selectedCategoryFilter}" category.`
-                    : 'No menu items yet. Click "+ Add New Item" to get started.';
-                container.innerHTML = `<p style="color:#666; text-align:center; padding:40px;">${msg}</p>`;
-                return;
-            }
-
-            let html = `<table><thead><tr><th>Name</th><th>Category</th><th>Price</th><th>Availability</th><th>Actions</th></tr></thead><tbody>`;
-            html += data.map(item => {
-                const availBadge = item.is_available !== false
-                    ? '<span style="background:var(--success); color:white; padding:2px 8px; border-radius:4px; font-size:11px;">Available</span>'
-                    : '<span style="background:#666; color:white; padding:2px 8px; border-radius:4px; font-size:11px;">Out of Stock</span>';
-                const publicBadge = item.is_public !== false
-                    ? '<span style="background:#3b82f6; color:white; padding:2px 6px; border-radius:4px; font-size:10px; margin-left:5px;">Public</span>'
-                    : '<span style="background:#64748b; color:white; padding:2px 6px; border-radius:4px; font-size:10px; margin-left:5px;">Hidden</span>';
-
-                return `
-                <tr>
-                    <td><strong>${item.name || 'Unnamed'}</strong></td>
-                    <td><span style="background:#334; padding:2px 6px; border-radius:4px;">${item.category || 'Uncategorized'}</span></td>
-                    <td>$${Number(item.price || 0).toFixed(2)}</td>
-                    <td>${availBadge} ${publicBadge}</td>
-                    <td>
-                        <button onclick="openMenuModal(${item.id})" style="color:var(--primary); background:none; border:none; cursor:pointer; margin-right:10px;">Edit</button>
-                        <button onclick="deleteMenuItem(${item.id})" style="color:var(--danger); background:none; border:none; cursor:pointer;">Delete</button>
-                    </td>
-                </tr>
-            `;
-            }).join('');
-            html += '</tbody></table>';
-            container.innerHTML = html;
-        }
-
-        // Expose globally for modal callbacks
-        window.fetchMenuGlobal = fetchMenu;
-
         // --- STAFF ---
         async function fetchStaff() {
             const container = document.getElementById('staffTableContainer');
@@ -1270,7 +954,9 @@
         window.showSection = showSection;
         window.logout = logout;
 
-        // --- GLOBAL MENU FUNCTIONS ---
+    })(); // End admin check IIFE
+
+        // --- GLOBAL MENU FUNCTIONS (OUTSIDE IIFE) ---
         // These MUST be global so onclick handlers can access them
 
         function handleCategoryChange() {
@@ -1288,7 +974,6 @@
             console.log('openMenuModal called with itemId:', itemId);
             const modal = document.getElementById('menuModal');
             const title = document.getElementById('menuModalTitle');
-            const categorySelect = document.getElementById('menuCategory');
 
             console.log('Modal element:', modal);
             console.log('Title element:', title);
@@ -1298,24 +983,10 @@
                 return;
             }
 
-            // Populate category dropdown from database  
-            categorySelect.innerHTML = '';
-            window._categoriesData.forEach(cat => {
-                const option = document.createElement('option');
-                option.value = cat.name;
-                option.textContent = cat.name;
-                categorySelect.appendChild(option);
-            });
-            // Add custom category option at end
-            const customOption = document.createElement('option');
-            customOption.value = '__custom__';
-            customOption.textContent = '+ Create New Category';
-            categorySelect.appendChild(customOption);
-
             // Reset form
             document.getElementById('menuItemId').value = '';
             document.getElementById('menuName').value = '';
-            document.getElementById('menuCategory').value = window._categoriesData[0]?.name || '';
+            document.getElementById('menuCategory').value = 'Appetizers';
             document.getElementById('customCategory').style.display = 'none';
             document.getElementById('customCategory').value = '';
             document.getElementById('menuPrice').value = '';
@@ -1333,7 +1004,7 @@
                 const item = window._menuData?.find(i => i.id == itemId);
                 if (item) {
                     document.getElementById('menuName').value = item.name || '';
-                    document.getElementById('menuCategory').value = item.category || '';
+                    document.getElementById('menuCategory').value = item.category || 'Appetizers';
                     document.getElementById('menuPrice').value = item.price || '';
                     document.getElementById('menuDescription').value = item.description || '';
                     document.getElementById('menuImageUrl').value = item.image_url || '';
@@ -1368,11 +1039,11 @@
             const isAvailable = document.getElementById('menuIsAvailable').checked;
 
             if (!name) {
-                showToast('Please enter item name', 'error');
+                alert('Please enter item name');
                 return;
             }
             if (!category) {
-                showToast('Please select or create a category', 'error');
+                alert('Please select or create a category');
                 return;
             }
 
@@ -1443,3 +1114,4 @@
 </body>
 
 </html>
+
