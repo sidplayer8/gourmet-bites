@@ -831,6 +831,53 @@
             fetchOrders(); // Refresh list -> Order will disappear
         }
 
+        // --- MENU ---
+        async function fetchMenu() {
+            const container = document.getElementById('menuTableContainer');
+            const { data, error } = await _supabase.from('menu_items').select('*').order('category');
+
+            if (error) {
+                container.innerHTML = `<p style="color:red">Error: ${error.message}</p>`;
+                return;
+            }
+
+            // Cache for edit modal
+            window._menuData = data;
+
+            if (!data || data.length === 0) {
+                container.innerHTML = '<p style="color:#666; text-align:center; padding:40px;">No menu items yet. Click "+ Add New Item" to get started.</p>';
+                return;
+            }
+
+            let html = `<table><thead><tr><th>Name</th><th>Category</th><th>Price</th><th>Availability</th><th>Actions</th></tr></thead><tbody>`;
+            html += data.map(item => {
+                const availBadge = item.is_available !== false
+                    ? '<span style="background:var(--success); color:white; padding:2px 8px; border-radius:4px; font-size:11px;">Available</span>'
+                    : '<span style="background:#666; color:white; padding:2px 8px; border-radius:4px; font-size:11px;">Out of Stock</span>';
+                const publicBadge = item.is_public !== false
+                    ? '<span style="background:#3b82f6; color:white; padding:2px 6px; border-radius:4px; font-size:10px; margin-left:5px;">Public</span>'
+                    : '<span style="background:#64748b; color:white; padding:2px 6px; border-radius:4px; font-size:10px; margin-left:5px;">Hidden</span>';
+
+                return `
+                <tr>
+                    <td><strong>${item.name || 'Unnamed'}</strong></td>
+                    <td><span style="background:#334; padding:2px 6px; border-radius:4px;">${item.category || 'Uncategorized'}</span></td>
+                    <td>$${Number(item.price || 0).toFixed(2)}</td>
+                    <td>${availBadge} ${publicBadge}</td>
+                    <td>
+                        <button onclick="openMenuModal(${item.id})" style="color:var(--primary); background:none; border:none; cursor:pointer; margin-right:10px;">Edit</button>
+                        <button onclick="deleteMenuItem(${item.id})" style="color:var(--danger); background:none; border:none; cursor:pointer;">Delete</button>
+                    </td>
+                </tr>
+            `;
+            }).join('');
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // Expose globally for modal callbacks
+        window.fetchMenuGlobal = fetchMenu;
+
         // --- STAFF ---
         async function fetchStaff() {
             const container = document.getElementById('staffTableContainer');
