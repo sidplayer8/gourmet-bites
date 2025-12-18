@@ -1087,22 +1087,17 @@
             }
         }
 
-        function deleteCategoryConfirm(id, name) {
-            if (window.confirm('Delete category "' + name + '"?')) {
-                deleteCategory(id, name);
-            }
-        }
-
-        async function deleteCategory(id, name) {
+        async function deleteCategoryConfirm(id, name) {
+            // Direct delete with toast feedback (no black box confirm)
             try {
                 const { error } = await _supabase.from('categories').delete().eq('id', id);
                 if (error) throw error;
 
-                showToast('Category deleted successfully', 'success');
+                showToast('Category "' + name + '" deleted', 'success');
                 await fetchCategories();
             } catch (err) {
                 console.error('Delete category error:', err);
-                showToast('Failed to delete category: ' + err.message, 'error');
+                showToast('Failed to delete: ' + err.message, 'error');
             }
         }
 

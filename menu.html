@@ -165,7 +165,19 @@
         // Load categories from database
         async function loadCategories() {
             try {
-                const { data, error } = await window.supabase
+                // Wait for Supabase to be ready
+                let attempts = 0;
+                while (!window._supabase && attempts < 10) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    attempts++;
+                }
+
+                if (!window._supabase) {
+                    console.error('Supabase client not available');
+                    return;
+                }
+
+                const { data, error } = await window._supabase
                     .from('categories')
                     .select('*')
                     .order('display_order');
@@ -197,6 +209,7 @@
                 });
 
                 categoryNav.innerHTML = html;
+                console.log('Loaded', data.length, 'categories');
             } catch (err) {
                 console.error('Failed to load categories:', err);
             }
