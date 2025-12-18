@@ -341,6 +341,16 @@
 
         <!-- SECTION: TABLES -->
         <div id="tables-section" class="content-section">
+            <div class="stat-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h3>Restaurant Tables</h3>
+                    <button class="btn-primary" onclick="initTables()">+ Reset/Init Tables</button>
+                </div>
+                <div id="tablesGrid"
+                    style="display:grid; grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:15px;">
+                    Loading tables...
+                </div>
+            </div>
         </div>
     </div>
 
