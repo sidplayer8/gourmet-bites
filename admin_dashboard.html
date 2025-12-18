@@ -1290,7 +1290,10 @@
             // Populate category dropdown
             const categorySelect = document.getElementById('menuCategory');
             categorySelect.innerHTML = '';
-            window._categoriesData.forEach(cat => {
+
+            // Use cached categories with null check
+            const cats = window._categoriesData || [];
+            cats.forEach(cat => {
                 const option = document.createElement('option');
                 option.value = cat.name;
                 option.textContent = cat.name;
