@@ -668,6 +668,23 @@
             }).join('');
         }
 
+        // --- STATS ---
+        async function fetchStats() {
+            const { count } = await _supabase.from('orders').select('*', { count: 'exact', head: true });
+            document.getElementById('statOrders').textContent = count || 0;
+
+            // Count tables that are currently 'taken'
+            const { data: takenTables } = await _supabase
+                .from('restaurant_tables')
+                .select('id')
+                .eq('status', 'taken');
+            document.getElementById('statActiveTables').textContent = takenTables?.length || 0;
+
+            const { data: orders } = await _supabase.from('orders').select('total_price');
+            const sum = orders?.reduce((acc, o) => acc + (Number(o.total_price) || 0), 0) || 0;
+            document.getElementById('statRevenue').textContent = '$' + sum.toFixed(2);
+        }
+
         // --- ORDERS ---
         async function fetchOrders() {
             const container = document.getElementById('ordersList');
@@ -680,7 +697,7 @@
 
             // Calc Stats (Keep calculating from ALL data)
             document.getElementById('stat-total-orders').textContent = data.length;
-            const revenue = data.reduce((acc, o) => acc + (o.total_price || 0), 0);
+            const revenue = data.reduce((acc, o => acc + (o.total_price || 0), 0);
             document.getElementById('stat-revenue').textContent = '$' + revenue.toFixed(2);
 
             // Filter for Display
