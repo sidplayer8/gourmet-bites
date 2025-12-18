@@ -391,6 +391,29 @@
         </div>
     </div>
 
+    <!-- CUSTOM CONFIRM MODAL for Table Init -->
+    <div id="confirmModal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:300; align-items:center; justify-content:center;">
+        <div
+            style="background:var(--card-bg); padding:40px; border-radius:16px; width:90%; max-width:450px; border:2px solid var(--primary); text-align:center;">
+            <div style="font-size:48px; margin-bottom:20px;">📋</div>
+            <h2 style="color:white; margin-bottom:15px;">Initialize Restaurant Tables?</h2>
+            <p style="color:#999; margin-bottom:30px; line-height:1.6;">This will create Tables 1-10 in your database.
+                You can then generate QR codes for them.</p>
+
+            <div style="display:flex; gap:15px; justify-content:center;">
+                <button onclick="closeConfirmModal()"
+                    style="flex:1; padding:14px 24px; background:#333; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; font-size:15px;">
+                    Cancel
+                </button>
+                <button onclick="confirmInitTables()" class="btn-primary"
+                    style="flex:1; padding:14px 24px; font-size:15px;">
+                    ✓ Create Tables
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const supabaseUrl = 'https://pklaofjfpcrlgevxkozy.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBrbGFvZmpmcGNybGdldnhrb3p5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyNjY1MDcsImV4cCI6MjA4MDg0MjUwN30.sNg6OVLocM1D-bG9LXTlDSsy6s74oW1SQ89QWCMbOKE';
@@ -527,7 +550,15 @@
         }
 
         async function initTables() {
-            if (!confirm('Create default tables (1-10)?')) return;
+            document.getElementById('confirmModal').style.display = 'flex';
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+        }
+
+        async function confirmInitTables() {
+            closeConfirmModal();
             const seeds = Array.from({ length: 10 }, (_, i) => ({ table_number: i + 1, status: 'available' }));
             const { error } = await _supabase.from('restaurant_tables').upsert(seeds, { onConflict: 'table_number' });
             if (error) alert('Error: ' + error.message);
