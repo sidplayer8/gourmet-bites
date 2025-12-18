@@ -232,12 +232,12 @@
                     user.phone = '+65' + user.phone.replace(/^0+/, ''); // Singapore default
                 }
 
-                // Prepare payload
+                // Prepare payload (ONLY fields that exist in DB)
                 const payload = {};
                 if (user.email) payload.email = user.email.toLowerCase(); // Normalize email
                 if (user.phone) payload.phone = user.phone;
                 payload.name = user.name || 'User';
-                if (user.photoURL) payload.photoURL = user.photoURL;
+                // Note: photoURL not saved to DB, only kept in localStorage
 
                 // Match on Email OR Phone (Upsert)
                 let matchKey = user.email ? 'email' : 'phone';
