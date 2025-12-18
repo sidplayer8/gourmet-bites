@@ -381,171 +381,201 @@
             <h3 id="modalTitle" style="margin-bottom:20px;">Add Menu Item</h3>
             <input type="hidden" id="editItemId">
             <label style="display:block; margin-bottom:5px; color:#aaa;">Name</label>
-            <input type="text" id="itemName"
-                style="width:100%; padding:10px; margin-bottom:15px; border-radius:6px; border:1px solid #444; background:#111; color:white;">
+            <!-- Modal: Add/Edit Menu Item -->
+            <div id="menuModal" class="custom-modal">
+                <div class="modal-content">
+                    <h2 id="menuModalTitle">Add Menu Item</h2>
+                    <input type="hidden" id="menuItemId">
 
-            <label style="display:block; margin-bottom:5px; color:#aaa;">Price ($)</label>
-            <input type="number" step="0.01" id="itemPrice"
-                style="width:100%; padding:10px; margin-bottom:15px; border-radius:6px; border:1px solid #444; background:#111; color:white;">
+                    <label>Name</label>
+                    <input type="text" id="menuName" placeholder="Item name">
 
-            <label style="display:block; margin-bottom:5px; color:#aaa;">Category</label>
-            <select id="itemCat"
-                style="width:100%; padding:10px; margin-bottom:15px; border-radius:6px; border:1px solid #444; background:#111; color:white;">
-                <option value="Starters">Starters</option>
-                <option value="Mains">Mains</option>
-                <option value="Burgers">Burgers</option>
-                <option value="Drinks">Drinks</option>
-                <option value="Desserts">Desserts</option>
-            </select>
+                    <label>Category</label>
+                    <select id="menuCategory" onchange="handleCategoryChange()">
+                        <option value="Appetizers">Appetizers</option>
+                        <option value="Mains">Mains</option>
+                        <option value="Desserts">Desserts</option>
+                        <option value="Drinks">Drinks</option>
+                        <option value="__custom__">+ Create New Category</option>
+                    </select>
+                    <input type="text" id="customCategory" placeholder="Enter new category name"
+                        style="display:none; margin-top:10px;">
 
-            <label style="display:block; margin-bottom:5px; color:#aaa;">Image URL</label>
-            <input type="text" id="itemImg" placeholder="https://..."
-                style="width:100%; padding:10px; margin-bottom:20px; border-radius:6px; border:1px solid #444; background:#111; color:white;">
+                    <label>Price</label>
+                    <input type="number" id="menuPrice" placeholder="0.00" step="0.01">
 
-            <div style="text-align:right;">
-                <button onclick="closeMenuModal()"
-                    style="background:transparent; color:#aaa; border:1px solid #666; padding:8px 16px; border-radius:6px; cursor:pointer; margin-right:10px;">Cancel</button>
-                <button onclick="saveMenuItem()" class="btn-primary">Save Item</button>
+                    <label>Description (Optional)</label>
+                    <textarea id="menuDescription" placeholder="Item description" rows="3"></textarea>
+
+                    <label>Image URL (Optional)</label>
+                    <input type="text" id="menuImageUrl" placeholder="https://...">
+
+                    <!-- Visibility Controls -->
+                    <div style="margin-top:15px; padding:15px; background:#1e293b; border-radius:8px;">
+                        <h4 style="margin:0 0 10px 0; color:#94a3b8;">Visibility & Availability</h4>
+
+                        <label style="display:flex; align-items:center; gap:10px; margin-bottom:10px; cursor:pointer;">
+                            <input type="checkbox" id="menuIsPublic" checked>
+                            <div>
+                                <strong>🌐 Show in Customer Menu (Public)</strong>
+                                <div style="font-size:12px; color:#64748b;">Uncheck to hide from customers (admin-only
+                                    view)</div>
+                            </div>
+                        </label>
+
+                        <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                            <input type="checkbox" id="menuIsAvailable" checked>
+                            <div>
+                                <strong>✅ In Stock (Available)</strong>
+                                <div style="font-size:12px; color:#64748b;">Uncheck to mark as out of stock</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div style="display:flex; gap:10px; margin-top:20px;">
+                        <button onclick="saveMenuItem()" class="btn-primary">Save</button>
+                        <button onclick="closeMenuModal()">Cancel</button>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
 
-    <!-- CUSTOM CONFIRM MODAL for Table Init -->
-    <div id="confirmModal"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:300; align-items:center; justify-content:center;">
-        <div
-            style="background:var(--card-bg); padding:40px; border-radius:16px; width:90%; max-width:450px; border:2px solid var(--primary); text-align:center;">
-            <div style="font-size:48px; margin-bottom:20px;">📋</div>
-            <h2 style="color:white; margin-bottom:15px;">Initialize Restaurant Tables?</h2>
-            <p style="color:#999; margin-bottom:30px; line-height:1.6;">This will create Tables 1-10 in your database.
-                You can then generate QR codes for them.</p>
+            <!-- CUSTOM CONFIRM MODAL for Table Init -->
+            <div id="confirmModal"
+                style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:300; align-items:center; justify-content:center;">
+                <div
+                    style="background:var(--card-bg); padding:40px; border-radius:16px; width:90%; max-width:450px; border:2px solid var(--primary); text-align:center;">
+                    <div style="font-size:48px; margin-bottom:20px;">📋</div>
+                    <h2 style="color:white; margin-bottom:15px;">Initialize Restaurant Tables?</h2>
+                    <p style="color:#999; margin-bottom:30px; line-height:1.6;">This will create Tables 1-10 in your
+                        database.
+                        You can then generate QR codes for them.</p>
 
-            <div style="display:flex; gap:15px; justify-content:center;">
-                <button onclick="closeConfirmModal()"
-                    style="flex:1; padding:14px 24px; background:#333; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; font-size:15px;">
-                    Cancel
-                </button>
-                <button onclick="confirmInitTables()" class="btn-primary"
-                    style="flex:1; padding:14px 24px; font-size:15px;">
-                    ✓ Create Tables
-                </button>
+                    <div style="display:flex; gap:15px; justify-content:center;">
+                        <button onclick="closeConfirmModal()"
+                            style="flex:1; padding:14px 24px; background:#333; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; font-size:15px;">
+                            Cancel
+                        </button>
+                        <button onclick="confirmInitTables()" class="btn-primary"
+                            style="flex:1; padding:14px 24px; font-size:15px;">
+                            ✓ Create Tables
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
 
-    <script>
-        const supabaseUrl = 'https://pklaofjfpcrlgevxkozy.supabase.co';
-        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBrbGFvZmpmcGNybGdldnhrb3p5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyNjY1MDcsImV4cCI6MjA4MDg0MjUwN30.sNg6OVLocM1D-bG9LXTlDSsy6s74oW1SQ89QWCMbOKE';
-        let _supabase;
+            <script>
+                const supabaseUrl = 'https://pklaofjfpcrlgevxkozy.supabase.co';
+                const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBrbGFvZmpmcGNybGdldnhrb3p5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyNjY1MDcsImV4cCI6MjA4MDg0MjUwN30.sNg6OVLocM1D-bG9LXTlDSsy6s74oW1SQ89QWCMbOKE';
+                let _supabase;
 
-        try {
-            _supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
-        } catch (e) {
-            console.error('Supabase Init Fail', e);
-            document.body.innerHTML = '<h3 style="color:white; padding:20px;">Error initializing database connection.</h3>';
-        }
-
-        // --- AUTH & INIT ---
-        (async function checkAdminAccess() {
-            // 1. Session Check
-            const { data: { session } } = await _supabase.auth.getSession();
-            let user = session?.user;
-
-            // 2. LocalStorage Fallback
-            if (!user) {
-                const localAdmin = JSON.parse(localStorage.getItem('adminUser'));
-                const localUser = JSON.parse(localStorage.getItem('user'));
-                user = localAdmin || localUser;
-            }
-
-            if (!user || (!user.id && !user.uid)) {
-                window.location.href = 'login.html';
-                return;
-            }
-
-            const uEmail = user.email || (user.user && user.user.email);
-            const uPhone = user.phone || (user.user && user.user.phone);
-
-            // 3. Allowlist (The Bypass)
-            const allowed = ['sapsinfocomm22@gmail.com', '+6590214181'];
-            if (allowed.includes(uEmail) || allowed.includes(uPhone)) {
-                document.getElementById('adminName').textContent = `Owner (${uEmail || uPhone})`;
-                showSection('dashboard');
-                return;
-            }
-            // 4. DB Check
-            // We use user.id (UUID) or try to find by email/phone if user.id fails
-            // For now, strict check on user.id is safest for standard flow
-            if (user.id) {
-                const { data: staff } = await _supabase.from('staff').select('*, roles(name)').eq('user_id', user.id).single();
-                if (staff) {
-                    document.getElementById('adminName').textContent = `${staff.roles?.name || 'Staff'} (${staff.name || uEmail})`;
-                    return;
+                try {
+                    _supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+                } catch (e) {
+                    console.error('Supabase Init Fail', e);
+                    document.body.innerHTML = '<h3 style="color:white; padding:20px;">Error initializing database connection.</h3>';
                 }
-            }
 
-            // If we got here, access denied
-            window.location.href = 'menu.html';
-        })(); // Invoke the IIFE
+                // --- AUTH & INIT ---
+                (async function checkAdminAccess() {
+                    // 1. Session Check
+                    const { data: { session } } = await _supabase.auth.getSession();
+                    let user = session?.user;
 
-        async function logout() {
-            await _supabase.auth.signOut();
-            localStorage.clear();
-            window.location.href = 'login.html';
-        }
+                    // 2. LocalStorage Fallback
+                    if (!user) {
+                        const localAdmin = JSON.parse(localStorage.getItem('adminUser'));
+                        const localUser = JSON.parse(localStorage.getItem('user'));
+                        user = localAdmin || localUser;
+                    }
 
-        function toggleSidebar() {
-            document.querySelector('.sidebar').classList.toggle('open');
-            document.querySelector('.sidebar-overlay').classList.toggle('active');
-        }
+                    if (!user || (!user.id && !user.uid)) {
+                        window.location.href = 'login.html';
+                        return;
+                    }
 
-        function showSection(sectionId) {
-            // Auto-close sidebar on mobile
-            if (window.innerWidth <= 768) {
-                document.querySelector('.sidebar').classList.remove('open');
-                document.querySelector('.sidebar-overlay').classList.remove('active');
-            }
+                    const uEmail = user.email || (user.user && user.user.email);
+                    const uPhone = user.phone || (user.user && user.user.phone);
 
-            // Sidebar UI
-            document.querySelectorAll('.nav-item').forEach(el => {
-                el.classList.remove('active');
-                if (el.textContent.toLowerCase().includes(sectionId)) el.classList.add('active');
-            });
+                    // 3. Allowlist (The Bypass)
+                    const allowed = ['sapsinfocomm22@gmail.com', '+6590214181'];
+                    if (allowed.includes(uEmail) || allowed.includes(uPhone)) {
+                        document.getElementById('adminName').textContent = `Owner (${uEmail || uPhone})`;
+                        showSection('dashboard');
+                        return;
+                    }
+                    // 4. DB Check
+                    // We use user.id (UUID) or try to find by email/phone if user.id fails
+                    // For now, strict check on user.id is safest for standard flow
+                    if (user.id) {
+                        const { data: staff } = await _supabase.from('staff').select('*, roles(name)').eq('user_id', user.id).single();
+                        if (staff) {
+                            document.getElementById('adminName').textContent = `${staff.roles?.name || 'Staff'} (${staff.name || uEmail})`;
+                            return;
+                        }
+                    }
 
-            // Content UI
-            document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
-            const target = document.getElementById(`${sectionId}-section`);
-            if (target) target.classList.add('active');
+                    // If we got here, access denied
+                    window.location.href = 'menu.html';
+                })(); // Invoke the IIFE
 
-            // Header
-            document.getElementById('pageTitle').textContent = sectionId.charAt(0).toUpperCase() + sectionId.slice(1);
+                async function logout() {
+                    await _supabase.auth.signOut();
+                    localStorage.clear();
+                    window.location.href = 'login.html';
+                }
 
-            // Fetch Data
-            if (sectionId === 'dashboard') fetchStats();
-            if (sectionId === 'orders') fetchOrders();
-            if (sectionId === 'history') fetchHistory();
-            if (sectionId === 'menu') fetchMenu();
-            if (sectionId === 'staff') fetchStaff();
-            if (sectionId === 'roles') fetchRoles();
-            if (sectionId === 'tables') fetchTables();
-        }
+                function toggleSidebar() {
+                    document.querySelector('.sidebar').classList.toggle('open');
+                    document.querySelector('.sidebar-overlay').classList.toggle('active');
+                }
 
-        // --- TABLES ---
-        async function fetchTables() {
-            const container = document.getElementById('tablesGrid');
-            const { data, error } = await _supabase.from('restaurant_tables').select('*').order('table_number');
+                function showSection(sectionId) {
+                    // Auto-close sidebar on mobile
+                    if (window.innerWidth <= 768) {
+                        document.querySelector('.sidebar').classList.remove('open');
+                        document.querySelector('.sidebar-overlay').classList.remove('active');
+                    }
 
-            if (error) { container.textContent = 'Error loading tables'; return; }
-            if (!data || !data.length) {
-                container.innerHTML = '<p>No tables found. Click "Reset/Init" to create them.</p>';
-                return;
-            }
+                    // Sidebar UI
+                    document.querySelectorAll('.nav-item').forEach(el => {
+                        el.classList.remove('active');
+                        if (el.textContent.toLowerCase().includes(sectionId)) el.classList.add('active');
+                    });
 
-            container.innerHTML = data.map(t => {
-                const isFree = t.status === 'available';
-                const color = isFree ? 'var(--success)' : 'var(--danger)';
+                    // Content UI
+                    document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
+                    const target = document.getElementById(`${sectionId}-section`);
+                    if (target) target.classList.add('active');
 
-                return `
+                    // Header
+                    document.getElementById('pageTitle').textContent = sectionId.charAt(0).toUpperCase() + sectionId.slice(1);
+
+                    // Fetch Data
+                    if (sectionId === 'dashboard') fetchStats();
+                    if (sectionId === 'orders') fetchOrders();
+                    if (sectionId === 'history') fetchHistory();
+                    if (sectionId === 'menu') fetchMenu();
+                    if (sectionId === 'staff') fetchStaff();
+                    if (sectionId === 'roles') fetchRoles();
+                    if (sectionId === 'tables') fetchTables();
+                }
+
+                // --- TABLES ---
+                async function fetchTables() {
+                    const container = document.getElementById('tablesGrid');
+                    const { data, error } = await _supabase.from('restaurant_tables').select('*').order('table_number');
+
+                    if (error) { container.textContent = 'Error loading tables'; return; }
+                    if (!data || !data.length) {
+                        container.innerHTML = '<p>No tables found. Click "Reset/Init" to create them.</p>';
+                        return;
+                    }
+
+                    container.innerHTML = data.map(t => {
+                        const isFree = t.status === 'available';
+                        const color = isFree ? 'var(--success)' : 'var(--danger)';
+
+                        return `
                 <div onclick="toggleTable('${t.id}', '${t.status}')" style="
                     background: ${isFree ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'}; 
                     border: 2px solid ${color}; 
@@ -558,95 +588,95 @@
                     <div style="font-size:24px; font-weight:bold; color:white;">T-${t.table_number}</div>
                     <div style="margin-top:5px; color:${color}; font-size:14px; font-weight:bold;">${t.status.toUpperCase()}</div>
                 </div>`;
-            }).join('');
-        }
-
-        async function toggleTable(id, currentStatus) {
-            const newStatus = currentStatus === 'available' ? 'taken' : 'available';
-            await _supabase.from('restaurant_tables').update({ status: newStatus }).eq('id', id);
-            fetchTables();
-        }
-
-        async function initTables() {
-            document.getElementById('confirmModal').style.display = 'flex';
-        }
-
-        function closeConfirmModal() {
-            document.getElementById('confirmModal').style.display = 'none';
-        }
-
-        async function confirmInitTables() {
-            closeConfirmModal();
-            const seeds = Array.from({ length: 10 }, (_, i) => ({ table_number: i + 1, status: 'available' }));
-            const { error } = await _supabase.from('restaurant_tables').upsert(seeds, { onConflict: 'table_number' });
-            if (error) {
-                console.error('Error creating tables:', error);
-                showToast('Error creating tables. Check console for details.', 'error');
-            } else {
-                showToast('✓ Tables created successfully!', 'success');
-                fetchTables();
-            }
-        }
-
-        async function updateOrderStatus(id, newStatus) {
-            const { data, error } = await _supabase.from('orders').update({ status: newStatus }).eq('id', id).select().single();
-            if (error) {
-                console.error('Error updating order:', error);
-                showToast('Failed to update order status', 'error');
-                return;
-            }
-
-            // If order is done/cancelled, free up the table
-            if (newStatus === 'completed' || newStatus === 'cancelled') { // Changed 'done' to 'completed' to match existing status
-                if (data.table_id) {
-                    await _supabase.from('restaurant_tables')
-                        .update({ status: 'available', current_order_id: null })
-                        .eq('id', data.table_id);
-                    fetchTables(); // Refresh table view
+                    }).join('');
                 }
-            }
 
-            fetchOrders();
-            showToast(`Order #${id.slice(0, 8)} marked as ${newStatus}`, 'success');
-        }
+                async function toggleTable(id, currentStatus) {
+                    const newStatus = currentStatus === 'available' ? 'taken' : 'available';
+                    await _supabase.from('restaurant_tables').update({ status: newStatus }).eq('id', id);
+                    fetchTables();
+                }
 
-        // --- HISTORY ---
-        async function fetchHistory() {
-            const container = document.getElementById('historyList');
-            const filter = document.getElementById('historyFilter').value;
+                async function initTables() {
+                    document.getElementById('confirmModal').style.display = 'flex';
+                }
 
-            let query = _supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(50);
+                function closeConfirmModal() {
+                    document.getElementById('confirmModal').style.display = 'none';
+                }
 
-            if (filter === 'completed') {
-                query = query.eq('status', 'completed');
-            } else if (filter === 'cancelled') {
-                query = query.eq('status', 'cancelled');
-            } else {
-                // All non-pending
-                query = query.in('status', ['completed', 'cancelled']);
-            }
+                async function confirmInitTables() {
+                    closeConfirmModal();
+                    const seeds = Array.from({ length: 10 }, (_, i) => ({ table_number: i + 1, status: 'available' }));
+                    const { error } = await _supabase.from('restaurant_tables').upsert(seeds, { onConflict: 'table_number' });
+                    if (error) {
+                        console.error('Error creating tables:', error);
+                        showToast('Error creating tables. Check console for details.', 'error');
+                    } else {
+                        showToast('✓ Tables created successfully!', 'success');
+                        fetchTables();
+                    }
+                }
 
-            const { data: orders, error } = await query;
+                async function updateOrderStatus(id, newStatus) {
+                    const { data, error } = await _supabase.from('orders').update({ status: newStatus }).eq('id', id).select().single();
+                    if (error) {
+                        console.error('Error updating order:', error);
+                        showToast('Failed to update order status', 'error');
+                        return;
+                    }
 
-            if (error || !orders) {
-                container.innerHTML = '<p>Error loading history</p>';
-                return;
-            }
+                    // If order is done/cancelled, free up the table
+                    if (newStatus === 'completed' || newStatus === 'cancelled') { // Changed 'done' to 'completed' to match existing status
+                        if (data.table_id) {
+                            await _supabase.from('restaurant_tables')
+                                .update({ status: 'available', current_order_id: null })
+                                .eq('id', data.table_id);
+                            fetchTables(); // Refresh table view
+                        }
+                    }
 
-            if (orders.length === 0) {
-                container.innerHTML = '<p style="color:#666; text-align:center; padding:40px;">No completed orders yet.</p>';
-                return;
-            }
+                    fetchOrders();
+                    showToast(`Order #${id.slice(0, 8)} marked as ${newStatus}`, 'success');
+                }
 
-            container.innerHTML = orders.map(o => {
-                let items = [];
-                try { items = typeof o.items === 'string' ? JSON.parse(o.items) : o.items; } catch (e) { }
-                const itemsStr = Array.isArray(items) ? items.map(i => `${i.quantity}x ${i.name}`).join(', ') : '';
-                const statusColor = o.status === 'completed' ? 'var(--success)' : '#666';
-                const tableBadge = o.table_number ? `<span style="background:#3b82f6; color:white; padding:2px 6px; border-radius:4px; font-size:12px; margin-left:8px;">Table ${o.table_number}</span>` : '';
-                const date = new Date(o.created_at);
+                // --- HISTORY ---
+                async function fetchHistory() {
+                    const container = document.getElementById('historyList');
+                    const filter = document.getElementById('historyFilter').value;
 
-                return `
+                    let query = _supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(50);
+
+                    if (filter === 'completed') {
+                        query = query.eq('status', 'completed');
+                    } else if (filter === 'cancelled') {
+                        query = query.eq('status', 'cancelled');
+                    } else {
+                        // All non-pending
+                        query = query.in('status', ['completed', 'cancelled']);
+                    }
+
+                    const { data: orders, error } = await query;
+
+                    if (error || !orders) {
+                        container.innerHTML = '<p>Error loading history</p>';
+                        return;
+                    }
+
+                    if (orders.length === 0) {
+                        container.innerHTML = '<p style="color:#666; text-align:center; padding:40px;">No completed orders yet.</p>';
+                        return;
+                    }
+
+                    container.innerHTML = orders.map(o => {
+                        let items = [];
+                        try { items = typeof o.items === 'string' ? JSON.parse(o.items) : o.items; } catch (e) { }
+                        const itemsStr = Array.isArray(items) ? items.map(i => `${i.quantity}x ${i.name}`).join(', ') : '';
+                        const statusColor = o.status === 'completed' ? 'var(--success)' : '#666';
+                        const tableBadge = o.table_number ? `<span style="background:#3b82f6; color:white; padding:2px 6px; border-radius:4px; font-size:12px; margin-left:8px;">Table ${o.table_number}</span>` : '';
+                        const date = new Date(o.created_at);
+
+                        return `
                 <div class="stat-card" style="margin-bottom:10px; border-left:4px solid ${statusColor}; opacity:0.8;">
                     <div style="display:flex; justify-content:space-between;">
                         <div>
@@ -662,73 +692,73 @@
                         </div>
                     </div>
                 </div>`;
-            }).join('');
-        }
-
-        // --- STATS ---
-        async function fetchStats() {
-            try {
-                const { count } = await _supabase.from('orders').select('*', { count: 'exact', head: true });
-                document.getElementById('stat-total-orders').textContent = count || 0;
-
-                // Count tables that are currently 'taken'
-                const { data: takenTables, error } = await _supabase
-                    .from('restaurant_tables')
-                    .select('id, status')
-                    .eq('status', 'taken');
-
-                if (error) {
-                    console.error('Error fetching active tables:', error);
-                } else {
-                    console.log('Active tables query result:', takenTables);
-                    document.getElementById('stat-active-tables').textContent = takenTables?.length || 0;
+                    }).join('');
                 }
 
-                const { data: orders } = await _supabase.from('orders').select('total_price');
-                const sum = orders?.reduce((acc, o) => acc + (Number(o.total_price) || 0), 0) || 0;
-                document.getElementById('stat-revenue').textContent = '$' + sum.toFixed(2);
-            } catch (err) {
-                console.error('fetchStats error:', err);
-            }
-        }
+                // --- STATS ---
+                async function fetchStats() {
+                    try {
+                        const { count } = await _supabase.from('orders').select('*', { count: 'exact', head: true });
+                        document.getElementById('stat-total-orders').textContent = count || 0;
 
-        // --- ORDERS ---
-        async function fetchOrders() {
-            const container = document.getElementById('ordersList');
-            container.innerHTML = 'Loading...';
-            // Fetch all, but we will filter client-side for now or we can filter DB side.
-            const { data, error } = await _supabase.from('orders').select('*').order('created_at', { ascending: false });
-            if (error) { container.textContent = 'Error: ' + error.message; return; }
+                        // Count tables that are currently 'taken'
+                        const { data: takenTables, error } = await _supabase
+                            .from('restaurant_tables')
+                            .select('id, status')
+                            .eq('status', 'taken');
 
-            if (!data.length) { container.innerHTML = '<p>No orders.</p>'; return; }
+                        if (error) {
+                            console.error('Error fetching active tables:', error);
+                        } else {
+                            console.log('Active tables query result:', takenTables);
+                            document.getElementById('stat-active-tables').textContent = takenTables?.length || 0;
+                        }
 
-            // Calc Stats (Keep calculating from ALL data)
-            document.getElementById('stat-total-orders').textContent = data.length;
-            const revenue = data.reduce((acc, o) => acc + (o.total_price || 0), 0);
-            document.getElementById('stat-revenue').textContent = '$' + revenue.toFixed(2);
+                        const { data: orders } = await _supabase.from('orders').select('total_price');
+                        const sum = orders?.reduce((acc, o) => acc + (Number(o.total_price) || 0), 0) || 0;
+                        document.getElementById('stat-revenue').textContent = '$' + sum.toFixed(2);
+                    } catch (err) {
+                        console.error('fetchStats error:', err);
+                    }
+                }
 
-            // Filter for Display
-            const showingHistory = document.getElementById('showHistoryCb').checked;
-            const activeOrders = data.filter(o => {
-                if (showingHistory) return o.status === 'completed' || o.status === 'cancelled';
-                return o.status === 'pending';
-            });
+                // --- ORDERS ---
+                async function fetchOrders() {
+                    const container = document.getElementById('ordersList');
+                    container.innerHTML = 'Loading...';
+                    // Fetch all, but we will filter client-side for now or we can filter DB side.
+                    const { data, error } = await _supabase.from('orders').select('*').order('created_at', { ascending: false });
+                    if (error) { container.textContent = 'Error: ' + error.message; return; }
 
-            if (activeOrders.length === 0) {
-                const msg = showingHistory ? "No history yet." : "No pending orders. All caught up! 🎉";
-                container.innerHTML = `<p style="padding:20px; color:#aaa;">${msg}</p>`;
-                return;
-            }
+                    if (!data.length) { container.innerHTML = '<p>No orders.</p>'; return; }
 
-            container.innerHTML = activeOrders.map(o => {
-                let items = [];
-                try { items = typeof o.items === 'string' ? JSON.parse(o.items) : o.items; } catch (e) { }
-                const itemsStr = Array.isArray(items) ? items.map(i => `${i.quantity}x ${i.name}`).join(', ') : '';
-                // Since we only show pending, color is always generic or specific for pending
-                const color = '#ffb020';
-                const tableBadge = o.table_number ? `<span style="background:#3b82f6; color:white; padding:2px 6px; border-radius:4px; font-size:12px; margin-left:8px;">Table ${o.table_number}</span>` : '';
+                    // Calc Stats (Keep calculating from ALL data)
+                    document.getElementById('stat-total-orders').textContent = data.length;
+                    const revenue = data.reduce((acc, o) => acc + (o.total_price || 0), 0);
+                    document.getElementById('stat-revenue').textContent = '$' + revenue.toFixed(2);
 
-                return `
+                    // Filter for Display
+                    const showingHistory = document.getElementById('showHistoryCb').checked;
+                    const activeOrders = data.filter(o => {
+                        if (showingHistory) return o.status === 'completed' || o.status === 'cancelled';
+                        return o.status === 'pending';
+                    });
+
+                    if (activeOrders.length === 0) {
+                        const msg = showingHistory ? "No history yet." : "No pending orders. All caught up! 🎉";
+                        container.innerHTML = `<p style="padding:20px; color:#aaa;">${msg}</p>`;
+                        return;
+                    }
+
+                    container.innerHTML = activeOrders.map(o => {
+                        let items = [];
+                        try { items = typeof o.items === 'string' ? JSON.parse(o.items) : o.items; } catch (e) { }
+                        const itemsStr = Array.isArray(items) ? items.map(i => `${i.quantity}x ${i.name}`).join(', ') : '';
+                        // Since we only show pending, color is always generic or specific for pending
+                        const color = '#ffb020';
+                        const tableBadge = o.table_number ? `<span style="background:#3b82f6; color:white; padding:2px 6px; border-radius:4px; font-size:12px; margin-left:8px;">Table ${o.table_number}</span>` : '';
+
+                        return `
                 <div class="stat-card" style="margin-bottom:10px; border-left:4px solid ${color};">
                     <div style="display:flex; justify-content:space-between;">
                         <div>
@@ -745,36 +775,163 @@
                         </div>
                     </div>
                 </div>`;
-            }).join('');
-        }
+                    }).join('');
+                }
 
-        async function updateOrder(id, status) {
-            // REMOVED 'confirm' dialog (The "Black Box")
-            // Instant update
-            await _supabase.from('orders').update({ status }).eq('id', id);
-            fetchOrders(); // Refresh list -> Order will disappear
-        }
+                async function updateOrder(id, status) {
+                    // REMOVED 'confirm' dialog (The "Black Box")
+                    // Instant update
+                    await _supabase.from('orders').update({ status }).eq('id', id);
+                    fetchOrders(); // Refresh list -> Order will disappear
+                }
 
-        // --- MENU ---
-        async function fetchMenu() {
-            const container = document.getElementById('menuTableContainer');
-            if (!container) {
-                console.error('menuTableContainer not found');
-                return;
-            }
-            container.innerHTML = 'Loading...';
+                // --- MENU ---
+                function handleCategoryChange() {
+                    const select = document.getElementById('menuCategory');
+                    const customInput = document.getElementById('customCategory');
+                    if (select.value === '__custom__') {
+                        customInput.style.display = 'block';
+                        customInput.focus();
+                    } else {
+                        customInput.style.display = 'none';
+                    }
+                }
 
-            const { data, error } = await _supabase.from('menu_items').select('*').order('category');
-            if (error) {
-                container.textContent = 'Error: ' + error.message;
-                console.error('Menu fetch error:', error);
-                return;
-            }
+                function openMenuModal(itemId = null) {
+                    const modal = document.getElementById('menuModal');
+                    const title = document.getElementById('menuModalTitle');
 
-            window._menuData = data; // Cache for edit
+                    // Reset form
+                    document.getElementById('menuItemId').value = '';
+                    document.getElementById('menuName').value = '';
+                    document.getElementById('menuCategory').value = 'Appetizers';
+                    document.getElementById('customCategory').style.display = 'none';
+                    document.getElementById('customCategory').value = '';
+                    document.getElementById('menuPrice').value = '';
+                    document.getElementById('menuDescription').value = '';
+                    document.getElementById('menuImageUrl').value = '';
+                    document.getElementById('menuIsPublic').checked = true;
+                    document.getElementById('menuIsAvailable').checked = true;
 
-            let html = `<table><thead><tr><th>Img</th><th>Name</th><th>Cat</th><th>Price</th><th>Act</th></tr></thead><tbody>`;
-            html += data.map(i => `
+                    if (itemId) {
+                        // Edit mode
+                        title.textContent = 'Edit Menu Item';
+                        document.getElementById('menuItemId').value = itemId;
+
+                        // Find item in cache
+                        const item = window._menuData?.find(i => i.id == itemId);
+                        if (item) {
+                            document.getElementById('menuName').value = item.name || '';
+                            document.getElementById('menuCategory').value = item.category || 'Appetizers';
+                            document.getElementById('menuPrice').value = item.price || '';
+                            document.getElementById('menuDescription').value = item.description || '';
+                            document.getElementById('menuImageUrl').value = item.image_url || '';
+                            document.getElementById('menuIsPublic').checked = item.is_public !== false;
+                            document.getElementById('menuIsAvailable').checked = item.is_available !== false;
+                        }
+                    } else {
+                        // Add mode
+                        title.textContent = 'Add Menu Item';
+                    }
+
+                    modal.style.display = 'flex';
+                }
+
+                function closeMenuModal() {
+                    document.getElementById('menuModal').style.display = 'none';
+                }
+
+                async function saveMenuItem() {
+                    const id = document.getElementById('menuItemId').value;
+                    const name = document.getElementById('menuName').value.trim();
+                    const categorySelect = document.getElementById('menuCategory').value;
+                    const customCat = document.getElementById('customCategory').value.trim();
+                    const category = categorySelect === '__custom__' ? customCat : categorySelect;
+                    const price = parseFloat(document.getElementById('menuPrice').value) || 0;
+                    const description = document.getElementById('menuDescription').value.trim();
+                    const imageUrl = document.getElementById('menuImageUrl').value.trim();
+                    const isPublic = document.getElementById('menuIsPublic').checked;
+                    const isAvailable = document.getElementById('menuIsAvailable').checked;
+
+                    if (!name) {
+                        alert('Please enter item name');
+                        return;
+                    }
+                    if (!category) {
+                        alert('Please select or create a category');
+                        return;
+                    }
+
+                    const payload = {
+                        name,
+                        category,
+                        price,
+                        description: description || null,
+                        image_url: imageUrl || null,
+                        is_public: isPublic,
+                        is_available: isAvailable
+                    };
+
+                    try {
+                        if (id) {
+                            // Update
+                            const { error } = await _supabase
+                                .from('menu_items')
+                                .update(payload)
+                                .eq('id', id);
+                            if (error) throw error;
+                        } else {
+                            // Insert
+                            const { error } = await _supabase
+                                .from('menu_items')
+                                .insert(payload);
+                            if (error) throw error;
+                        }
+
+                        closeMenuModal();
+                        fetchMenu(); // REFRESH MENU
+                    } catch (err) {
+                        console.error('Save error:', err);
+                        alert('Failed to save: ' + err.message);
+                    }
+                }
+
+                async function deleteMenuItem(itemId) {
+                    if (!confirm('Delete this menu item?')) return;
+
+                    try {
+                        const { error } = await _supabase
+                            .from('menu_items')
+                            .delete()
+                            .eq('id', itemId);
+
+                        if (error) throw error;
+                        fetchMenu(); // REFRESH MENU
+                    } catch (err) {
+                        console.error('Delete error:', err);
+                        alert('Failed to delete: ' + err.message);
+                    }
+                }
+
+                async function fetchMenu() {
+                    const container = document.getElementById('menuTableContainer');
+                    if (!container) {
+                        console.error('menuTableContainer not found');
+                        return;
+                    }
+                    container.innerHTML = 'Loading...';
+
+                    const { data, error } = await _supabase.from('menu_items').select('*').order('category');
+                    if (error) {
+                        container.textContent = 'Error: ' + error.message;
+                        console.error('Menu fetch error:', error);
+                        return;
+                    }
+
+                    window._menuData = data; // Cache for edit
+
+                    let html = `< table ><thead><tr><th>Img</th><th>Name</th><th>Cat</th><th>Price</th><th>Act</th></tr></thead><tbody>`;
+                    html += data.map(i => `
                 <tr>
                     <td><img src="${i.image_url || ''}" style="width:30px; height:30px; border-radius:4px; object-fit:cover;"></td>
                     <td>${i.name}</td>
@@ -786,19 +943,19 @@
                     </td>
                 </tr>
             `).join('');
-            html += '</tbody></table>';
-            container.innerHTML = html;
-        }
+                    html += '</tbody></table > ';
+                    container.innerHTML = html;
+                }
 
-        async function fetchMenuItems() {
-            const container = document.getElementById('menuTableContainer');
-            const { data, error } = await _supabase.from('menu_items').select('*').order('category');
-            if (error) { container.textContent = 'Error'; return; }
+                async function fetchMenuItems() {
+                    const container = document.getElementById('menuTableContainer');
+                    const { data, error } = await _supabase.from('menu_items').select('*').order('category');
+                    if (error) { container.textContent = 'Error'; return; }
 
-            window._menuData = data; // Cache for edit
+                    window._menuData = data; // Cache for edit
 
-            let html = `<table><thead><tr><th>Img</th><th>Name</th><th>Cat</th><th>Price</th><th>Act</th></tr></thead><tbody>`;
-            html += data.map(i => `
+                    let html = `<table><thead><tr><th>Img</th><th>Name</th><th>Cat</th><th>Price</th><th>Act</th></tr></thead><tbody>`;
+                    html += data.map(i => `
                 <tr>
                     <td><img src="${i.image_url || ''}" style="width:30px; height:30px; border-radius:4px; object-fit:cover;"></td>
                     <td>${i.name}</td>
@@ -810,33 +967,33 @@
                     </td>
                 </tr>
             `).join('');
-            html += '</tbody></table>';
-            container.innerHTML = html;
-        }
+                    html += '</tbody></table>';
+                    container.innerHTML = html;
+                }
 
-        async function deleteMenuItem(id) {
-            if (confirm('Delete item?')) {
-                await _supabase.from('menu_items').delete().eq('id', id);
-                fetchMenuItems();
-            }
-        }
+                async function deleteMenuItem(id) {
+                    if (confirm('Delete item?')) {
+                        await _supabase.from('menu_items').delete().eq('id', id);
+                        fetchMenuItems();
+                    }
+                }
 
-        // --- STAFF ---
-        async function fetchStaff() {
-            const container = document.getElementById('staffTableContainer');
-            /* 
-              This query relies on foreign key logic. 
-              If 'roles' table exists and FK is set up: .select('*, roles(name)')
-            */
-            const { data, error } = await _supabase.from('staff').select('*, roles(name)');
+                // --- STAFF ---
+                async function fetchStaff() {
+                    const container = document.getElementById('staffTableContainer');
+                    /* 
+                      This query relies on foreign key logic. 
+                      If 'roles' table exists and FK is set up: .select('*, roles(name)')
+                    */
+                    const { data, error } = await _supabase.from('staff').select('*, roles(name)');
 
-            if (error) {
-                container.innerHTML = `<p style="color:red">Error: ${error.message}. Make sure 'roles' relationship exists.</p>`;
-                return;
-            }
+                    if (error) {
+                        container.innerHTML = `<p style="color:red">Error: ${error.message}. Make sure 'roles' relationship exists.</p>`;
+                        return;
+                    }
 
-            let html = `<table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Actions</th></tr></thead><tbody>`;
-            html += data.map(s => `
+                    let html = `<table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Actions</th></tr></thead><tbody>`;
+                    html += data.map(s => `
                 <tr>
                     <td>${s.name || 'Unset'}</td>
                     <td>${s.email || '-'}</td>
@@ -847,106 +1004,106 @@
                     </td>
                 </tr>
             `).join('');
-            html += '</tbody></table>';
-            container.innerHTML = html;
-        }
+                    html += '</tbody></table>';
+                    container.innerHTML = html;
+                }
 
-        async function deleteStaff(id) {
-            if (confirm('Remove access for this staff member?')) {
-                await _supabase.from('staff').delete().eq('id', id);
-                fetchStaff();
-            }
-        }
+                async function deleteStaff(id) {
+                    if (confirm('Remove access for this staff member?')) {
+                        await _supabase.from('staff').delete().eq('id', id);
+                        fetchStaff();
+                    }
+                }
 
-        // --- ROLES ---
-        async function fetchRoles() {
-            const container = document.getElementById('rolesList');
-            const { data, error } = await _supabase.from('roles').select('*');
-            if (error) { container.textContent = 'Error loading roles'; return; }
+                // --- ROLES ---
+                async function fetchRoles() {
+                    const container = document.getElementById('rolesList');
+                    const { data, error } = await _supabase.from('roles').select('*');
+                    if (error) { container.textContent = 'Error loading roles'; return; }
 
-            container.innerHTML = data.map(r => `
+                    container.innerHTML = data.map(r => `
                 <div style="background:#2a3040; padding:10px; margin-bottom:5px; border-radius:8px; display:flex; justify-content:space-between;">
                     <strong>${r.name}</strong>
                     <small>ID: ${r.id}</small>
                 </div>
             `).join('');
-        }
+                }
 
-        // --- MODALS (Enhanced) ---
-        function openMenuModal(id) {
-            const modal = document.getElementById('menuModal');
-            const item = id ? window._menuData.find(i => i.id == id) : {};
+                // --- MODALS (Enhanced) ---
+                function openMenuModal(id) {
+                    const modal = document.getElementById('menuModal');
+                    const item = id ? window._menuData.find(i => i.id == id) : {};
 
-            document.getElementById('modalTitle').textContent = id ? 'Edit Menu Item' : 'Add New Item';
-            document.getElementById('editItemId').value = id || '';
-            document.getElementById('itemName').value = item.name || '';
-            document.getElementById('itemPrice').value = item.price || '';
-            document.getElementById('itemCat').value = item.category || 'Mains';
-            document.getElementById('itemImg').value = item.image_url || '';
+                    document.getElementById('modalTitle').textContent = id ? 'Edit Menu Item' : 'Add New Item';
+                    document.getElementById('editItemId').value = id || '';
+                    document.getElementById('itemName').value = item.name || '';
+                    document.getElementById('itemPrice').value = item.price || '';
+                    document.getElementById('itemCat').value = item.category || 'Mains';
+                    document.getElementById('itemImg').value = item.image_url || '';
 
-            modal.style.display = 'flex';
-        }
+                    modal.style.display = 'flex';
+                }
 
-        function closeMenuModal() {
-            document.getElementById('menuModal').style.display = 'none';
-        }
+                function closeMenuModal() {
+                    document.getElementById('menuModal').style.display = 'none';
+                }
 
-        async function saveMenuItem() {
-            const id = document.getElementById('editItemId').value;
-            const name = document.getElementById('itemName').value;
-            const price = parseFloat(document.getElementById('itemPrice').value);
-            const category = document.getElementById('itemCat').value;
-            const image_url = document.getElementById('itemImg').value;
+                async function saveMenuItem() {
+                    const id = document.getElementById('editItemId').value;
+                    const name = document.getElementById('itemName').value;
+                    const price = parseFloat(document.getElementById('itemPrice').value);
+                    const category = document.getElementById('itemCat').value;
+                    const image_url = document.getElementById('itemImg').value;
 
-            if (!name || isNaN(price)) { alert('Please enter valid name and price'); return; }
+                    if (!name || isNaN(price)) { alert('Please enter valid name and price'); return; }
 
-            const payload = { name, price, category, image_url };
+                    const payload = { name, price, category, image_url };
 
-            if (id) {
-                await _supabase.from('menu_items').update(payload).eq('id', id);
-            } else {
-                await _supabase.from('menu_items').insert([payload]);
-            }
+                    if (id) {
+                        await _supabase.from('menu_items').update(payload).eq('id', id);
+                    } else {
+                        await _supabase.from('menu_items').insert([payload]);
+                    }
 
-            closeMenuModal();
-            fetchMenuItems();
-        }
+                    closeMenuModal();
+                    fetchMenuItems();
+                }
 
-        function openStaffModal() {
-            // Add Staff Logic
-            // We ask for Name, Email OR Phone, and Role ID
-            const name = prompt("Staff Name:");
-            if (!name) return;
-            const contact = prompt("Email OR Phone (e.g. +65...):");
-            if (!contact) return;
-            const roleId = prompt("Role ID (1=Owner, 2=Manager, 3=Staff, 4=Chef):", "3");
+                function openStaffModal() {
+                    // Add Staff Logic
+                    // We ask for Name, Email OR Phone, and Role ID
+                    const name = prompt("Staff Name:");
+                    if (!name) return;
+                    const contact = prompt("Email OR Phone (e.g. +65...):");
+                    if (!contact) return;
+                    const roleId = prompt("Role ID (1=Owner, 2=Manager, 3=Staff, 4=Chef):", "3");
 
-            // Guess if email or phone
-            const isEmail = contact.includes('@');
-            const payload = {
-                name: name,
-                role_id: parseInt(roleId),
-                email: isEmail ? contact : null,
-                phone: !isEmail ? contact : null
-            };
+                    // Guess if email or phone
+                    const isEmail = contact.includes('@');
+                    const payload = {
+                        name: name,
+                        role_id: parseInt(roleId),
+                        email: isEmail ? contact : null,
+                        phone: !isEmail ? contact : null
+                    };
 
-            (async () => {
-                const { error } = await _supabase.from('staff').insert([payload]);
-                if (error) alert('Error: ' + error.message);
-                else fetchStaff();
-            })();
-        }
+                    (async () => {
+                        const { error } = await _supabase.from('staff').insert([payload]);
+                        if (error) alert('Error: ' + error.message);
+                        else fetchStaff();
+                    })();
+                }
 
-        // Expose
-        window.openMenuModal = openMenuModal;
-        window.deleteMenuItem = deleteMenuItem;
-        window.openStaffModal = openStaffModal;
-        window.deleteStaff = deleteStaff;
-        window.updateOrder = updateOrder;
-        window.showSection = showSection;
-        window.logout = logout;
+                // Expose
+                window.openMenuModal = openMenuModal;
+                window.deleteMenuItem = deleteMenuItem;
+                window.openStaffModal = openStaffModal;
+                window.deleteStaff = deleteStaff;
+                window.updateOrder = updateOrder;
+                window.showSection = showSection;
+                window.logout = logout;
 
-    </script>
+            </script>
 </body>
 
 </html>
