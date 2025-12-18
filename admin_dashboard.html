@@ -669,7 +669,7 @@
         async function fetchStats() {
             try {
                 const { count } = await _supabase.from('orders').select('*', { count: 'exact', head: true });
-                document.getElementById('statOrders').textContent = count || 0;
+                document.getElementById('stat-total-orders').textContent = count || 0;
 
                 // Count tables that are currently 'taken'
                 const { data: takenTables, error } = await _supabase
@@ -681,12 +681,12 @@
                     console.error('Error fetching active tables:', error);
                 } else {
                     console.log('Active tables query result:', takenTables);
-                    document.getElementById('statActiveTables').textContent = takenTables?.length || 0;
+                    document.getElementById('stat-active-tables').textContent = takenTables?.length || 0;
                 }
 
                 const { data: orders } = await _supabase.from('orders').select('total_price');
                 const sum = orders?.reduce((acc, o) => acc + (Number(o.total_price) || 0), 0) || 0;
-                document.getElementById('statRevenue').textContent = '$' + sum.toFixed(2);
+                document.getElementById('stat-revenue').textContent = '$' + sum.toFixed(2);
             } catch (err) {
                 console.error('fetchStats error:', err);
             }
