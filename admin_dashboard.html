@@ -1110,7 +1110,11 @@
         }
 
         async function deleteCategoryConfirm(id, name) {
-            // Direct delete with toast feedback (no black box confirm)
+            // Show confirmation dialog
+            if (!confirm(`Delete category "${name}"?\n\nNote: Menu items in this category will keep their category text.`)) {
+                return;
+            }
+
             try {
                 const { error } = await _supabase.from('categories').delete().eq('id', id);
                 if (error) throw error;
@@ -1303,11 +1307,15 @@
             })();
         }
 
-        // Expose
+        // Expose functions globally for inline onclick handlers
         window.openStaffModal = openStaffModal;
         window.deleteStaff = deleteStaff;
         window.updateOrder = updateOrder;
         window.showSection = showSection;
+        window.openMenuModal = openMenuModal;
+        window.deleteMenuItem = deleteMenuItem;
+        window.openCategoryModal = openCategoryModal;
+        window.filterMenuByCategory = filterMenuByCategory;
         window.logout = logout;
 
         // --- GLOBAL MENU FUNCTIONS ---
