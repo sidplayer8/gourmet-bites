@@ -948,20 +948,20 @@
             let html = '<div style="display:flex; flex-direction:column; gap:5px;">';
 
             // "All" filter button
+            const allSelected = selectedCategoryFilter === null;
             html += `
-                <div onclick="filterMenuByCategory(null)" style="
+                <div class="cat-filter" data-cat="__all__" style="
                     padding:10px 12px;
-                    background:${selectedCategoryFilter === null ? 'rgba(255,102,0,0.2)' : 'transparent'};
-                    border-left:3px solid ${selectedCategoryFilter === null ? 'var(--primary)' : 'transparent'};
+                    background:${allSelected ? 'rgba(255,102,0,0.2)' : 'transparent'};
+                    border-left:3px solid ${allSelected ? 'var(--primary)' : 'transparent'};
                     border-radius:6px;
                     cursor:pointer;
                     display:flex;
                     justify-content:space-between;
                     align-items:center;
                     transition:all 0.2s;
-                    font-weight:${selectedCategoryFilter === null ? 'bold' : 'normal'};
-                " onmouseover="if(${selectedCategoryFilter !== null}) this.style.background='rgba(255,255,255,0.05)'" 
-                   onmouseout="if(${selectedCategoryFilter !== null}) this.style.background='transparent'">
+                    font-weight:${allSelected ? 'bold' : 'normal'};
+                ">
                     <span>📋 All Items</span>
                 </div>
             `;
@@ -969,7 +969,7 @@
             categories.forEach(cat => {
                 const isSelected = selectedCategoryFilter === cat.name;
                 html += `
-                    <div style="
+                    <div class="cat-filter" data-cat="${cat.name}" data-catid="${cat.id}" style="
                         padding:10px 12px;
                         background:${isSelected ? 'rgba(255,102,0,0.2)' : 'transparent'};
                         border-left:3px solid ${isSelected ? 'var(--primary)' : 'transparent'};
@@ -980,15 +980,13 @@
                         align-items:center;
                         transition:all 0.2s;
                         font-weight:${isSelected ? 'bold' : 'normal'};
-                    " onmouseover="if(!${isSelected}) this.style.background='rgba(255,255,255,0.05)'" 
-                       onmouseout="if(!${isSelected}) this.style.background='transparent'"
-                       onclick="filterMenuByCategory('${cat.name.replace(/'/g, "\\'")}')">
+                    ">
                         <span>${cat.name}</span>
                         <div style="display:flex; gap:8px;">
-                            <button onclick="event.stopPropagation(); openCategoryModal(${cat.id})" 
+                            <button class="cat-edit" data-id="${cat.id}" 
                                 style="background:none; border:none; color:#888; cursor:pointer; padding:2px;"
                                 title="Edit">✏️</button>
-                            <button onclick="event.stopPropagation(); deleteCategory(${cat.id}, '${cat.name.replace(/'/g, "\\'")}');" 
+                            <button class="cat-del" data-id="${cat.id}" data-name="${cat.name}"
                                 style="background:none; border:none; color:var(--danger); cursor:pointer; padding:2px;"
                                 title="Delete">🗑️</button>
                         </div>
@@ -998,6 +996,29 @@
 
             html += '</div>';
             container.innerHTML = html;
+
+            // Attach event listeners
+            container.querySelectorAll('.cat-filter').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    if (e.target.closest('.cat-edit') || e.target.closest('.cat-del')) return;
+                    const cat = el.dataset.cat;
+                    filterMenuByCategory(cat === '__all__' ? null : cat);
+                });
+            });
+
+            container.querySelectorAll('.cat-edit').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openCategoryModal(parseInt(btn.dataset.id));
+                });
+            });
+
+            container.querySelectorAll('.cat-del').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteCategoryConfirm(parseInt(btn.dataset.id), btn.dataset.name);
+                });
+            });
         }
 
         function openCategoryModal(id = null) {
@@ -1066,11 +1087,13 @@
             }
         }
 
-        async function deleteCategory(id, name) {
-            if (!confirm(`Delete category "${name}"?\n\nMenu items in this category will remain but show as uncategorized.`)) {
-                return;
+        function deleteCategoryConfirm(id, name) {
+            if (window.confirm('Delete category "' + name + '"?')) {
+                deleteCategory(id, name);
             }
+        }
 
+        async function deleteCategory(id, name) {
             try {
                 const { error } = await _supabase.from('categories').delete().eq('id', id);
                 if (error) throw error;
