@@ -757,36 +757,37 @@
 
         // --- MENU ---
         async function fetchMenu() {
-            const container = document.getElementById('menuList');
+            const container = document.getElementById('menuTableContainer');
+            if (!container) {
+                console.error('menuTableContainer not found');
+                return;
+            }
             container.innerHTML = 'Loading...';
-            const { data, error } = await _supabase.from('menu_items').select('*').order('category').order('name');
-            if (error) { container.textContent = 'Error: ' + error.message; return; }
-            if (!data.length) { container.innerHTML = '<p>No menu items.</p>'; return; }
 
-            // Group by category
-            const byCategory = {};
-            data.forEach(item => {
-                if (!byCategory[item.category]) byCategory[item.category] = [];
-                byCategory[item.category].push(item);
-            });
+            const { data, error } = await _supabase.from('menu_items').select('*').order('category');
+            if (error) {
+                container.textContent = 'Error: ' + error.message;
+                console.error('Menu fetch error:', error);
+                return;
+            }
 
-            container.innerHTML = Object.keys(byCategory).map(cat => `
-                <div class="menu-category">
-                    <h3>${cat}</h3>
-                    ${byCategory[cat].map(item => `
-                        <div class="menu-item-row">
-                            <img src="${item.image_url || '/placeholder.png'}" alt="${item.name}">
-                            <div class="menu-item-info">
-                                <strong>${item.name}</strong>
-                                <p>${item.description || ''}</p>
-                            </div>
-                            <div class="menu-item-price">$${Number(item.price).toFixed(2)}</div>
-                            <button onclick="editMenuItem(${item.id})">Edit</button>
-                            <button onclick="deleteMenuItem(${item.id})" style="background:var(--danger);">Delete</button>
-                        </div>
-                    `).join('')}
-                </div>
+            window._menuData = data; // Cache for edit
+
+            let html = `<table><thead><tr><th>Img</th><th>Name</th><th>Cat</th><th>Price</th><th>Act</th></tr></thead><tbody>`;
+            html += data.map(i => `
+                <tr>
+                    <td><img src="${i.image_url || ''}" style="width:30px; height:30px; border-radius:4px; object-fit:cover;"></td>
+                    <td>${i.name}</td>
+                    <td>${i.category}</td>
+                    <td>$${i.price}</td>
+                    <td>
+                        <button onclick="openMenuModal('${i.id}')" style="color:#60a5fa; background:none; border:none; cursor:pointer;">Edit</button>
+                        <button onclick="deleteMenuItem('${i.id}')" style="color:var(--danger); background:none; border:none; cursor:pointer;">Del</button>
+                    </td>
+                </tr>
             `).join('');
+            html += '</tbody></table>';
+            container.innerHTML = html;
         }
 
         async function fetchMenuItems() {
