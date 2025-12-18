@@ -1000,23 +1000,41 @@
             // Attach event listeners
             container.querySelectorAll('.cat-filter').forEach(el => {
                 el.addEventListener('click', (e) => {
-                    if (e.target.closest('.cat-edit') || e.target.closest('.cat-del')) return;
+                    // Check if click was on a button or inside a button
+                    if (e.target.classList.contains('cat-edit') ||
+                        e.target.classList.contains('cat-del') ||
+                        e.target.closest('.cat-edit') ||
+                        e.target.closest('.cat-del')) {
+                        return; // Let button handlers deal with it
+                    }
                     const cat = el.dataset.cat;
                     filterMenuByCategory(cat === '__all__' ? null : cat);
                 });
             });
 
-            container.querySelectorAll('.cat-edit').forEach(btn => {
+            const editBtns = container.querySelectorAll('.cat-edit');
+            const delBtns = container.querySelectorAll('.cat-del');
+
+            console.log('Attaching listeners to', editBtns.length, 'edit buttons and', delBtns.length, 'delete buttons');
+
+            editBtns.forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    openCategoryModal(parseInt(btn.dataset.id));
+                    e.preventDefault();
+                    const id = parseInt(btn.dataset.id);
+                    console.log('Edit button clicked for category ID:', id);
+                    openCategoryModal(id);
                 });
             });
 
-            container.querySelectorAll('.cat-del').forEach(btn => {
+            delBtns.forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    deleteCategoryConfirm(parseInt(btn.dataset.id), btn.dataset.name);
+                    e.preventDefault();
+                    const id = parseInt(btn.dataset.id);
+                    const name = btn.dataset.name;
+                    console.log('Delete button clicked for category:', name, 'ID:', id);
+                    deleteCategoryConfirm(id, name);
                 });
             });
         }
