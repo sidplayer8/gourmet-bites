@@ -398,6 +398,7 @@ async function checkTableStatus() {
 
             if (data) {
                 // VALID!
+                console.log('QR Code verified:', { tableNum: data.table_number, tableId: data.id });
                 localStorage.setItem('activeTable', data.table_number);
                 localStorage.setItem('activeTableId', data.id); // Secure Proof
 
@@ -510,9 +511,16 @@ async function checkout() {
 
         // Update table status to 'taken'
         if (tableId) {
-            await client.from('restaurant_tables')
+            console.log('Updating table status:', { tableId, tableNum, orderId: data[0].id });
+            const { error: tableError } = await client.from('restaurant_tables')
                 .update({ status: 'taken', current_order_id: data[0].id })
                 .eq('id', tableId);
+
+            if (tableError) {
+                console.error('Failed to update table status:', tableError);
+            } else {
+                console.log('✓ Table status updated successfully');
+            }
         }
 
         showToast(`✓ Order #${data[0].id.slice(0, 8)} placed for Table ${tableNum}!`, 'success');
