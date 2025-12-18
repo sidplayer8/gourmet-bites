@@ -446,22 +446,46 @@
         }
 
         // --- AUTH & INIT ---
-        return;
+        (async function checkAdminAccess() {
+            // 1. Session Check
+            const { data: { session } } = await _supabase.auth.getSession();
+            let user = session?.user;
+
+            // 2. LocalStorage Fallback
+            if (!user) {
+                const localAdmin = JSON.parse(localStorage.getItem('adminUser'));
+                const localUser = JSON.parse(localStorage.getItem('user'));
+                user = localAdmin || localUser;
             }
 
-        // 4. DB Check
-        // We use user.id (UUID) or try to find by email/phone if user.id fails
-        // For now, strict check on user.id is safest for standard flow
-        if (user.id) {
-            const { data: staff } = await _supabase.from('staff').select('*, roles(name)').eq('user_id', user.id).single();
-            if (staff) {
-                document.getElementById('adminName').textContent = `${staff.roles?.name || 'Staff'} (${staff.name || uEmail})`;
+            if (!user || (!user.id && !user.uid)) {
+                window.location.href = 'login.html';
                 return;
             }
-        }
 
-        // If we got here, access denied
-        window.location.href = 'menu.html';
+            const uEmail = user.email || (user.user && user.user.email);
+            const uPhone = user.phone || (user.user && user.user.phone);
+
+            // 3. Allowlist (The Bypass)
+            const allowed = ['sapsinfocomm22@gmail.com', '+6590214181'];
+            if (allowed.includes(uEmail) || allowed.includes(uPhone)) {
+                document.getElementById('adminName').textContent = `Owner (${uEmail || uPhone})`;
+                showSection('dashboard');
+                return;
+            }
+            // 4. DB Check
+            // We use user.id (UUID) or try to find by email/phone if user.id fails
+            // For now, strict check on user.id is safest for standard flow
+            if (user.id) {
+                const { data: staff } = await _supabase.from('staff').select('*, roles(name)').eq('user_id', user.id).single();
+                if (staff) {
+                    document.getElementById('adminName').textContent = `${staff.roles?.name || 'Staff'} (${staff.name || uEmail})`;
+                    return;
+                }
+            }
+
+            // If we got here, access denied
+            window.location.href = 'menu.html';
         }
 
         async function logout() {
