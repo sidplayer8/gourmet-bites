@@ -570,6 +570,28 @@
             }
         }
 
+        async function updateOrderStatus(id, newStatus) {
+            const { data, error } = await _supabase.from('orders').update({ status: newStatus }).eq('id', id).select().single();
+            if (error) {
+                console.error('Error updating order:', error);
+                showToast('Failed to update order status', 'error');
+                return;
+            }
+
+            // If order is done/cancelled, free up the table
+            if (newStatus === 'completed' || newStatus === 'cancelled') { // Changed 'done' to 'completed' to match existing status
+                if (data.table_id) {
+                    await _supabase.from('restaurant_tables')
+                        .update({ status: 'available', current_order_id: null })
+                        .eq('id', data.table_id);
+                    fetchTables(); // Refresh table view
+                }
+            }
+
+            fetchOrders();
+            showToast(`Order #${id.slice(0, 8)} marked as ${newStatus}`, 'success');
+        }
+
         // --- ORDERS ---
         async function fetchOrders() {
             const container = document.getElementById('ordersList');

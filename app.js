@@ -508,6 +508,13 @@ async function checkout() {
 
         if (error) throw error;
 
+        // Update table status to 'taken'
+        if (tableId) {
+            await client.from('restaurant_tables')
+                .update({ status: 'taken', current_order_id: data[0].id })
+                .eq('id', tableId);
+        }
+
         showToast(`✓ Order #${data[0].id.slice(0, 8)} placed for Table ${tableNum}!`, 'success');
         cart = [];
         localStorage.setItem('cart', JSON.stringify(cart));
