@@ -254,10 +254,11 @@
     <div class="sidebar">
         <div class="logo">🍴 Gourmet Admin</div>
         <div class="nav-item active" onclick="showSection('dashboard')">📊 Dashboard</div>
-        <div class="nav-item" onclick="showSection('orders')">📦 Calls (Orders)</div>
+        <div class="nav-item" onclick="showSection('orders')">📞 Calls (Orders)</div>
+        <div class="nav-item" onclick="showSection('history')">📜 History</div>
         <div class="nav-item" onclick="showSection('menu')">🍔 Menu Management</div>
         <div class="nav-item" onclick="showSection('staff')">👥 Staff</div>
-        <div class="nav-item" onclick="showSection('roles')">🛡️ Roles</div> <!-- NEW -->
+        <div class="nav-item" onclick="showSection('roles')">🔐 Roles</div>
         <div class="nav-item" onclick="showSection('tables')">🪑 Tables</div>
         <div style="flex:1"></div>
         <div class="nav-item" onclick="logout()">🚪 Logout</div>
@@ -336,6 +337,24 @@
             <div class="stat-card">
                 <h3>Roles & Permissions</h3>
                 <div id="rolesList" style="margin-top:20px;">Loading roles...</div>
+            </div>
+        </div>
+
+        <!-- SECTION: HISTORY -->
+        <div id="history-section" class="content-section">
+            <div class="stat-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h3>Order History</h3>
+                    <div style="display:flex; gap:10px;">
+                        <select id="historyFilter" onchange="fetchHistory()"
+                            style="padding:8px; border-radius:6px; border:1px solid #444; background:#111; color:white;">
+                            <option value="all">All Orders</option>
+                            <option value="completed">Completed Only</option>
+                            <option value="cancelled">Cancelled Only</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="historyList" style="margin-top:20px;">Loading history...</div>
             </div>
         </div>
 
@@ -505,8 +524,10 @@
             document.getElementById('pageTitle').textContent = sectionId.charAt(0).toUpperCase() + sectionId.slice(1);
 
             // Fetch Data
+            if (sectionId === 'dashboard') fetchStats();
             if (sectionId === 'orders') fetchOrders();
-            if (sectionId === 'menu') fetchMenuItems();
+            if (sectionId === 'history') fetchHistory();
+            if (sectionId === 'menu') fetchMenu();
             if (sectionId === 'staff') fetchStaff();
             if (sectionId === 'roles') fetchRoles();
             if (sectionId === 'tables') fetchTables();
@@ -590,6 +611,61 @@
 
             fetchOrders();
             showToast(`Order #${id.slice(0, 8)} marked as ${newStatus}`, 'success');
+        }
+
+        // --- HISTORY ---
+        async function fetchHistory() {
+            const container = document.getElementById('historyList');
+            const filter = document.getElementById('historyFilter').value;
+
+            let query = _supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(50);
+
+            if (filter === 'completed') {
+                query = query.eq('status', 'completed');
+            } else if (filter === 'cancelled') {
+                query = query.eq('status', 'cancelled');
+            } else {
+                // All non-pending
+                query = query.in('status', ['completed', 'cancelled']);
+            }
+
+            const { data: orders, error } = await query;
+
+            if (error || !orders) {
+                container.innerHTML = '<p>Error loading history</p>';
+                return;
+            }
+
+            if (orders.length === 0) {
+                container.innerHTML = '<p style="color:#666; text-align:center; padding:40px;">No completed orders yet.</p>';
+                return;
+            }
+
+            container.innerHTML = orders.map(o => {
+                let items = [];
+                try { items = typeof o.items === 'string' ? JSON.parse(o.items) : o.items; } catch (e) { }
+                const itemsStr = Array.isArray(items) ? items.map(i => `${i.quantity}x ${i.name}`).join(', ') : '';
+                const statusColor = o.status === 'completed' ? 'var(--success)' : '#666';
+                const tableBadge = o.table_number ? `<span style="background:#3b82f6; color:white; padding:2px 6px; border-radius:4px; font-size:12px; margin-left:8px;">Table ${o.table_number}</span>` : '';
+                const date = new Date(o.created_at);
+
+                return `
+                <div class="stat-card" style="margin-bottom:10px; border-left:4px solid ${statusColor}; opacity:0.8;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <div>
+                            <strong>#${o.id.slice(0, 8)}...</strong> ${tableBadge} 
+                            <span style="background:${statusColor}; color:white; padding:2px 8px; border-radius:4px; font-size:11px; margin-left:8px;">${o.status.toUpperCase()}</span>
+                            <br>
+                            <small>${date.toLocaleDateString()} ${date.toLocaleTimeString()}</small><br>
+                            <div style="margin-top:5px; font-size:14px; color:#ccc;">${itemsStr}</div>
+                            ${o.custom_notes ? `<div style="margin-top:5px; font-size:12px; color:#aaa;">📝 ${o.custom_notes}</div>` : ''}
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:18px; font-weight:bold;">$${Number(o.total_price || 0).toFixed(2)}</div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
         }
 
         // --- ORDERS ---
