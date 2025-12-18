@@ -49,23 +49,8 @@
             </div>
         </div>
 
-        <div class="category-nav">
-            <button class="cat-btn active" onclick="filterMenu('All')"
-                style="background:none; border:none; color:white; padding:8px 16px; margin-right:8px; border-radius:20px; cursor:pointer; font-weight:bold;">All</button>
-            <button class="cat-btn" onclick="filterMenu('Burgers')"
-                style="background:none; border:none; color:#999; padding:8px 16px; margin-right:8px; border-radius:20px; cursor:pointer;">Burgers</button>
-            <button class="cat-btn" onclick="filterMenu('Pizza')"
-                style="background:none; border:none; color:#999; padding:8px 16px; margin-right:8px; border-radius:20px; cursor:pointer;">Pizza</button>
-            <button class="cat-btn" onclick="filterMenu('Mains')"
-                style="background:none; border:none; color:#999; padding:8px 16px; margin-right:8px; border-radius:20px; cursor:pointer;">Mains</button>
-            <button class="cat-btn" onclick="filterMenu('Salads')"
-                style="background:none; border:none; color:#999; padding:8px 16px; margin-right:8px; border-radius:20px; cursor:pointer;">Salads</button>
-            <button class="cat-btn" onclick="filterMenu('Appetizers')"
-                style="background:none; border:none; color:#999; padding:8px 16px; margin-right:8px; border-radius:20px; cursor:pointer;">Sides</button>
-            <button class="cat-btn" onclick="filterMenu('Drinks')"
-                style="background:none; border:none; color:#999; padding:8px 16px; margin-right:8px; border-radius:20px; cursor:pointer;">Drinks</button>
-            <button class="cat-btn" onclick="filterMenu('Dessert')"
-                style="background:none; border:none; color:#999; padding:8px 16px; margin-right:8px; border-radius:20px; cursor:pointer;">Dessert</button>
+        <div id="categoryNav" class="category-nav">
+            <!-- Categories will be loaded dynamically from database -->
         </div>
 
         <div id="menuView" class="menu-grid"></div>
@@ -170,11 +155,52 @@
         window.stopScanner = stopScanner;
 
         // Load menu when page loads
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
+            await loadCategories();
             if (typeof loadMenu === 'function') {
                 loadMenu();
             }
         });
+
+        // Load categories from database
+        async function loadCategories() {
+            try {
+                const { data, error } = await window.supabase
+                    .from('categories')
+                    .select('*')
+                    .order('display_order');
+
+                if (error) {
+                    console.error('Error loading categories:', error);
+                    return;
+                }
+
+                const categoryNav = document.getElementById('categoryNav');
+                if (!categoryNav) return;
+
+                // Add "All" button
+                let html = `
+                    <button class="cat-btn active" onclick="filterMenu('All')"
+                        style="background:none; border:none; color:white; padding:8px 16px; margin-right:8px; border-radius:20px; cursor:pointer; font-weight:bold;">
+                        All
+                    </button>
+                `;
+
+                // Add category buttons from database
+                data.forEach(cat => {
+                    html += `
+                        <button class="cat-btn" onclick="filterMenu('${cat.name}')"
+                            style="background:none; border:none; color:#999; padding:8px 16px; margin-right:8px; border-radius:20px; cursor:pointer;">
+                            ${cat.name}
+                        </button>
+                    `;
+                });
+
+                categoryNav.innerHTML = html;
+            } catch (err) {
+                console.error('Failed to load categories:', err);
+            }
+        }
 
         // Set profile picture and name
         const user = JSON.parse(localStorage.getItem('user'));
