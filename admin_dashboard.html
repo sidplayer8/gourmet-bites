@@ -1110,11 +1110,6 @@
         }
 
         async function deleteCategoryConfirm(id, name) {
-            // Show confirmation dialog
-            if (!confirm(`Delete category "${name}"?\n\nNote: Menu items in this category will keep their category text.`)) {
-                return;
-            }
-
             try {
                 const { error } = await _supabase.from('categories').delete().eq('id', id);
                 if (error) throw error;
@@ -1317,6 +1312,12 @@
         window.openCategoryModal = openCategoryModal;
         window.filterMenuByCategory = filterMenuByCategory;
         window.logout = logout;
+
+        // Debug: Log that functions are exposed
+        console.log('Global functions exposed:', {
+            openMenuModal: typeof window.openMenuModal,
+            deleteMenuItem: typeof window.deleteMenuItem
+        });
 
         // --- GLOBAL MENU FUNCTIONS ---
         // These MUST be global so onclick handlers can access them
