@@ -239,16 +239,40 @@
                 payload.name = user.name || 'User';
                 // Note: photoURL not saved to DB, only kept in localStorage
 
-                // Match on Email OR Phone (Upsert)
+                // Manual upsert: check if user exists first
                 let matchKey = user.email ? 'email' : 'phone';
+                let matchValue = user.email ? payload.email : payload.phone;
 
-                const { data, error } = await _supabase
+                // Try to find existing user
+                const { data: existingUsers } = await _supabase
                     .from('users')
-                    .upsert(payload, { onConflict: matchKey })
-                    .select()
-                    .single();
+                    .select('*')
+                    .eq(matchKey, matchValue)
+                    .limit(1);
 
-                if (error) throw error;
+                let data;
+                if (existingUsers && existingUsers.length > 0) {
+                    // User exists - update
+                    const { data: updated, error: updateError } = await _supabase
+                        .from('users')
+                        .update(payload)
+                        .eq('id', existingUsers[0].id)
+                        .select()
+                        .single();
+                    if (updateError) throw updateError;
+                    data = updated;
+                } else {
+                    // User doesn't exist - insert
+                    const { data: inserted, error: insertError } = await _supabase
+                        .from('users')
+                        .insert(payload)
+                        .select()
+                        .single();
+                    if (insertError) throw insertError;
+                    data = inserted;
+                }
+
+                if (!data) throw new Error('Failed to sync user');
 
                 // Update LocalStorage with the REAL Database ID (UUID)
                 user.id = data.id;
