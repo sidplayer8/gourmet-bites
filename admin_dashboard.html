@@ -299,6 +299,46 @@
                 transform: translateY(0);
             }
         }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--card-bg);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 400px;
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.warning {
+            border-left: 4px solid #ffb020;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 
@@ -568,6 +608,20 @@
             await _supabase.auth.signOut();
             localStorage.clear();
             window.location.href = 'login.html';
+        }
+
+        // Toast Notification Function
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(400px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
 
         function toggleSidebar() {
@@ -1084,11 +1138,11 @@
             const isAvailable = document.getElementById('menuIsAvailable').checked;
 
             if (!name) {
-                alert('Please enter item name');
+                showToast('Please enter item name', 'error');
                 return;
             }
             if (!category) {
-                alert('Please select or create a category');
+                showToast('Please select or create a category', 'error');
                 return;
             }
 
