@@ -844,8 +844,17 @@
         }
 
         function openMenuModal(itemId = null) {
+            console.log('openMenuModal called with itemId:', itemId);
             const modal = document.getElementById('menuModal');
             const title = document.getElementById('menuModalTitle');
+
+            console.log('Modal element:', modal);
+            console.log('Title element:', title);
+
+            if (!modal || !title) {
+                console.error('Modal or title not found!', { modal, title });
+                return;
+            }
 
             // Reset form
             document.getElementById('menuItemId').value = '';
@@ -880,7 +889,9 @@
                 title.textContent = 'Add Menu Item';
             }
 
+            console.log('About to show modal...');
             modal.classList.add('show');
+            console.log('Modal shown');
         }
 
         function closeMenuModal() {
