@@ -756,6 +756,39 @@
         }
 
         // --- MENU ---
+        async function fetchMenu() {
+            const container = document.getElementById('menuList');
+            container.innerHTML = 'Loading...';
+            const { data, error } = await _supabase.from('menu_items').select('*').order('category').order('name');
+            if (error) { container.textContent = 'Error: ' + error.message; return; }
+            if (!data.length) { container.innerHTML = '<p>No menu items.</p>'; return; }
+
+            // Group by category
+            const byCategory = {};
+            data.forEach(item => {
+                if (!byCategory[item.category]) byCategory[item.category] = [];
+                byCategory[item.category].push(item);
+            });
+
+            container.innerHTML = Object.keys(byCategory).map(cat => `
+                <div class="menu-category">
+                    <h3>${cat}</h3>
+                    ${byCategory[cat].map(item => `
+                        <div class="menu-item-row">
+                            <img src="${item.image_url || '/placeholder.png'}" alt="${item.name}">
+                            <div class="menu-item-info">
+                                <strong>${item.name}</strong>
+                                <p>${item.description || ''}</p>
+                            </div>
+                            <div class="menu-item-price">$${Number(item.price).toFixed(2)}</div>
+                            <button onclick="editMenuItem(${item.id})">Edit</button>
+                            <button onclick="deleteMenuItem(${item.id})" style="background:var(--danger);">Delete</button>
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('');
+        }
+
         async function fetchMenuItems() {
             const container = document.getElementById('menuTableContainer');
             const { data, error } = await _supabase.from('menu_items').select('*').order('category');
