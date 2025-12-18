@@ -486,7 +486,7 @@
 
             // If we got here, access denied
             window.location.href = 'menu.html';
-        }
+        })(); // Invoke the IIFE
 
         async function logout() {
             await _supabase.auth.signOut();
