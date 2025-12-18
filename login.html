@@ -227,9 +227,14 @@
             if (!_supabase) return true; // Skip if offline
 
             try {
+                // Normalize phone number (always include country code)
+                if (user.phone && !user.phone.startsWith('+')) {
+                    user.phone = '+65' + user.phone.replace(/^0+/, ''); // Singapore default
+                }
+
                 // Prepare payload
                 const payload = {};
-                if (user.email) payload.email = user.email;
+                if (user.email) payload.email = user.email.toLowerCase(); // Normalize email
                 if (user.phone) payload.phone = user.phone;
                 payload.name = user.name || 'User';
                 if (user.photoURL) payload.photoURL = user.photoURL;
@@ -247,6 +252,8 @@
 
                 // Update LocalStorage with the REAL Database ID (UUID)
                 user.id = data.id;
+                user.email = data.email; // Use normalized version
+                user.phone = data.phone;
                 localStorage.setItem('user', JSON.stringify(user));
                 console.log('✓ User synced! Database UUID:', data.id);
                 return true;
