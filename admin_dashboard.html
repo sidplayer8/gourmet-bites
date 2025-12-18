@@ -561,8 +561,13 @@
             closeConfirmModal();
             const seeds = Array.from({ length: 10 }, (_, i) => ({ table_number: i + 1, status: 'available' }));
             const { error } = await _supabase.from('restaurant_tables').upsert(seeds, { onConflict: 'table_number' });
-            if (error) alert('Error: ' + error.message);
-            else fetchTables();
+            if (error) {
+                console.error('Error creating tables:', error);
+                showToast('Error creating tables. Check console for details.', 'error');
+            } else {
+                showToast('✓ Tables created successfully!', 'success');
+                fetchTables();
+            }
         }
 
         // --- ORDERS ---
