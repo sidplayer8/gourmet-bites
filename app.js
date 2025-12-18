@@ -429,8 +429,12 @@ async function checkTableStatus() {
     } else {
         document.getElementById('tableModal').style.display = 'none';
 
-        // Ensure visual URL matches
-        if (urlParams.get('table') != activeTable) {
+        // SECURITY: If user manually changed URL table param, ignore it
+        // Only trust our verified session
+        const urlTableParam = urlParams.get('table');
+        if (urlTableParam && urlTableParam != activeTable) {
+            // User is trying to spoof - redirect to correct table
+            console.warn('URL tampering detected - correcting to verified table');
             const newUrl = new URL(window.location.href);
             newUrl.searchParams.set('table', activeTable);
             window.history.replaceState({}, '', newUrl);
@@ -465,15 +469,19 @@ async function checkout() {
 
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-    // Get Table (Should be set by now)
+    // STRICT SECURITY: Get VERIFIED table (ignore URL)
     const tableNum = localStorage.getItem('activeTable');
-    if (!tableNum) {
-        // Fallback safety (shouldn't happen if modal blocks)
-        checkTableStatus();
+    const tableId = localStorage.getItem('activeTableId'); // The UUID proof
+
+    if (!tableNum || !tableId) {
+        // No verified table - block order
+        console.error('No verified table ID found');
+        showToast('Please scan a valid table QR code to order', 'error');
+        checkTableStatus(); // Show the modal
         return;
     }
 
-    // Prepare Order Payload
+    // Prepare Order Payload - use VERIFIED table only
     const orderData = {
         user_id: user.id,
         items: cart,
@@ -481,8 +489,8 @@ async function checkout() {
         total: total,
         status: 'pending',
         type: 'dine_in',
-        table_number: tableNum,
-        table_id: null,
+        table_number: tableNum,  // From verified scan
+        table_id: tableId,        // Secure UUID proof
         custom_notes: document.getElementById('orderNotes')?.value || ''
     };
 
