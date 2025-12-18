@@ -259,7 +259,14 @@
                 return true;
 
             } catch (err) {
-                console.error('DB Sync Error:', err);
+                console.error('❌ DB Sync Error:', err);
+                console.error('Error details:', {
+                    message: err.message,
+                    code: err.code,
+                    details: err.details,
+                    hint: err.hint
+                });
+                alert('Database sync failed: ' + err.message + '\nUsing temporary session. Orders may not save.');
                 if (!user.id) user.id = 'temp_' + Date.now();
                 localStorage.setItem('user', JSON.stringify(user));
                 return false;
