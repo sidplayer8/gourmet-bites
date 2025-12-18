@@ -84,6 +84,9 @@
     <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+    <!-- HTML5 QR Code Scanner -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
     <!-- Supabase inline config -->
     <script src="supabase-inline.js"></script>
 
@@ -91,6 +94,67 @@
     <script src="app.js"></script>
 
     <script>
+        let html5QrCode = null;
+
+        function startScanner() {
+            document.getElementById('startScanBtn').style.display = 'none';
+            document.getElementById('qrScanner').style.display = 'block';
+
+            html5QrCode = new Html5Qrcode("qrReader");
+
+            html5QrCode.start(
+                { facingMode: "environment" },
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 }
+                },
+                (decodedText, decodedResult) => {
+                    // QR code scanned successfully
+                    console.log(`QR Code detected: ${decodedText}`);
+
+                    // Extract table_id from URL
+                    try {
+                        const url = new URL(decodedText);
+                        const tableId = url.searchParams.get('table_id');
+
+                        if (tableId) {
+                            // Stop scanner and redirect
+                            stopScanner();
+                            window.location.href = decodedText;
+                        } else {
+                            alert('Invalid QR code. Please scan a valid table QR code.');
+                        }
+                    } catch (e) {
+                        alert('Invalid QR code format.');
+                    }
+                },
+                (errorMessage) => {
+                    // Ignore scanning errors (they happen continuously while scanning)
+                }
+            ).catch((err) => {
+                console.error('Camera error:', err);
+                alert('Unable to access camera. Please check permissions or scan the QR code with your phone\'s camera app.');
+                stopScanner();
+            });
+        }
+
+        function stopScanner() {
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    html5QrCode.clear();
+                    html5QrCode = null;
+                }).catch((err) => {
+                    console.error('Error stopping scanner:', err);
+                });
+            }
+            document.getElementById('startScanBtn').style.display = 'block';
+            document.getElementById('qrScanner').style.display = 'none';
+        }
+
+        // Expose scanner functions globally
+        window.startScanner = startScanner;
+        window.stopScanner = stopScanner;
+
         // Load menu when page loads
         window.addEventListener('DOMContentLoaded', () => {
             if (typeof loadMenu === 'function') {
