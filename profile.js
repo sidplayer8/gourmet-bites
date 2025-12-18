@@ -13,6 +13,8 @@ script.onload = async () => {
     const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBrbGFvZmpmcGNybGdldnhrb3p5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyNjY1MDcsImV4cCI6MjA4MDg0MjUwN30.sNg6OVLocM1D-bG9LXTlDSsy6s74oW1SQ89QWCMbOKE';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
+    console.log('Fetching order history for user:', user.id);
+
     const { data: orders, error } = await supabase
         .from('orders')
         .select('*')
@@ -21,7 +23,15 @@ script.onload = async () => {
 
     const historyDiv = document.getElementById('orderHistory');
 
-    if (error || !orders || orders.length === 0) {
+    if (error) {
+        console.error('Error fetching orders:', error);
+        historyDiv.innerHTML = '<p style="color:#666; text-align:center; padding:40px;">Error loading orders</p>';
+        return;
+    }
+
+    console.log(`Found ${orders?.length || 0} orders for this user`);
+
+    if (!orders || orders.length === 0) {
         historyDiv.innerHTML = '<p style="color:#666; text-align:center; padding:40px;">No orders yet. Start ordering!</p>';
         return;
     }

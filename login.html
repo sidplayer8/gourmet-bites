@@ -248,7 +248,7 @@
                 // Update LocalStorage with the REAL Database ID (UUID)
                 user.id = data.id;
                 localStorage.setItem('user', JSON.stringify(user));
-                console.log('Synced! DB ID:', user.id);
+                console.log('✓ User synced! Database UUID:', data.id);
                 return true;
 
             } catch (err) {
