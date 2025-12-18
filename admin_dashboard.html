@@ -831,201 +831,6 @@
             fetchOrders(); // Refresh list -> Order will disappear
         }
 
-        // --- MENU ---
-        function handleCategoryChange() {
-            const select = document.getElementById('menuCategory');
-            const customInput = document.getElementById('customCategory');
-            if (select.value === '__custom__') {
-                customInput.style.display = 'block';
-                customInput.focus();
-            } else {
-                customInput.style.display = 'none';
-            }
-        }
-
-        function openMenuModal(itemId = null) {
-            console.log('openMenuModal called with itemId:', itemId);
-            const modal = document.getElementById('menuModal');
-            const title = document.getElementById('menuModalTitle');
-
-            console.log('Modal element:', modal);
-            console.log('Title element:', title);
-
-            if (!modal || !title) {
-                console.error('Modal or title not found!', { modal, title });
-                return;
-            }
-
-            // Reset form
-            document.getElementById('menuItemId').value = '';
-            document.getElementById('menuName').value = '';
-            document.getElementById('menuCategory').value = 'Appetizers';
-            document.getElementById('customCategory').style.display = 'none';
-            document.getElementById('customCategory').value = '';
-            document.getElementById('menuPrice').value = '';
-            document.getElementById('menuDescription').value = '';
-            document.getElementById('menuImageUrl').value = '';
-            document.getElementById('menuIsPublic').checked = true;
-            document.getElementById('menuIsAvailable').checked = true;
-
-            if (itemId) {
-                // Edit mode
-                title.textContent = 'Edit Menu Item';
-                document.getElementById('menuItemId').value = itemId;
-
-                // Find item in cache
-                const item = window._menuData?.find(i => i.id == itemId);
-                if (item) {
-                    document.getElementById('menuName').value = item.name || '';
-                    document.getElementById('menuCategory').value = item.category || 'Appetizers';
-                    document.getElementById('menuPrice').value = item.price || '';
-                    document.getElementById('menuDescription').value = item.description || '';
-                    document.getElementById('menuImageUrl').value = item.image_url || '';
-                    document.getElementById('menuIsPublic').checked = item.is_public !== false;
-                    document.getElementById('menuIsAvailable').checked = item.is_available !== false;
-                }
-            } else {
-                // Add mode
-                title.textContent = 'Add Menu Item';
-            }
-
-            console.log('About to show modal...');
-            modal.classList.add('show');
-            console.log('Modal shown');
-        }
-
-        function closeMenuModal() {
-            const modal = document.getElementById('menuModal');
-            modal.classList.remove('show');
-        }
-
-        async function saveMenuItem() {
-            const id = document.getElementById('menuItemId').value;
-            const name = document.getElementById('menuName').value.trim();
-            const categorySelect = document.getElementById('menuCategory').value;
-            const customCat = document.getElementById('customCategory').value.trim();
-            const category = categorySelect === '__custom__' ? customCat : categorySelect;
-            const price = parseFloat(document.getElementById('menuPrice').value) || 0;
-            const description = document.getElementById('menuDescription').value.trim();
-            const imageUrl = document.getElementById('menuImageUrl').value.trim();
-            const isPublic = document.getElementById('menuIsPublic').checked;
-            const isAvailable = document.getElementById('menuIsAvailable').checked;
-
-            if (!name) {
-                alert('Please enter item name');
-                return;
-            }
-            if (!category) {
-                alert('Please select or create a category');
-                return;
-            }
-
-            const payload = {
-                name,
-                category,
-                price,
-                description: description || null,
-                image_url: imageUrl || null,
-                is_public: isPublic,
-                is_available: isAvailable
-            };
-
-            try {
-                if (id) {
-                    // Update
-                    const { error } = await _supabase
-                        .from('menu_items')
-                        .update(payload)
-                        .eq('id', id);
-                    if (error) throw error;
-                } else {
-                    // Insert
-                    const { error } = await _supabase
-                        .from('menu_items')
-                        .insert(payload);
-                    if (error) throw error;
-                }
-
-                closeMenuModal();
-                fetchMenu(); // REFRESH MENU
-            } catch (err) {
-                console.error('Save error:', err);
-                alert('Failed to save: ' + err.message);
-            }
-        }
-
-        async function deleteMenuItem(itemId) {
-            if (!confirm('Delete this menu item?')) return;
-
-            try {
-                const { error } = await _supabase
-                    .from('menu_items')
-                    .delete()
-                    .eq('id', itemId);
-
-                if (error) throw error;
-                fetchMenu(); // REFRESH MENU
-            } catch (err) {
-                console.error('Delete error:', err);
-                alert('Failed to delete: ' + err.message);
-            }
-        }
-
-        async function fetchMenu() {
-            const container = document.getElementById('menuTableContainer');
-            if (!container) {
-                console.error('menuTableContainer not found');
-                return;
-            }
-            container.innerHTML = 'Loading...';
-
-            const { data, error } = await _supabase.from('menu_items').select('*').order('category');
-            if (error) {
-                container.textContent = 'Error: ' + error.message;
-                console.error('Menu fetch error:', error);
-                return;
-            }
-
-            window._menuData = data; // Cache for edit
-
-            let html = '<table><thead><tr><th>Img</th><th>Name</th><th>Category</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
-            html += data.map(i => `
-                <tr>
-                    <td><img src="${i.image_url || ''}" style="width:30px; height:30px; border-radius:4px; object-fit:cover;"></td>
-                    <td>${i.name}</td>
-                    <td>${i.category}</td>
-                    <td>$${Number(i.price).toFixed(2)}</td>
-                    <td>
-                        ${i.is_public !== false ? '<span style="background:#10b981; color:white; padding:2px 8px; border-radius:4px; font-size:11px;">🌐 Public</span>' : '<span style="background:#6b7280; color:white; padding:2px 8px; border-radius:4px; font-size:11px;">🔒 Private</span>'}
-                        ${i.is_available !== false ? '<span style="background:#10b981; color:white; padding:2px 8px; border-radius:4px; font-size:11px; margin-left:5px;">✅ Available</span>' : '<span style="background:#ef4444; color:white; padding:2px 8px; border-radius:4px; font-size:11px; margin-left:5px;">❌ Out of Stock</span>'}
-                    </td>
-                    <td>
-                        <button onclick="openMenuModal('${i.id}')" style="color:#60a5fa; background:none; border:none; cursor:pointer;">Edit</button>
-                        <button onclick="deleteMenuItem('${i.id}')" style="color:var(--danger); background:none; border:none; cursor:pointer;">Del</button>
-                    </td>
-                </tr>
-            `).join('');
-            html += '</tbody></table>';
-            container.innerHTML = html;
-        }
-
-        async function deleteMenuItem(itemId) {
-            if (!confirm('Delete this menu item?')) return;
-
-            try {
-                const { error } = await _supabase
-                    .from('menu_items')
-                    .delete()
-                    .eq('id', itemId);
-
-                if (error) throw error;
-                fetchMenu(); // REFRESH MENU
-            } catch (err) {
-                console.error('Delete error:', err);
-                alert('Failed to delete: ' + err.message);
-            }
-        }
-
         // --- STAFF ---
         async function fetchStaff() {
             const container = document.getElementById('staffTableContainer');
@@ -1143,14 +948,168 @@
         }
 
         // Expose
-        window.openMenuModal = openMenuModal;
-        window.deleteMenuItem = deleteMenuItem;
         window.openStaffModal = openStaffModal;
         window.deleteStaff = deleteStaff;
         window.updateOrder = updateOrder;
         window.showSection = showSection;
         window.logout = logout;
 
+    }) (); // End admin check IIFE
+
+        // --- GLOBAL MENU FUNCTIONS (OUTSIDE IIFE) ---
+        // These MUST be global so onclick handlers can access them
+
+        function handleCategoryChange() {
+            const select = document.getElementById('menuCategory');
+            const customInput = document.getElementById('customCategory');
+            if (select.value === '__custom__') {
+                customInput.style.display = 'block';
+                customInput.focus();
+            } else {
+                customInput.style.display = 'none';
+            }
+        }
+
+        function openMenuModal(itemId = null) {
+            console.log('openMenuModal called with itemId:', itemId);
+            const modal = document.getElementById('menuModal');
+            const title = document.getElementById('menuModalTitle');
+
+            console.log('Modal element:', modal);
+            console.log('Title element:', title);
+
+            if (!modal || !title) {
+                console.error('Modal or title not found!', { modal, title });
+                return;
+            }
+
+            // Reset form
+            document.getElementById('menuItemId').value = '';
+            document.getElementById('menuName').value = '';
+            document.getElementById('menuCategory').value = 'Appetizers';
+            document.getElementById('customCategory').style.display = 'none';
+            document.getElementById('customCategory').value = '';
+            document.getElementById('menuPrice').value = '';
+            document.getElementById('menuDescription').value = '';
+            document.getElementById('menuImageUrl').value = '';
+            document.getElementById('menuIsPublic').checked = true;
+            document.getElementById('menuIsAvailable').checked = true;
+
+            if (itemId) {
+                // Edit mode
+                title.textContent = 'Edit Menu Item';
+                document.getElementById('menuItemId').value = itemId;
+
+                // Find item in cache
+                const item = window._menuData?.find(i => i.id == itemId);
+                if (item) {
+                    document.getElementById('menuName').value = item.name || '';
+                    document.getElementById('menuCategory').value = item.category || 'Appetizers';
+                    document.getElementById('menuPrice').value = item.price || '';
+                    document.getElementById('menuDescription').value = item.description || '';
+                    document.getElementById('menuImageUrl').value = item.image_url || '';
+                    document.getElementById('menuIsPublic').checked = item.is_public !== false;
+                    document.getElementById('menuIsAvailable').checked = item.is_available !== false;
+                }
+            } else {
+                // Add mode
+                title.textContent = 'Add Menu Item';
+            }
+
+            console.log('About to show modal...');
+            modal.classList.add('show');
+            console.log('Modal shown');
+        }
+
+        function closeMenuModal() {
+            const modal = document.getElementById('menuModal');
+            modal.classList.remove('show');
+        }
+
+        async function saveMenuItem() {
+            const id = document.getElementById('menuItemId').value;
+            const name = document.getElementById('menuName').value.trim();
+            const categorySelect = document.getElementById('menuCategory').value;
+            const customCat = document.getElementById('customCategory').value.trim();
+            const category = categorySelect === '__custom__' ? customCat : categorySelect;
+            const price = parseFloat(document.getElementById('menuPrice').value) || 0;
+            const description = document.getElementById('menuDescription').value.trim();
+            const imageUrl = document.getElementById('menuImageUrl').value.trim();
+            const isPublic = document.getElementById('menuIsPublic').checked;
+            const isAvailable = document.getElementById('menuIsAvailable').checked;
+
+            if (!name) {
+                alert('Please enter item name');
+                return;
+            }
+            if (!category) {
+                alert('Please select or create a category');
+                return;
+            }
+
+            const payload = {
+                name,
+                category,
+                price,
+                description: description || null,
+                image_url: imageUrl || null,
+                is_public: isPublic,
+                is_available: isAvailable
+            };
+
+            try {
+                if (id) {
+                    // Update
+                    const { error } = await _supabase
+                        .from('menu_items')
+                        .update(payload)
+                        .eq('id', id);
+                    if (error) throw error;
+                } else {
+                    // Insert
+                    const { error } = await _supabase
+                        .from('menu_items')
+                        .insert(payload);
+                    if (error) throw error;
+                }
+
+                closeMenuModal();
+                // Need to expose fetchMenu too!
+                if (typeof window.fetchMenuGlobal === 'function') {
+                    window.fetchMenuGlobal();
+                }
+            } catch (err) {
+                console.error('Save error:', err);
+                alert('Failed to save: ' + err.message);
+            }
+        }
+
+        async function deleteMenuItem(itemId) {
+            if (!confirm('Delete this menu item?')) return;
+
+            try {
+                const { error } = await _supabase
+                    .from('menu_items')
+                    .delete()
+                    .eq('id', itemId);
+
+                if (error) throw error;
+
+                if (typeof window.fetchMenuGlobal === 'function') {
+                    window.fetchMenuGlobal();
+                }
+            } catch (err) {
+                console.error('Delete error:', err);
+                alert('Failed to delete: ' + err.message);
+            }
+        }
+
+        // Expose to window
+        window.openMenuModal = openMenuModal;
+        window.closeMenuModal = closeMenuModal;
+        window.saveMenuItem = saveMenuItem;
+        window.deleteMenuItem = deleteMenuItem;
+        window.handleCategoryChange = handleCategoryChange;
     </script>
 </body>
 
