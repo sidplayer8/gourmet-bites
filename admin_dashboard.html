@@ -968,8 +968,11 @@
 
             categories.forEach(cat => {
                 const isSelected = selectedCategoryFilter === cat.name;
+                // Escape category name for safe HTML attribute insertion
+                const escapedName = cat.name.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
                 html += `
-                    <div class="cat-filter" data-cat="${cat.name}" data-catid="${cat.id}" style="
+                    <div class="cat-filter" data-cat="${escapedName}" data-catid="${cat.id}" style="
                         padding:10px 12px;
                         background:${isSelected ? 'rgba(255,102,0,0.2)' : 'transparent'};
                         border-left:3px solid ${isSelected ? 'var(--primary)' : 'transparent'};
@@ -983,10 +986,10 @@
                     ">
                         <span>${cat.name}</span>
                         <div style="display:flex; gap:8px;">
-                            <button class="cat-edit" data-id="${cat.id}" 
+                            <button class="cat-edit" data-id="${cat.id}" data-name="${escapedName}"
                                 style="background:rgba(255,255,255,0.1); border:1px solid #666; color:#ccc; cursor:pointer; padding:4px 8px; border-radius:4px; font-size:11px;"
                                 title="Edit category">Edit</button>
-                            <button class="cat-del" data-id="${cat.id}" data-name="${cat.name}"
+                            <button class="cat-del" data-id="${cat.id}" data-name="${escapedName}"
                                 style="background:rgba(220,38,38,0.2); border:1px solid var(--danger); color:var(--danger); cursor:pointer; padding:4px 8px; border-radius:4px; font-size:11px;"
                                 title="Delete category">Del</button>
                         </div>
