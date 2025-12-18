@@ -403,28 +403,6 @@ async function checkTableStatus() {
                 localStorage.setItem('activeTableId', data.id); // Secure Proof
 
                 // Redirect/Clean URL to show nice number (but we have proof in storage)
-                // Load menu from Supabase
-                async function loadMenuFromDB() {
-                    try {
-                        const { data, error } = await client
-                            .from('menu_items')
-                            .select('*')
-                            .eq('is_public', true)      // Only public items
-                            .eq('is_available', true);  // Only available items
-
-                        if (error) throw error;
-
-                        if (data && data.length > 0) {
-                            menu = data;
-                            displayMenu(menu);
-                        } else {
-                            document.getElementById('menu').innerHTML = '<p style="text-align:center; color:#999;">No menu items available at this time.</p>';
-                        }
-                    } catch (error) {
-                        console.error('Error loading menu:', error);
-                        document.getElementById('menu').innerHTML = '<p style="text-align:center; color:#ff6b6b;">Error loading menu. Please refresh the page.</p>';
-                    }
-                }
                 const newUrl = new URL(window.location.href);
                 newUrl.searchParams.delete('table_id');
                 newUrl.searchParams.set('table', data.table_number);
