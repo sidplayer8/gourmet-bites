@@ -697,7 +697,7 @@
 
             // Calc Stats (Keep calculating from ALL data)
             document.getElementById('stat-total-orders').textContent = data.length;
-            const revenue = data.reduce((acc, o => acc + (o.total_price || 0), 0);
+            const revenue = data.reduce((acc, o) => acc + (o.total_price || 0), 0);
             document.getElementById('stat-revenue').textContent = '$' + revenue.toFixed(2);
 
             // Filter for Display
