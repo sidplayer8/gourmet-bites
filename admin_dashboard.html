@@ -1963,31 +1963,6 @@
             fetchMenuItems();
         }
 
-        function openStaffModal() {
-            // Add Staff Logic
-            // We ask for Name, Email OR Phone, and Role ID
-            const name = prompt("Staff Name:");
-            if (!name) return;
-            const contact = prompt("Email OR Phone (e.g. +65...):");
-            if (!contact) return;
-            const roleId = prompt("Role ID (1=Owner, 2=Manager, 3=Staff, 4=Chef):", "3");
-
-            // Guess if email or phone
-            const isEmail = contact.includes('@');
-            const payload = {
-                name: name,
-                role_id: parseInt(roleId),
-                email: isEmail ? contact : null,
-                phone: !isEmail ? contact : null
-            };
-
-            (async () => {
-                const { error } = await _supabase.from('staff').insert([payload]);
-                if (error) alert('Error: ' + error.message);
-                else fetchStaff();
-            })();
-        }
-
         // Expose functions globally for inline onclick handlers
         window.openStaffModal = openStaffModal;
         window.deleteStaff = deleteStaff;
