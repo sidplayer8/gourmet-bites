@@ -1876,22 +1876,10 @@
                 return;
             }
 
-            if (!password) {
-                generateStaffPassword();
-                password = document.getElementById('staffPassword').value;
-            }
-
-            if (password.length < 6) {
-                showToast('Password must be at least 6 characters', 'error');
-                return;
-            }
+            
 
             try {
-                const { data: authData, error: authError } = await _supabase.auth.signUp({
-                    email,
-                    password,
-                    options: { data: { name, phone: phone || null } }
-                });
+                
 
                 if (authError) console.warn('Auth creation warning:', authError);
 
@@ -1906,7 +1894,7 @@
                 if (staffError) throw staffError;
 
                 // Show credentials in a better way - just use toast for now
-                showToast(`Staff created! Email: ${email}, Password: ${password}`, 'success');
+                showToast(`Staff added! \ can login using customer login`, 'success');
                 console.log(`📧 Staff Credentials:\nEmail: ${email}\n${phone ? `Phone: ${phone}\n` : ''}Password: ${password}`);
 
                 closeStaffModal();
