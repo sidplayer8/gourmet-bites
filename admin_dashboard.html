@@ -1839,7 +1839,6 @@
             document.getElementById('staffName').value = '';
             document.getElementById('staffEmail').value = '';
             document.getElementById('staffPhone').value = '';
-            document.getElementById('staffPassword').value = '';
 
             // Populate role dropdown
             _supabase.from('roles').select('id,name,color').order('position', { ascending: false })
