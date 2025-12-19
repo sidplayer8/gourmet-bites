@@ -1289,7 +1289,7 @@
             });
         }
 
-        function openMenuModal(itemId = null) {
+        async function openMenuModal(itemId = null) {
             const modal = document.getElementById('menuModal');
             const title = document.getElementById('menuModalTitle');
 
@@ -1321,7 +1321,24 @@
                 document.getElementById('menuItemId').value = itemId;
 
                 // Find item in cache using strict equality
-                const item = window._menuData?.find(i => i.id === parseInt(itemId));
+                let item = window._menuData?.find(i => i.id === parseInt(itemId));
+
+                // If not found in cache, fetch from database
+                if (!item) {
+                    try {
+                        const { data, error } = await _supabase
+                            .from('menu_items')
+                            .select('*')
+                            .eq('id', itemId)
+                            .single();
+
+                        if (!error && data) {
+                            item = data;
+                        }
+                    } catch (err) {
+                        console.error('Error fetching item:', err);
+                    }
+                }
 
                 if (item) {
                     document.getElementById('menuName').value = item.name || '';
