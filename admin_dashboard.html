@@ -1293,9 +1293,6 @@
             const modal = document.getElementById('menuModal');
             const title = document.getElementById('menuModalTitle');
 
-            console.log('openMenuModal called with itemId:', itemId);
-            console.log('Cached menu data:', window._menuData);
-
             // Reset form
             document.getElementById('menuItemId').value = '';
             document.getElementById('menuName').value = '';
@@ -1323,9 +1320,8 @@
                 title.textContent = 'Edit Menu Item';
                 document.getElementById('menuItemId').value = itemId;
 
-                // Find item in cache
-                const item = window._menuData?.find(i => i.id == itemId);
-                console.log('Found item for editing:', item);
+                // Find item in cache using strict equality
+                const item = window._menuData?.find(i => i.id === parseInt(itemId));
 
                 if (item) {
                     document.getElementById('menuName').value = item.name || '';
