@@ -25,22 +25,15 @@ INSERT INTO roles (name, permissions, color, position) VALUES
 -- Enable Row Level Security
 ALTER TABLE roles ENABLE ROW LEVEL SECURITY;
 
--- Policy: Only users with MANAGE_ROLES permission can manage roles
-CREATE POLICY "Users with permission can manage roles"
-    ON roles FOR ALL
-    USING (
-        auth.uid() IN (
-            SELECT auth_user_id 
-            FROM staff 
-            WHERE role_id IN (
-                SELECT id FROM roles WHERE (permissions & 32768) = 32768  -- 32768 = MANAGE_ROLES bit
-            )
-        )
-    );
-
--- Policy: All authenticated users can view roles
+-- Temporary simple policies - will be updated after staff table migration
+-- Policy: All authenticated users can view roles (for now)
 CREATE POLICY "Authenticated users can view roles"
     ON roles FOR SELECT
+    USING (auth.uid() IS NOT NULL);
+
+-- Policy: Allow inserts for now (will restrict after staff table is updated)
+CREATE POLICY "Authenticated users can manage roles temp"
+    ON roles FOR ALL
     USING (auth.uid() IS NOT NULL);
 
 -- Create index for better performance

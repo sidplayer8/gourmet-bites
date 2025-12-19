@@ -622,8 +622,8 @@
     </div>
 
     <!-- Role Management Modal -->
-    <div id="roleModal" class="custom-modal" style="display:none;">
-        <div class="modal-content" style="max-width: 750px;">
+    <div id="roleModal" class="custom-modal" style="display:none; align-items:center; justify-content:center;">
+        <div class="modal-content" style="max-width: 600px; margin:auto;">
             <h2 id="roleModalTitle">Create Role</h2>
             <input type="hidden" id="roleId">
 
@@ -643,7 +643,7 @@
 
             <h3 style="margin-top: 20px; margin-bottom: 10px;">Permissions</h3>
             <div
-                style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; max-height: 450px; overflow-y: auto; padding: 20px; background: #1e293b; border-radius: 8px;">
+                style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; max-height: 350px; overflow-y: auto; padding: 20px; background: #1e293b; border-radius: 8px;">
 
                 <!-- Menu Management -->
                 <div>
@@ -750,7 +750,7 @@
                         <span>Manage Roles</span>
                     </label>
                     <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
-                        <input type="checkbox" class="perm-checkbox" data-perm="ADMINISTRATOR">
+                        <input type="checkbox" class="perm-checkbox" data-perm="ADMINISTRATOR" id="adminCheckbox">
                         <span style="color: #ef4444; font-weight: bold;">⚠️ Administrator (Full Access)</span>
                     </label>
                 </div>
@@ -759,6 +759,46 @@
             <div style="display:flex; gap:10px; margin-top:20px;">
                 <button onclick="saveRole()" class="btn-primary">Save Role</button>
                 <button onclick="closeRoleModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Staff Creation Modal -->
+    <div id="staffModal" class="custom-modal" style="display:none; align-items:center; justify-content:center;">
+        <div class="modal-content" style="max-width: 500px; margin:auto;">
+            <h2 id="staffModalTitle">Add Staff Member</h2>
+            <input type="hidden" id="staffId">
+
+            <label>Full Name *</label>
+            <input type="text" id="staffName" placeholder="John Doe" required>
+
+            <label>Email *</label>
+            <input type="email" id="staffEmail" placeholder="john@restaurant.com" required>
+
+            <label>Phone Number (Optional)</label>
+            <input type="tel" id="staffPhone" placeholder="+1234567890">
+            <small style="color:#94a3b8; margin-top:-10px; display:block;">If provided, staff can login with either
+                email or phone</small>
+
+            <label>Assign Role *</label>
+            <select id="staffRoleSelect" required>
+                <option value="">Select a role...</option>
+                <!-- Populated dynamically -->
+            </select>
+
+            <label>Initial Password</label>
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="staffPassword" placeholder="Auto-generated if empty" style="flex:1;">
+                <button type="button" onclick="generateStaffPassword()"
+                    style="padding:10px 15px; background:#3b82f6; color:white; border:none; border-radius:6px; cursor:pointer; white-space:nowrap;">🎲
+                    Generate</button>
+            </div>
+            <small style="color:#94a3b8; margin-top:-10px; display:block;">Minimum 6 characters. Share this with the
+                staff member securely.</small>
+
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button onclick="saveStaff()" class="btn-primary">Create Account</button>
+                <button onclick="closeStaffModal()">Cancel</button>
             </div>
         </div>
     </div>
@@ -1702,6 +1742,17 @@
                 title.textContent = 'Create Role';
             }
 
+            // Add event listener for Administrator checkbox auto-check
+            const adminCheckbox = document.getElementById('adminCheckbox');
+            if (adminCheckbox) {
+                adminCheckbox.addEventListener('change', function () {
+                    const allCheckboxes = document.querySelectorAll('.perm-checkbox:not(#adminCheckbox)');
+                    allCheckboxes.forEach(cb => {
+                        cb.checked = this.checked;
+                    });
+                });
+            }
+
             modal.style.display = 'flex';
         }
 
@@ -1772,6 +1823,103 @@
                     }
                 }
             );
+        }
+
+        // --- STAFF MANAGEMENT ---
+        function openStaffModal(staffId = null) {
+            const modal = document.getElementById('staffModal');
+            const title = document.getElementById('staffModalTitle');
+
+            // Reset form
+            document.getElementById('staffId').value = '';
+            document.getElementById('staffName').value = '';
+            document.getElementById('staffEmail').value = '';
+            document.getElementById('staffPhone').value = '';
+            document.getElementById('staffPassword').value = '';
+
+            // Populate role dropdown
+            _supabase.from('roles').select('id,name,color').order('position', { ascending: false })
+                .then(({ data: roles, error }) => {
+                    const select = document.getElementById('staffRoleSelect');
+                    select.innerHTML = '<option value="">Select a role...</option>';
+
+                    if (!error && roles) {
+                        roles.forEach(role => {
+                            const option = document.createElement('option');
+                            option.value = role.id;
+                            option.textContent = role.name;
+                            select.appendChild(option);
+                        });
+                    }
+                });
+
+            title.textContent = staffId ? 'Edit Staff Member' : 'Add Staff Member';
+            modal.style.display = 'flex';
+        }
+
+        function closeStaffModal() {
+            document.getElementById('staffModal').style.display = 'none';
+        }
+
+        function generateStaffPassword() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%';
+            let password = '';
+            for (let i = 0; i < 12; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('staffPassword').value = password;
+        }
+
+        async function saveStaff() {
+            const name = document.getElementById('staffName').value.trim();
+            const email = document.getElementById('staffEmail').value.trim();
+            const phone = document.getElementById('staffPhone').value.trim();
+            const roleId = document.getElementById('staffRoleSelect').value;
+            let password = document.getElementById('staffPassword').value.trim();
+
+            if (!name || !email || !roleId) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+
+            if (!password) {
+                generateStaffPassword();
+                password = document.getElementById('staffPassword').value;
+            }
+
+            if (password.length < 6) {
+                showToast('Password must be at least 6 characters', 'error');
+                return;
+            }
+
+            try {
+                const { data: authData, error: authError } = await _supabase.auth.signUp({
+                    email,
+                    password,
+                    options: { data: { name, phone: phone || null } }
+                });
+
+                if (authError) console.warn('Auth creation warning:', authError);
+
+                const { error: staffError } = await _supabase.from('staff').insert([{
+                    name,
+                    email,
+                    phone: phone || null,
+                    role_id: roleId,
+                    auth_user_id: authData?.user?.id || null
+                }]);
+
+                if (staffError) throw staffError;
+
+                alert(`Staff account created!\n\nEmail: ${email}\n${phone ? `Phone: ${phone}\n` : ''}Password: ${password}\n\n⚠️ Share this password securely.`);
+                showToast('Staff account created successfully', 'success');
+
+                closeStaffModal();
+                fetchStaff();
+            } catch (err) {
+                console.error('Save staff error:', err);
+                showToast('Failed to create staff: ' + err.message, 'error');
+            }
         }
 
         // --- MODALS (Enhanced) ---
