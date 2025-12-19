@@ -1276,14 +1276,14 @@
             // Attach event listeners to all edit/delete buttons
             container.querySelectorAll('.menu-edit-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    const id = parseInt(btn.dataset.id);
+                    const id = btn.dataset.id; // Keep as string (UUID)
                     openMenuModal(id);
                 });
             });
 
             container.querySelectorAll('.menu-del-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    const id = parseInt(btn.dataset.id);
+                    const id = btn.dataset.id; // Keep as string (UUID)
                     deleteMenuItem(id);
                 });
             });
@@ -1320,8 +1320,8 @@
                 title.textContent = 'Edit Menu Item';
                 document.getElementById('menuItemId').value = itemId;
 
-                // Find item in cache using strict equality
-                let item = window._menuData?.find(i => i.id === parseInt(itemId));
+                // Find item in cache - compare as strings for UUID support
+                let item = window._menuData?.find(i => i.id == itemId);
 
                 // If not found in cache, fetch from database
                 if (!item) {
