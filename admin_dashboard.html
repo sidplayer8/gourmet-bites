@@ -1911,8 +1911,9 @@
 
                 if (staffError) throw staffError;
 
-                alert(`Staff account created!\n\nEmail: ${email}\n${phone ? `Phone: ${phone}\n` : ''}Password: ${password}\n\n⚠️ Share this password securely.`);
-                showToast('Staff account created successfully', 'success');
+                // Show credentials in a better way - just use toast for now
+                showToast(`Staff created! Email: ${email}, Password: ${password}`, 'success');
+                console.log(`📧 Staff Credentials:\nEmail: ${email}\n${phone ? `Phone: ${phone}\n` : ''}Password: ${password}`);
 
                 closeStaffModal();
                 fetchStaff();
