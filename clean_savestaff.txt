@@ -1,0 +1,30 @@
+        async function saveStaff() {
+            const name = document.getElementById('staffName').value.trim();
+            const email = document.getElementById('staffEmail').value.trim();
+            const phone = document.getElementById('staffPhone').value.trim();
+            const roleId = document.getElementById('staffRoleSelect').value;
+            
+            if (!name || !email || !roleId) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            try {
+                const { error: staffError } = await _supabase.from('staff').insert([{
+                    name,
+                    email,
+                    phone: phone || null,
+                    role_id: roleId
+                }]);
+                
+                if (staffError) throw staffError;
+                
+                showToast(`Staff added! ${name} can login using customer login`, 'success');
+                
+                closeStaffModal();
+                fetchStaff();
+            } catch (err) {
+                console.error('Save staff error:', err);
+                showToast('Failed to add staff: ' + err.message, 'error');
+            }
+        }
