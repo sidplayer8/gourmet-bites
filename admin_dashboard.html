@@ -1865,21 +1865,11 @@
             document.getElementById('staffModal').style.display = 'none';
         }
 
-        function generateStaffPassword() {
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%';
-            let password = '';
-            for (let i = 0; i < 12; i++) {
-                password += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            document.getElementById('staffPassword').value = password;
-        }
-
         async function saveStaff() {
             const name = document.getElementById('staffName').value.trim();
             const email = document.getElementById('staffEmail').value.trim();
             const phone = document.getElementById('staffPhone').value.trim();
             const roleId = document.getElementById('staffRoleSelect').value;
-            let password = document.getElementById('staffPassword').value.trim();
 
             if (!name || !email || !roleId) {
                 showToast('Please fill in all required fields', 'error');
