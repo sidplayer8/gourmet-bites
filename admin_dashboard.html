@@ -446,7 +446,10 @@
         <!-- SECTION: ROLES -->
         <div id="roles-section" class="content-section">
             <div class="stat-card">
-                <h3>Roles & Permissions</h3>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h3 style="margin:0;">Roles & Permissions</h3>
+                    <button class="btn-primary" onclick="openRoleModal()">+ Add New Role</button>
+                </div>
                 <div id="rolesList" style="margin-top:20px;">Loading roles...</div>
             </div>
         </div>
@@ -618,6 +621,148 @@
         </div>
     </div>
 
+    <!-- Role Management Modal -->
+    <div id="roleModal" class="custom-modal" style="display:none;">
+        <div class="modal-content" style="max-width: 750px;">
+            <h2 id="roleModalTitle">Create Role</h2>
+            <input type="hidden" id="roleId">
+
+            <label>Role Name</label>
+            <input type="text" id="roleName" placeholder="Manager, Chef, Waiter, etc." required>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div>
+                    <label>Role Color</label>
+                    <input type="color" id="roleColor" value="#99AAB5">
+                </div>
+                <div>
+                    <label>Position (Higher = More Authority)</label>
+                    <input type="number" id="rolePosition" value="10" min="0" max="100">
+                </div>
+            </div>
+
+            <h3 style="margin-top: 20px; margin-bottom: 10px;">Permissions</h3>
+            <div
+                style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; max-height: 450px; overflow-y: auto; padding: 20px; background: #1e293b; border-radius: 8px;">
+
+                <!-- Menu Management -->
+                <div>
+                    <h4 style="color: #f59e0b; margin-bottom: 12px;">📋 Menu Management</h4>
+                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                        <input type="checkbox" class="perm-checkbox" data-perm="VIEW_MENU">
+                        <span>View Menu</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                        <input type="checkbox" class="perm-checkbox" data-perm="CREATE_MENU">
+                        <span>Create Menu Items</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                        <input type="checkbox" class="perm-checkbox" data-perm="EDIT_MENU">
+                        <span>Edit Menu Items</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                        <input type="checkbox" class="perm-checkbox" data-perm="DELETE_MENU">
+                        <span>Delete Menu Items</span>
+                    </label>
+                </div>
+
+                <!-- Category Management -->
+                <div>
+                    <h4 style="color: #8b5cf6; margin-bottom: 12px;">🏷️ Category Management</h4>
+                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                        <input type="checkbox" class="perm-checkbox" data-perm="VIEW_CATEGORIES">
+                        <span>View Categories</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                        <input type="checkbox" class="perm-checkbox" data-perm="CREATE_CATEGORIES">
+                        <span>Create Categories</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                        <input type="checkbox" class="perm-checkbox" data-perm="EDIT_CATEGORIES">
+                        <span>Edit Categories</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                        <input type="checkbox" class="perm-checkbox" data-perm="DELETE_CATEGORIES">
+                        <span>Delete Categories</span>
+                    </label>
+                </div>
+
+                <!-- Staff Management -->
+                <div>
+                    <h4 style="color: #3b82f6; margin-bottom: 12px;">👥 Staff Management</h4>
+                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                        <input type="checkbox" class="perm-checkbox" data-perm="VIEW_STAFF">
+                        <span>View Staff</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                        <input type="checkbox" class="perm-checkbox" data-perm="CREATE_STAFF">
+                        <span>Create Staff</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                        <input type="checkbox" class="perm-checkbox" data-perm="EDIT_STAFF">
+                        <span>Edit Staff</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                        <input type="checkbox" class="perm-checkbox" data-perm="DELETE_STAFF">
+                        <span>Remove Staff</span>
+                    </label>
+                </div>
+
+                <!-- Order Management -->
+                <div>
+                    <h4 style="color: #10b981; margin-bottom: 12px;">🛒 Order Management</h4>
+                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                        <input type="checkbox" class="perm-checkbox" data-perm="VIEW_ORDERS">
+                        <span>View Orders</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                        <input type="checkbox" class="perm-checkbox" data-perm="UPDATE_ORDERS">
+                        <span>Update Orders</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                        <input type="checkbox" class="perm-checkbox" data-perm="DELETE_ORDERS">
+                        <span>Delete Orders</span>
+                    </label>
+                </div>
+
+                <!-- Table Management -->
+                <div>
+                    <h4 style="color: #ec4899; margin-bottom: 12px;">🪑 Table Management</h4>
+                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                        <input type="checkbox" class="perm-checkbox" data-perm="VIEW_TABLES">
+                        <span>View Tables</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                        <input type="checkbox" class="perm-checkbox" data-perm="MANAGE_TABLES">
+                        <span>Manage Tables</span>
+                    </label>
+                </div>
+
+                <!-- Analytics & Other -->
+                <div>
+                    <h4 style="color: #6366f1; margin-bottom: 12px;">📊 Other Permissions</h4>
+                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                        <input type="checkbox" class="perm-checkbox" data-perm="VIEW_ANALYTICS">
+                        <span>View Analytics</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                        <input type="checkbox" class="perm-checkbox" data-perm="MANAGE_ROLES">
+                        <span>Manage Roles</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                        <input type="checkbox" class="perm-checkbox" data-perm="ADMINISTRATOR">
+                        <span style="color: #ef4444; font-weight: bold;">⚠️ Administrator (Full Access)</span>
+                    </label>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button onclick="saveRole()" class="btn-primary">Save Role</button>
+                <button onclick="closeRoleModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const supabaseUrl = 'https://pklaofjfpcrlgevxkozy.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBrbGFvZmpmcGNybGdldnhrb3p5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyNjY1MDcsImV4cCI6MjA4MDg0MjUwN30.sNg6OVLocM1D-bG9LXTlDSsy6s74oW1SQ89QWCMbOKE';
@@ -629,6 +774,77 @@
             console.error('Supabase Init Fail', e);
             document.body.innerHTML = '<h3 style="color:white; padding:20px;">Error initializing database connection.</h3>';
         }
+
+        // --- PERMISSION SYSTEM (Discord-style bitwise flags) ---
+        const PERMISSIONS = {
+            // Menu Management (1-8)
+            VIEW_MENU: 1 << 0,         // 1
+            CREATE_MENU: 1 << 1,       // 2
+            EDIT_MENU: 1 << 2,         // 4
+            DELETE_MENU: 1 << 3,       // 8
+
+            // Category Management (16-128)
+            VIEW_CATEGORIES: 1 << 4,   // 16
+            CREATE_CATEGORIES: 1 << 5, // 32
+            EDIT_CATEGORIES: 1 << 6,   // 64
+            DELETE_CATEGORIES: 1 << 7, // 128
+
+            // Staff Management (256-2048)
+            VIEW_STAFF: 1 << 8,        // 256
+            CREATE_STAFF: 1 << 9,      // 512
+            EDIT_STAFF: 1 << 10,       // 1024
+            DELETE_STAFF: 1 << 11,     // 2048
+
+            // Order Management (4096-16384)
+            VIEW_ORDERS: 1 << 12,      // 4096
+            UPDATE_ORDERS: 1 << 13,    // 8192
+            DELETE_ORDERS: 1 << 14,    // 16384
+
+            // Role Management (32768)
+            MANAGE_ROLES: 1 << 15,     // 32768
+
+            // Table Management (65536-131072)
+            VIEW_TABLES: 1 << 16,      // 65536
+            MANAGE_TABLES: 1 << 17,    // 131072
+
+            // Analytics (262144)
+            VIEW_ANALYTICS: 1 << 18,   // 262144
+
+            // System (1073741824)
+            ADMINISTRATOR: 1 << 30     // 1073741824 - Full access
+        };
+
+        // Helper functions for permission checking
+        function hasPermission(userPerms, requiredPerm) {
+            // Check if user has specific permission
+            return (userPerms & requiredPerm) === requiredPerm;
+        }
+
+        function addPermission(currentPerms, newPerm) {
+            // Add permission using bitwise OR
+            return currentPerms | newPerm;
+        }
+
+        function removePermission(currentPerms, perm) {
+            // Remove permission using bitwise AND with NOT
+            return currentPerms & ~perm;
+        }
+
+        function togglePermission(currentPerms, perm) {
+            // Toggle permission using bitwise XOR
+            return currentPerms ^ perm;
+        }
+
+        // Get permission name from value
+        function getPermissionName(permValue) {
+            for (const [name, value] of Object.entries(PERMISSIONS)) {
+                if (value === permValue) return name;
+            }
+            return 'UNKNOWN';
+        }
+
+        // Store current user's permissions globally
+        let currentUserPermissions = 0;
 
         // --- AUTH & INIT ---
         (async function checkAdminAccess() {
@@ -1414,15 +1630,148 @@
         // --- ROLES ---
         async function fetchRoles() {
             const container = document.getElementById('rolesList');
-            const { data, error } = await _supabase.from('roles').select('*');
-            if (error) { container.textContent = 'Error loading roles'; return; }
+            const { data, error } = await _supabase.from('roles').select('*').order('position', { ascending: false });
+            if (error) {
+                container.innerHTML = `<p style="color: red;">Error loading roles: ${error.message}</p>`;
+                return;
+            }
 
-            container.innerHTML = data.map(r => `
-                <div style="background:#2a3040; padding:10px; margin-bottom:5px; border-radius:8px; display:flex; justify-content:space-between;">
-                    <strong>${r.name}</strong>
-                    <small>ID: ${r.id}</small>
+            if (!data || data.length === 0) {
+                container.innerHTML = '<p style="color:#666;">No roles created yet. Click "+ Add New Role" to create one.</p>';
+                return;
+            }
+
+            container.innerHTML = data.map(r => {
+                const permCount = r.permissions.toString(2).split('1').length - 1; // Count set bits
+                return `
+                <div style="background:#2a3040; padding:15px; margin-bottom:10px; border-radius:8px; border-left:4px solid ${r.color};">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <strong style="font-size:16px; color:${r.color};">${r.name}</strong>
+                            <div style="margin-top:5px; color:#94a3b8; font-size:12px;">
+                                Position: ${r.position} | ${permCount} permissions
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button onclick="openRoleModal('${r.id}')" style="color:var(--primary); background:none; border:none; cursor:pointer; padding:5px 10px;">Edit</button>
+                            <button onclick="deleteRole('${r.id}')" style="color:var(--danger); background:none; border:none; cursor:pointer; padding:5px 10px;">Delete</button>
+                        </div>
+                    </div>
                 </div>
-            `).join('');
+            `;
+            }).join('');
+        }
+
+        function openRoleModal(roleId = null) {
+            const modal = document.getElementById('roleModal');
+            const title = document.getElementById('roleModalTitle');
+
+            // Reset form
+            document.getElementById('roleId').value = '';
+            document.getElementById('roleName').value = '';
+            document.getElementById('roleColor').value = '#99AAB5';
+            document.getElementById('rolePosition').value = '10';
+
+            // Uncheck all permissions
+            document.querySelectorAll('.perm-checkbox').forEach(cb => cb.checked = false);
+
+            if (roleId) {
+                // Edit mode - load role data
+                title.textContent = 'Edit Role';
+                document.getElementById('roleId').value = roleId;
+
+                // Find role from fetched data
+                _supabase.from('roles').select('*').eq('id', roleId).single()
+                    .then(({ data: role, error }) => {
+                        if (!error && role) {
+                            document.getElementById('roleName').value = role.name;
+                            document.getElementById('roleColor').value = role.color;
+                            document.getElementById('rolePosition').value = role.position;
+
+                            // Check permissions
+                            for (const [permName, permValue] of Object.entries(PERMISSIONS)) {
+                                if (hasPermission(role.permissions, permValue)) {
+                                    const checkbox = document.querySelector(`[data-perm="${permName}"]`);
+                                    if (checkbox) checkbox.checked = true;
+                                }
+                            }
+                        }
+                    });
+            } else {
+                // Create mode
+                title.textContent = 'Create Role';
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        function closeRoleModal() {
+            document.getElementById('roleModal').style.display = 'none';
+        }
+
+        async function saveRole() {
+            const roleId = document.getElementById('roleId').value;
+            const name = document.getElementById('roleName').value.trim();
+            const color = document.getElementById('roleColor').value;
+            const position = parseInt(document.getElementById('rolePosition').value);
+
+            if (!name) {
+                showToast('Please enter a role name', 'error');
+                return;
+            }
+
+            // Calculate permissions from checked boxes
+            let permissions = 0;
+            document.querySelectorAll('.perm-checkbox:checked').forEach(cb => {
+                const permName = cb.dataset.perm;
+                permissions = addPermission(permissions, PERMISSIONS[permName]);
+            });
+
+            try {
+                const roleData = { name, color, position, permissions };
+
+                if (roleId) {
+                    // Update existing role
+                    const { error } = await _supabase.from('roles')
+                        .update(roleData)
+                        .eq('id', roleId);
+
+                    if (error) throw error;
+                    showToast('Role updated successfully', 'success');
+                } else {
+                    // Create new role
+                    const { error } = await _supabase.from('roles')
+                        .insert([roleData]);
+
+                    if (error) throw error;
+                    showToast('Role created successfully', 'success');
+                }
+
+                closeRoleModal();
+                fetchRoles();
+            } catch (err) {
+                console.error('Save role error:', err);
+                showToast('Failed to save role: ' + err.message, 'error');
+            }
+        }
+
+        async function deleteRole(roleId) {
+            showConfirmModal(
+                'Delete Role',
+                'Are you sure you want to delete this role? Staff members with this role will need to be reassigned.',
+                async () => {
+                    try {
+                        const { error } = await _supabase.from('roles').delete().eq('id', roleId);
+                        if (error) throw error;
+
+                        showToast('Role deleted successfully', 'success');
+                        fetchRoles();
+                    } catch (err) {
+                        console.error('Delete role error:', err);
+                        showToast('Failed to delete: ' + err.message, 'error');
+                    }
+                }
+            );
         }
 
         // --- MODALS (Enhanced) ---
