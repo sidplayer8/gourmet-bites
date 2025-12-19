@@ -893,17 +893,16 @@
         // --- AUTH & INIT ---
         // === NAVIGATION ===
         function showSection(sectionId) {
-            document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
+                 ocument.querySelectorA            tent-section').forEach(s => s.styl                'none');
             const target = document.getElementById(sectionId + '-section');
-            if (target) target.style.display = 'block';
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                 f (target) target.style.display = 'block';
+            document.                rAll('.nav-item').forEach(i => i.classList.r                e'));
             if (event && event.target) event.target.classList.add('active');
-            const titles = {'dashboard':'Dashboard','orders':'Calls (Orders)','history':'History','menu':'Menu Management','staff':'Staff Management','roles':'Roles & Permissions','tables':'Tables'};
-            document.getElementById('pageTitle').textContent = titles[sectionId] || 'Dashboard';
+                const titles = {'dashboard':'Dashboard                Calls (Orders)', 'history':'H istory','men u':'Menu  Management','staf f':'Staff  Management ','role s':'Roles & Permis sions',' tables':'Tables'};
+              document.getElemen tById('pa geTitle' ).t                 titles[sectionId] || 'Dashboard';
         }
         
-        (async function checkAdminAccess() {
-            // 1. Session Check
+        (async function checkAd            s(        // 1. Session Check
             const { data: { session } } = await _supabase.auth.getSession();
             let user = session?.user;
 
@@ -914,74 +913,51 @@
                 user = localAdmin || localUser;
             }
 
-            if (!user || (!user.id && !user.uid)) {
+            if (!user || e                               localSt                );
+                window.location.hr            gin                        }
 
-                localStorage.clear();
-                window.location.href = 'login.html';
+            // T            ification Function
+            function showT                , type = 'info') {
+                const toas                .createElement('div');
+                            assName = `toast ${type}`;
+                    toast.textContent = message;
+                    document.body.appen                                    setTimeout(                                toast.style.opacity = '0';
+                          ast.style.transform = 'translateX(400px                                      eou            toast.remove(), 300);
+                     , 3000);
             }
 
-            // Toast Notification Function
-            function showToast(message, type = 'info') {
-                const toast = document.createElement('div');
-                toast.className = `toast ${type}`;
-                toast.textContent = message;
-                document.body.appendChild(toast);
-
-                setTimeout(() => {
-                    toast.style.opacity = '0';
-                    toast.style.transform = 'translateX(400px)';
-                    setTimeout(() => toast.remove(), 300);
-                }, 3000);
+            function toggleSidebar()                       document.querySelector('.sidebar').classList.toggle('open');
+                               t.querySelector('.sidebar-overlay'                toggle('active');
             }
+                 function showSection(sectionId)                       // Auto-close sidebar on mobile
+                if (window                    68) {
+                    document.querySelector('.sidebar').classList.                ');                         docum                ector('.sidebar-overlay').classList.remove('active');
+                     
 
-            function toggleSidebar() {
-                document.querySelector('.sidebar').classList.toggle('open');
-                document.querySelector('.sidebar-overlay').classList.toggle('active');
-            }
-
-            function showSection(sectionId) {
-                // Auto-close sidebar on mobile
-                if (window.innerWidth <= 768) {
-                    document.querySelector('.sidebar').classList.remove('open');
-                    document.querySelector('.sidebar-overlay').classList.remove('active');
-                }
-
-                // Sidebar UI
-                document.querySelectorAll('.nav-item').forEach(el => {
-                    el.classList.remove('active');
-                    if (el.textContent.toLowerCase().includes(sectionId)) el.classList.add('active');
+                // Sidebar UI                     document.querySelectorAll('.nav-item').forEach(el => {
+                    el.cla                e('ac                                              tContent.toLowerCase().includes(sectionId)) el.classList.add('active');
                 });
-
-                // Content UI
-                document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
-                const target = document.getElementById(`${sectionId}-section`);
-                if (target) target.classList.add('active');
-
-                // Header
-                document.getElementById('pageTitle').textContent = sectionId.charAt(0).toUpperCase() + sectionId.slice(1);
+                     // Content UI
+                document.querySelectorAll('.c                on').forEach(el => el.classList.remove('activ                                           = document.getElementById(`${sectionId}-section`);
+                if (target) target.classList.add('active                         // He                         document.getElementById('pageTitle')                 = sectionId.charAt(0).toUpperCase() + sect                1);
 
                 // Fetch Data
-                if (sectionId === 'dashboard') fetchStats();
-                if (sectionId === 'orders') fetchOrders();
-                if (sectionId === 'history') fetchHistory();
-                if (sectionId === 'menu') {
-                    fetchCategories();
-                    fetchMenu();
-                }
-                if (sectionId === 'staff') fetchStaff();
-                if (sectionId === 'roles') fetchRoles();
-                if (sectionId === 'tables') fetchTables();
+                          ctionId === 'dashboard') fet                               if (sect                    s') fetchOrde                                  sectionId === 'history') fetchHistory();
+                    if (sectionId === 'menu') {
+                         etchCategories();
+                    fetch                                }
+                       (sectionId === 'staff') fetchSt                           if (sectionId === 'roles') fetchRoles();
+                     f (sectionId === 'tables') fetchTables();
             }
 
             // --- TABLES ---
-            async function fetchTables() {
-                const container = document.getElementById('tablesGrid');
-                const { data, error } = await _supabase.from('restaurant_tables').select('*').order('table_number');
+            asy                fetchTables() {
+                const container = document.getElementBy                id');
+                const {                     await _supabase.from('restaurant_tables').select('*').order('table_number');
 
-                if (error) { container.textContent = 'Error loading tables'; return; }
-                if (!data || !data.length) {
-                    container.innerHTML = '<p>No tables found. Click "Reset/Init" to create them.</p>';
-                    return;
+                         rror) {                 xtC                ror loading tables'; return; }
+                           ta || !data.length) {
+                                       HTML = '<p>No tables found. Click "Reset/Init" to create the                                 return;
                 }
 
                 container.innerHTML = data.map(t => {
@@ -998,92 +974,73 @@
                     cursor: pointer;
                     transition: transform 0.2s;
                 " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                    <div style="font-size:24px; font-weight:bold; color:white;">T-${t.table_number}</div>
-                    <div style="margin-top:5px; color:${color}; font-size:14px; font-weight:bold;">${t.status.toUpperCase()}</div>
+                        <div style="            e:2            t-weight:bold; color:white;">T-${t.table_number}                               <div style="margin-top:5px; color:${color}; font-size:14px                t:bold;">${t.status.toUpperCase()}</div>
                 </div>`;
-                }).join('');
+                }).j                         }
+
+                as            tion toggleTable(id, currentSt                            const newStatus = currentStatus === 'available' ? 't            'av            ;
+                await _supaba                taurant_tables').update({ status: newStatus }).eq('id', id);
+                              ables();
             }
 
-            async function toggleTable(id, currentStatus) {
-                const newStatus = currentStatus === 'available' ? 'taken' : 'available';
-                await _supabase.from('restaurant_tables').update({ status: newStatus }).eq('id', id);
-                fetchTables();
+            a                n initTables() {
+                    document.getElementById('confirmModal').style.display = 'flex';
             }
 
-            async function initTables() {
-                document.getElementById('confirmModal').style.display = 'flex';
-            }
-
-            function closeConfirmModal() {
+            function                 Modal() {
                 document.getElementById('confirmModal').style.display = 'none';
             }
 
-            async function confirmInitTables() {
+                  ync function                     s() {
                 closeConfirmModal();
-                const seeds = Array.from({ length: 10 }, (_, i) => ({ table_number: i + 1, status: 'available' }));
-                const { error } = await _supabase.from('restaurant_tables').upsert(seeds, { onConflict: 'table_number' });
-                if (error) {
-                    console.error('Error creating tables:', error);
+                          seeds = Array.from({ length: 10 }, (_, i) => ({ table_number: i + 1, sta                ble' }));                     const { error } = await _supabase.from('restaurant_tabl                    s, { onConflict                be                               if (error) {
+                    console.error                ting tables:', error);
                     showToast('Error creating tables. Check console for details.', 'error');
-                } else {
-                    showToast('✓ Tables created successfully!', 'success');
-                    fetchTables();
+                    } else {
+                        showToast('✓ Tables created successfully!',                                     fetchTables();
                 }
-            }
-
-            async function updateOrderStatus(id, newStatus) {
-                const { data, error } = await _supabase.from('orders').update({ status: newStatus }).eq('id', id).select().single();
-                if (error) {
-                    console.error('Error updating order:', error);
-                    showToast('Failed to update order status', 'error');
+                               a                n u                atus(id, newStatus) {
+                const { dat                 await _supabase.from('orders').update({ status: newStatus }).eq('id', id).select().single();
+                if (error)                           console.error(                        r:', error);
+                    showToast                             status', 'error');
                     return;
-                }
-
-                // If order is done/cancelled, free up the table
-                if (newStatus === 'completed' || newStatus === 'cancelled') { // Changed 'done' to 'completed' to match existing status
+                                       // If order is done/canc                        able
+                if (newStatus ==                     n                 'c                 // Changed 'do                leted' to match existing status
                     if (data.table_id) {
-                        await _supabase.from('restaurant_tables')
-                            .update({ status: 'available', current_order_id: null })
-                            .eq('id', data.table_id);
-                        fetchTables(); // Refresh table view
+                                await _supabas            restaurant_tables')
+                                .update({ status: 'available', current_order_id: null                                    .eq('id', data.table_id);
+                                   bles(); // Refresh table view
                     }
                 }
 
                 fetchOrders();
-                showToast(`Order #${id.slice(0, 8)} marked as ${newStatus}`, 'success');
-            }
+                    showToast(`Order #${id.slic                    as ${newStatus}`, 'success');
+                               // --- HISTORY ---
+            as                    chHistory() {
+                const conta                ent.getEl                    ryList');
+                             ter = document.getElementById('historyFilter').value;
 
-            // --- HISTORY ---
-            async function fetchHistory() {
-                const container = document.getElementById('historyList');
-                const filter = document.getElementById('historyFilter').value;
-
-                let query = _supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(50);
-
-                if (filter === 'completed') {
-                    query = query.eq('status', 'completed');
-                } else if (filter === 'cancelled') {
+                                    _supabase.from('orders').select('*').order('cr                 ascending: false }).lim                             if (filter === 'completed') {
+                                   ry.eq('s                ple                           } else if (filte                    ') {
                     query = query.eq('status', 'cancelled');
                 } else {
-                    // All non-pending
-                    query = query.in('status', ['completed', 'cancelled']);
-                }
+                                       ing
+                                       ry.in('status', ['completed', 'cancelled                         }
 
-                const { data: orders, error } = await query;
+                            data: orders, error } = await query;
 
                 if (error || !orders) {
-                    container.innerHTML = '<p>Error loading history</p>';
+                                 .innerHTML = '<p>Error loading history</p>';
                     return;
                 }
 
-                if (orders.length === 0) {
-                    container.innerHTML = '<p style="color:#666; text-align:center; padding:40px;">No completed orders yet.</p>';
+                            rs.length === 0) {
+                    container.innerHTML = '<p style="co                    lign:center; padding:40px;">No completed orders yet.</p>';
                     return;
                 }
 
                 container.innerHTML = orders.map(o => {
-                    let items = [];
-                    try { items = typeof o.items === 'string' ? JSON.parse(o.items) : o.items; } catch (e) { }
+                    let items                               try { items = typeof o.item                     JSON.parse(o.items) : o.items; } catch (e) { }
                     const itemsStr = Array.isArray(items) ? items.map(i => `${i.quantity}x ${i.name}`).join(', ') : '';
                     const statusColor = o.status === 'completed' ? 'var(--success)' : '#666';
                     const tableBadge = o.table_number ? `<span style="background:#3b82f6; color:white; padding:2px 6px; border-radius:4px; font-size:12px; margin-left:8px;">Table ${o.table_number}</span>` : '';
@@ -1096,70 +1053,53 @@
                             <strong>#${o.id.slice(0, 8)}...</strong> ${tableBadge} 
                             <span style="background:${statusColor}; color:white; padding:2px 8px; border-radius:4px; font-size:11px; margin-left:8px;">${o.status.toUpperCase()}</span>
                             <br>
-                            <small>${date.toLocaleDateString()} ${date.toLocaleTimeString()}</small><br>
-                            <div style="margin-top:5px; font-size:14px; color:#ccc;">${itemsStr}</div>
-                            ${o.custom_notes ? `<div style="margin-top:5px; font-size:12px; color:#aaa;">📝 ${o.custom_notes}</div>` : ''}
+                            <small>${date.toLocaleDateString()} ${date.toLocaleTimeString                br>
+                                    <div style="margi            x; font-size:14px; color:#ccc;                }</div                                  ${o.custom_notes ? `<div style="margin-top:5px; font-size:12px; color:#aaa;">📝                     }</div>` : ''}
                         </div>
-                        <div style="text-align:right;">
-                            <div style="font-size:18px; font-weight:bold;">$${Number(o.total_price || 0).toFixed(2)}</div>
-                        </div>
-                    </div>
-                </div>`;
-                }).join('');
-            }
+                        <d                    lign:right;">
+                            <                    size:18px; font-weight:bold;">$${Number(o.total_price                        div>
+                                                       </div>
+                                             }).join(''                    
 
-            // --- STATS ---
-            async function fetchStats() {
-                try {
-                    const { count } = await _supabase.from('orders').select('*', { count: 'exact', head: true });
-                    document.getElementById('stat-total-orders').textContent = count || 0;
-
-                    // Count tables that are currently 'taken'
-                    const { data: takenTables, error } = await _supabase
+                                             async function fetchStats() {
+                                                                    await _supabase.from('orders').select('*', { count: 'exac                                           document.getElementById('stat-total-orders').textContent = count ||                                           ables that are currently 'taken'
+                    const { data: takenTables,                     _supabase
                         .from('restaurant_tables')
-                        .select('id, status')
+                                          tatus')
                         .eq('status', 'taken');
 
-                    if (error) {
-                        console.error('Error fetching active tables:', error);
-                    } else {
-                        console.log('Active tables query result:', takenTables);
-                        document.getElementById('stat-active-tables').textContent = takenTables?.length || 0;
+                                   {
+                                  e.error('Error fetching active tables:',                                              e {
+                            console.log('Active tables qu                , takenTables);
+                        document.getEleme                -active-tables').textContent = taken                th || 0;
                     }
 
-                    const { data: orders } = await _supabase.from('orders').select('total_price');
-                    const sum = orders?.reduce((acc, o) => acc + (Number(o.total_price) || 0), 0) || 0;
-                    document.getElementById('stat-revenue').textContent = '$' + sum.toFixed(2);
+                    const { data: orders } = aw                e.from('orders').select('total_price');
+                    const sum = orders?.reduce((acc, o) => acc + (Numb                rice) || 0), 0) || 0;
+                    document.getElementById('stat-rev                ontent = '$' + sum.toFixed(2);
                 } catch (err) {
-                    console.error('fetchStats error:', err);
-                }
-            }
+                           sole.error('fetchStats error:', err);
+                                  }
 
             // --- ORDERS ---
-            async function fetchOrders() {
-                const container = document.getElementById('ordersList');
-                container.innerHTML = 'Loading...';
-                // Fetch all, but we will filter client-side for now or we can filter DB side.
-                const { data, error } = await _supabase.from('orders').select('*').order('created_at', { ascending: false });
-                if (error) { container.textContent = 'Error: ' + error.message; return; }
+            async function fet                
+                const container = document.getElementById('ordersList')                      container.innerHTML = 'Loading...';
+                // Fetch all, but we wi                ient-side for now or w                 DB side.
+                const { data, error } = await _supabase.from('o                ct('*').order('created_at', { ascending:                               if (error) { container.textContent = 'Error: ' + error.message; return                         if (!data.length) { contai                L = '                .</p>'; return; }
 
-                if (!data.length) { container.innerHTML = '<p>No orders.</p>'; return; }
+                                  (Keep calculating from ALL data)
+                document.getElementById('stat-total-orde                     = data.length;
+                const revenue = data.reduce((acc, o) => a                    ice || 0                                   ment.getElementById('stat-revenue').textConten                    e.toFixed(2);
 
-                // Calc Stats (Keep calculating from ALL data)
-                document.getElementById('stat-total-orders').textContent = data.length;
-                const revenue = data.reduce((acc, o) => acc + (o.total_price || 0), 0);
-                document.getElementById('stat-revenue').textContent = '$' + revenue.toFixed(2);
-
-                // Filter for Display
-                const showingHistory = document.getElementById('showHistoryCb').checked;
+                     / Filter for Display
+                const showingHistory = document.getElementById('showHi                    d;
                 const activeOrders = data.filter(o => {
-                    if (showingHistory) return o.status === 'completed' || o.status === 'cancelled';
-                    return o.status === 'pending';
-                });
+                    if (showingHistory) r                    == 'completed' || o.status === 'cancelled';
+                    return o.status                                    });
 
-                if (activeOrders.length === 0) {
+                        activeOrders.length === 0) {
                     const msg = showingHistory ? "No history yet." : "No pending orders. All caught up! 🎉";
-                    container.innerHTML = `<p style="padding:20px; color:#aaa;">${msg}</p>`;
+                    container.innerHTML = `<p style="p                    or:#aaa;">${msg}</p>`;
                     return;
                 }
 
@@ -1179,32 +1119,28 @@
                             <div style="margin-top:5px; font-size:15px; color:white;">${itemsStr}</div>
                             ${o.custom_notes ? `<div style="margin-top:5px; font-size:12px; color:#aaa;">📝 ${o.custom_notes}</div>` : ''}
                         </div>
-                        <div style="text-align:right;">
-                            <div style="font-size:18px; font-weight:bold;">$${Number(o.total_price || 0).toFixed(2)}</div>
-                            <div style="margin-top:10px;">
-                                <button style="background:var(--success); color:white; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; font-weight:bold;" onclick="updateOrder('${o.id}', 'completed')">DONE</button>
-                                <button style="background:var(--card-bg); border:1px solid #444; color:#aaa; padding:8px 12px; border-radius:4px; cursor:pointer;" onclick="updateOrder('${o.id}', 'cancelled')">Cancel</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
-                }).join('');
-            }
+                        <div style="te                ht;">
+                                    <div style="font-size:18px; font-weight                umber(o.total_price || 0).toFixed(2)}</div>
+                                <div                in-top:10px;">
+                                <button style="ba                (--success); color:white; border:none; padding:8px 12px            -ra            ; cursor:pointer; font            bold;" onclick="updateOrder('${o.id            pleted')">DONE</button>
+                                    <button style="ba                (--card-bg); border:1px solid #444; color:#aaa; padding:8px 12px; border-radius:4px; cursor:poi                ck="updateOrd                    ancelled')">Cancel</button>
+                                                                    /d                            </div>
+                </                           }).join('');
+                 
 
-            async function updateOrder(id, status) {
-                // REMOVED 'confirm' dialog (The "Black Box")
-                // Instant update
-                await _supabase.from('orders').update({ status }).eq('id', id);
-                fetchOrders(); // Refresh list -> Order will disappear
+                       unc            ateOrder(id, status) {
+                            ED 'confirm' dialog (The "Black Box")
+                // Insta                              await _supabase.from('orders')                atus }).eq('id', id);
+                fetchOrd                    h list -> Order will disappear
             }
 
             // --- CATEGORIES ---
-            let selectedCategoryFilter = null;
-            window._categoriesData = [];
+            let selectedCa                    ull;
+                   dow                Data = [];
 
             async function fetchCategories() {
-                const { data, error } = await _supabase.from('categories').select('*').order('display_order');
-                if (error) {
+                                , error } = await _supa                ategories').select('*').order('display_order');
+                     f (error) {
                     console.error('Error fetching categories:', error);
                     return;
                 }
@@ -1222,13 +1158,13 @@
                     return;
                 }
 
-                let html = '<div style="display:flex; flex-direction:column; gap:5px;">';
+                le                iv style="display:flex; flex                    n; gap:5px;">';
 
                 // "All" filter button
-                const allSelected = selectedCategoryFilter === null;
-                html += `
+                    const allSelected = selectedCategoryFilter === null;
+                         += `
                 <div class="cat-filter" data-cat="__all__" style="
-                    padding:10px 12px;
+                          dding:10px 12px;
                     background:${allSelected ? 'rgba(255,102,0,0.2)' : 'transparent'};
                     border-left:3px solid ${allSelected ? 'var(--primary)' : 'transparent'};
                     border-radius:6px;
@@ -1259,209 +1195,147 @@
                         justify-content:space-between;
                         align-items:center;
                         transition:all 0.2s;
-                        font-weight:${isSelected ? 'bold' : 'normal'};
-                    ">
-                        <span>${cat.name}</span>
-                        <div style="display:flex; gap:8px;">
-                            <button class="cat-edit" data-id="${cat.id}" data-name="${escapedName}"
-                                style="background:rgba(255,255,255,0.1); border:1px solid #666; color:#ccc; cursor:pointer; padding:4px 8px; border-radius:4px; font-size:11px;"
-                                title="Edit category">Edit</button>
-                            <button class="cat-del" data-id="${cat.id}" data-name="${escapedName}"
-                                style="background:rgba(220,38,38,0.2); border:1px solid var(--danger); color:var(--danger); cursor:pointer; padding:4px 8px; border-radius:4px; font-size:11px;"
-                                title="Delete category">Del</button>
+                        font-weight:${isSelected ? 'bold' : 'nor                                     
+                                 >${cat.name}</span>
+                            <div style="display:fle                >
+                            <button class="cat-edit" dat                     data-name="${escapedName}"
+                                    style="background:rgba(255,255,255,0.1); border:1px                        ccc; cursor:pointer; padding:4px 8px; border-ra                            ;"
+                                title="                            ton>
+                                                        data-id="${cat.id}" data-name="$                                                   style="background:rgb                        rd                        anger); color:var(--danger);                        ding:4px 8px; border-radius:4px; font-size:11px;"
+                                            e="De                y">Del</button>
                         </div>
-                    </div>
+                           iv>
                 `;
                 });
 
-                html += '</div>';
+                             </div>';
                 container.innerHTML = html;
 
                 // Attach event listeners
-                container.querySelectorAll('.cat-filter').forEach(el => {
-                    el.addEventListener('click', (e) => {
-                        // Check if click was on a button or inside a button
-                        if (e.target.classList.contains('cat-edit') ||
-                            e.target.classList.contains('cat-del') ||
+                               uerySelectorAll('.cat-filt                    => {
+                    el.addEventLis                        > {
+                                         lick was on a button                                                if (e.target.                        cat-edit') ||
+                            e.target.classL                        l') ||
                             e.target.closest('.cat-edit') ||
-                            e.target.closest('.cat-del')) {
-                            return; // Let button handlers deal with it
-                        }
-                        const cat = el.dataset.cat;
-                        filterMenuByCategory(cat === '__all__' ? null : cat);
+                                e.target.closest(                                                             ; // Let button handlers                                          }
+                                        el.dataset.cat;
+                             ilterMenuByCategory(                        null : cat);
                     });
-                });
+                        
+                const editBtns                        lectorAll('.cat-edit');
+                const delBtns = container.que                        del');
 
-                const editBtns = container.querySelectorAll('.cat-edit');
-                const delBtns = container.querySelectorAll('.cat-del');
-
-                console.log('Attaching listeners to', editBtns.length, 'edit buttons and', delBtns.length, 'delete buttons');
-
-                editBtns.forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        const id = parseInt(btn.dataset.id);
-                        console.log('Edit button clicked for category ID:', id);
-                        console.log('VERSION: 2024-12-18-17:45 - Calling openCategoryModal');
-                        openCategoryModal(id);
+                console.l                    sten                tBtn            , '            tons and', delBtns.length, 'delete butto                           editBtns.forEach(btn => {
+                                   tListener('click', (e) => {
+                        e.stopPro                                        e.preventDefault();
+                               st id = parseInt(btn.dataset.id);
+                        co                dit button                    egory ID:', i                                console.log('VERSION: 2024-12-18-17:45 - Calling ope                    ;
+                                      ryModal(id);
                     });
-                });
-
-                delBtns.forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        const id = parseInt(btn.dataset.id);
-                        const name = btn.dataset.name;
-                        console.log('Delete button clicked for category:', name, 'ID:', id);
-                        deleteCategoryConfirm(id, name);
+                        
+                delBtns.forEach(                                 btn.addEven                    ',                                             topPropagati                                  e.preventDefault();
+                            const id = parse                    id);
+                               st                 ataset.name;
+                                ole.log('Delete but            ked            egory:', name, 'ID:', id);
+                            deleteCategoryConfirm(id, name);
                     });
-                });
-            }
+                                        }
 
-            function openCategoryModal(id = null) {
-                const modal = document.getElementById('categoryModal');
-                const title = document.getElementById('categoryModalTitle');
-                const nameInput = document.getElementById('categoryName');
-                const idInput = document.getElementById('categoryItemId');
-
-                if (id) {
-                    // Edit mode
-                    const category = window._categoriesData.find(c => c.id === id);
-                    if (category) {
-                        title.textContent = 'Edit Category';
-                        nameInput.value = category.name;
-                        idInput.value = id;
-                    }
-                } else {
-                    // Add mode
+            function op                dal(id = null) {
+                const modal = document.getE                categoryModal');
+                const title = document.getElementBy                ModalTitle');                     const nameInput = document.getElementById('category                                            t =                tEleme                    ItemId');
+                        (id) {
+                                    
+                    const categor                            ta.find(c => c.id ==                               if (category) {                             title.textCont                        ';
+                                              category.name;
+                        idInput.value =                                                     else {
+                               mode
                     title.textContent = 'Add Category';
-                    nameInput.value = '';
-                    idInput.value = '';
-                }
-
-                modal.classList.add('show');
-                nameInput.focus();
+                    nameInp                                       idInput.value = '';                                        modal.cl                                         nameInput.focus();
             }
 
-            function closeCategoryModal() {
-                document.getElementById('categoryModal').classList.remove('show');
-            }
+                         closeCategoryModal() {
+                         ent.getElementById('categoryModal').classList.remove(                                            async function saveCa                                   const id =                    mentById('categoryItemId').value;
+                const                ment.getElementB                    e').value.trim();
 
-            async function saveCategoryItem() {
-                const id = document.getElementById('categoryItemId').value;
-                const name = document.getElementById('categoryName').value.trim();
-
-                if (!name) {
-                    showToast('Please enter a category name', 'error');
-                    return;
-                }
+                if (!name                            showToast('Please enter a category name', 'error');
+                                 n;
+                    }
 
                 try {
-                    if (id) {
-                        // Update existing
-                        const { error } = await _supabase
-                            .from('categories')
-                            .update({ name })
+                        if (id) {
+                        // Update                                      const { error } = await _supabase
+                                .from('categories')
+                                     te({ name })
                             .eq('id', id);
-                        if (error) throw error;
-                        showToast('Category updated successfully', 'success');
-                    } else {
-                        // Insert new
-                        const maxOrder = Math.max(...window._categoriesData.map(c => c.display_order || 0), 0);
-                        const { error } = await _supabase
+                            if (error) throw error;
+                        show                ory updated successfully', 's                                  } else {
+                            // Insert new
+                        const max                .max(...window._categoriesData.map(c =>                 der || 0), 0);
+                        const { err                 _supabase
                             .from('categories')
-                            .insert({ name, display_order: maxOrder + 1 });
-                        if (error) throw error;
-                        showToast('Category added successfully', 'success');
-                    }
+                                .insert({ name, display_order: maxOrd                                       if                    rror;
+                                       st(            y added successfully', 'success                            }
 
                     closeCategoryModal();
-                    await fetchCategories();
-                    await fetchMenu(); // Refresh menu to update dropdowns
-                } catch (err) {
-                    console.error('Save category error:', err);
-                    showToast('Failed to save category: ' + err.message, 'error');
-                }
+                                  fetchCategories();
+                    await fetc                Refresh menu to up                                   } ca                                    console.error('Save category error:', err);
+                    showToast('Failed                     : ' + err.mess                                                                    // Custom confirm modal functions
+            function showConfirm                            Confirm) {
+                                          .getElementById('confirmModal');
+                const ti                            entById('confirmTitle');
+                        t messageEl = do                            onfirmMessage');
+                const confirm                            tById('confirmBtn');
+
+                titleEl.textConten                                              ex                ess                             modal.style.display = 'flex'; // Flex for ce                             // Remove old listeners an                e
+                const n                 = confirmBtn            de(                           co            .parentNode.replaceChild(newC                onfirmBtn);
+
+                newConfirmBtn.addEventListener('clic                                    closeConfirmModal();
+                    onConfirm();                     });
             }
 
-            // Custom confirm modal functions
-            function showConfirmModal(title, message, onConfirm) {
-                const modal = document.getElementById('confirmModal');
-                const titleEl = document.getElementById('confirmTitle');
-                const messageEl = document.getElementById('confirmMessage');
-                const confirmBtn = document.getElementById('confirmBtn');
-
-                titleEl.textContent = title;
-                messageEl.textContent = message;
-                modal.style.display = 'flex'; // Flex for centering
-
-                // Remove old listeners and add new one
-                const newConfirmBtn = confirmBtn.cloneNode(true);
-                confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
-
-                newConfirmBtn.addEventListener('click', () => {
-                    closeConfirmModal();
-                    onConfirm();
-                });
-            }
-
-            function closeConfirmModal() {
-                document.getElementById('confirmModal').style.display = 'none';
-            }
-
-            async function deleteCategoryConfirm(id, name) {
-                showConfirmModal(
+            f                eConfirmModal() {
+                                ElementById('confirmModal').style.display = 'none';
+                  
+                  ync function deleteCategoryConfirm(id,                                                 (
                     'Delete Category',
-                    `Delete category "${name}"?\n\nNote: Menu items in this category will keep their category text.`,
-                    async () => {
-                        try {
-                            const { error } = await _supabase.from('categories').delete().eq('id', id);
-                            if (error) throw error;
+                    `Delete categ                    \nNote:                 n t                 will keep their categor                                  async ()                                  try {
+                                const { error } = await _supabase                        delete().eq('id', id);
+                            if                         
 
-                            showToast('Category "' + name + '" deleted', 'success');
+                            showToast('Category "' + name + '                    cess');
                             await fetchCategories();
-                        } catch (err) {
-                            console.error('Delete category error:', err);
+                        } catch                                             co                'Delete category error:', err);
                             showToast('Failed to delete: ' + err.message, 'error');
-                        }
-                    }
-                );
-            }
+                                                  }
+                                   }
 
-            function filterMenuByCategory(categoryName) {
-                selectedCategoryFilter = categoryName;
+            function filterMenuByCateg                                        selectedCategoryFilter = categoryName;
                 renderCategorySidebar();
                 fetchMenu();
-            }
-
-            // --- MENU ---
+                               // --- MENU ---
 
             async function fetchMenu() {
-                const container = document.getElementById('menuTableContainer');
-                let query = _supabase.from('menu_items').select('*').order('category');
+                const container = document.getElementById(                    ner');
+                let query = _supabase.                        elect('*').order('category');
 
                 // Apply category filter if selected
                 if (selectedCategoryFilter) {
-                    query = query.eq('category', selectedCategoryFilter);
+                            y = query.eq('category', selectedCategoryFilter);
                 }
 
                 const { data, error } = await query;
 
-                if (error) {
-                    container.innerHTML = `<p style="color:red">Error: ${error.message}</p>`;
+                                                     container.innerHTML = `<p style="color:red">Erro                    ge}</p>`;
                     return;
                 }
 
-                // Cache for edit modal
-                window._menuData = data;
+                // Cache for                                window._menuData = data;
 
-                if (!data || data.length === 0) {
-                    const msg = selectedCategoryFilter
-                        ? `No items in "${selectedCategoryFilter}" category.`
+                           ta || data.length === 0) {
+                    const msg = select                                             ? `No items in "${selectedCategory                    y.`
                         : 'No menu items yet. Click "+ Add New Item" to get started.';
-                    container.innerHTML = `<p style="color:#666; text-align:center; padding:40px;">${msg}</p>`;
+                        container.innerHTML = `<p style="color:#666; text-align                    :40px;">${msg}</p>`;
                     return;
                 }
 
@@ -1471,117 +1345,87 @@
                         ? '<span style="background:var(--success); color:white; padding:2px 8px; border-radius:4px; font-size:11px;">Available</span>'
                         : '<span style="background:#666; color:white; padding:2px 8px; border-radius:4px; font-size:11px;">Out of Stock</span>';
                     const publicBadge = item.is_public !== false
-                        ? '<span style="background:#3b82f6; color:white; padding:2px 6px; border-radius:4px; font-size:10px; margin-left:5px;">Public</span>'
-                        : '<span style="background:#64748b; color:white; padding:2px 6px; border-radius:4px; font-size:10px; margin-left:5px;">Hidden</span>';
+                        ? '<span style="background:#3b82f6; color:white; padding:2px 6px; border-radius:4px; f                x; margin-lef                ic</span>'
+                                 pan style="background:#64748b                e; padding:2px 6px; border-radius:4px; font-size:10px                t:5px;">Hidden</span>';
 
-                    // Check if category still exists (only if category list is loaded)
-                    const categoriesLoaded = window._categoriesData && window._categoriesData.length > 0;
-                    const categoryExists = categoriesLoaded
-                        ? window._categoriesData.some(cat => cat.name === item.category)
-                        : true; // Assume exists if categories not loaded yet
+                    // Check if categ                     (only if category list is loaded)
+                           st categoriesLoaded = window._categoriesData && wind                        ength > 0;
+                            t ca                 = ca                ed
+                        ? window._categoriesData.some(cat                     item.category)
+                                               xists if categories not loaded yet
 
-                    const displayCategory = (item.category && categoryExists) ? item.category : 'Uncategorized';
-                    const categoryStyle = categoryExists ? '#334' : '#666';
+                                        egory = (item.catego                    ists                egor            ate            ;
+                    const categoryStyle = ca                 ? '#334' : '#666';
 
                     return `
-                <tr>
-                    <td><strong>${item.name || 'Unnamed'}</strong></td>
-                    <td><span style="background:${categoryStyle}; padding:2px 6px; border-radius:4px;">${displayCategory}</span></td>
-                    <td>$${Number(item.price || 0).toFixed(2)}</td>
-                    <td>${availBadge} ${publicBadge}</td>
-                    <td>
-                        <button class="menu-edit-btn" data-id="${item.id}" style="color:var(--primary); background:none; border:none; cursor:pointer; margin-right:10px;">Edit</button>
-                        <button class="menu-del-btn" data-id="${item.id}" style="color:var(--danger); background:none; border:none; cursor:pointer;">Delete</button>
-                    </td>
-                </tr>
-            `;
+                    <tr>
+                    <td><strong>${item.name || 'Unn                ng></td>
+                           ><span style="background:${categoryStyle}; padding                rder-radius:4px;">${displayCategory}</span></td>                         <td>$${Number(item.price || 0).toFixed(2                                <td>${availBadge} ${publicBadge}</td>
+                        <td>
+                        <button class="m                " data-id="${item.id}" style="color:var(--primary); back                 border:none; cursor:pointer; margin-right:10px;">Edit</butt                                <button class=                n" data-id="${item.id}" style="color:var(--danger); background:n                none; cursor:pointer;">Delete</b                               </td>
+                </tr                  `;
                 }).join('');
-                html += '</tbody></table>';
-                container.innerHTML = html;
+                         += '</tbody></table>';                     container.innerHTML = html;
 
-                // Attach event listeners to all edit/delete buttons
-                container.querySelectorAll('.menu-edit-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const id = btn.dataset.id; // Keep as string (UUID)
-                        openMenuModal(id);
+                //                     teners to all edit/delete                             container.querySelecto                    -btn').forEach(btn => {
+                            addEv                'click', () => {
+                        const id = btn.dataset.                as string (UUID)
+                        openMenuModal                              });
+                });                      container.querySelectorAll('.menu-del                ch(btn => {
+                    btn.addEve                click', () =>                               con                    set.id; // Keep as string (UUID)
+                            deleteMenuItem(id);
                     });
-                });
+                                    }
 
-                container.querySelectorAll('.menu-del-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const id = btn.dataset.id; // Keep as string (UUID)
-                        deleteMenuItem(id);
-                    });
-                });
-            }
-
-            async function openMenuModal(itemId = null) {
-                const modal = document.getElementById('menuModal');
-                const title = document.getElementById('menuModalTitle');
-
-                // Reset form first
-                document.getElementById('menuItemId').value = '';
-                document.getElementById('menuName').value = '';
-                document.getElementById('menuPrice').value = '';
-                document.getElementById('menuDescription').value = '';
-                document.getElementById('menuImageUrl').value = '';
-                document.getElementById('menuIsPublic').checked = true;
-                document.getElementById('menuIsAvailable').checked = true;
-
-                // Populate category dropdown
-                const categorySelect = document.getElementById('menuCategory');
+            async function openMenuModal(itemId =                             const modal = document.getElementById('menuModal                        const title = document.getElementById('men                                                         st
+                               tElementById('menuItemId').value = '';
+                                 lementById('menuName                                   document.g                                alue = '';
+                                       ById('menuDe                                            docume                                Url').value =                            um                        menuIsPublic').c                                   document.getElementById('menuIsAvaila                        ;
+                     //                    ry dropdown
+                cons                     = document.                        Category');
                 categorySelect.innerHTML = '';
 
-                // Use cached categories with null check
-                const cats = window._categoriesData || [];
+                         e cached categories with null check
+                const cats = wind                        | [];
                 cats.forEach(cat => {
-                    const option = document.createElement('option');
+                                           ment.createElement('option');
                     option.value = cat.name;
-                    option.textContent = cat.name;
-                    categorySelect.appendChild(option);
-                });
+                        option.textContent = cat.name;
+                    categorySelect.appe                                     });
 
-                // Add "Uncategorized" option for items with deleted categories
+                // Add "Uncategorized" option for items wi                        s
                 const uncatOption = document.createElement('option');
-                uncatOption.value = 'Uncategorized';
-                uncatOption.textContent = 'Uncategorized';
-                categorySelect.appendChild(uncatOption);
+                              n.value =                                      uncatOption.textContent = 'Uncategorized'                                      ct.append                    n);
 
-                if (itemId) {
-                    // Edit mode
-                    title.textContent = 'Edit Menu Item';
-                    document.getElementById('menuItemId').value = itemId;
+                           mId) {
+                    // Edit mo                                   e.textContent = 'Edit Menu Item';
+                        document.getElementById('me            ').            itemId;
 
-                    // Find item in cache - compare as strings for UUID support
-                    let item = window._menuData?.find(i => i.id == itemId);
+                    // Find ite                 compare as string                    rt
+                                     ndow._menuData?.find(i => i.id == itemId);
 
-                    // If not found in cache, fetch from database
-                    if (!item) {
-                        try {
+                    // If not found i                    rom database
+                         f (!it                                  try {
                             const { data, error } = await _supabase
-                                .from('menu_items')
-                                .select('*')
-                                .eq('id', itemId)
-                                .single();
+                                    .from('menu_items                                       .select('*')
+                                               temId)
+                                    .single();
 
-                            if (!error && data) {
-                                item = data;
-                            }
-                        } catch (err) {
-                            console.error('Error fetching item:', err);
+                                if (!error && data) {
+                                                                             }
+                        } catc                                              co                'Er            hin            , err);
                         }
-                    }
+                        }
 
-                    // Populate form with item data
-                    if (item) {
-                        document.getElementById('menuName').value = item.name || '';
-                        document.getElementById('menuCategory').value = item.category || '';
-                        document.getElementById('menuPrice').value = item.price || '';
-                        document.getElementById('menuDescription').value = item.description || '';
-                        document.getElementById('menuImageUrl').value = item.image_url || '';
-                        document.getElementById('menuIsPublic').checked = item.is_public !== false;
+                    // Popu            m with item data
+                        if (item) {
+                            document.getElementById('menuName').value = item.name || '';                                      ent.getElementById('menuCategory').value                   y || '';
+                        document.getElementById('menuPrice'                em.                
+                        document.getElementById('menuDescription').value = item.                || '';
+                            document.getElementById('menuImageUrl').value = item.image_url || '';
+                        document.getElemen                    lic').ch                .is                false;
                         document.getElementById('menuIsAvailable').checked = item.is_available !== false;
-                    } else {
+                          else {
                         showToast('Error: Could not load item data', 'error');
                     }
                 } else {
@@ -1596,33 +1440,22 @@
             async function deleteMenuItem(itemId) {
                 showConfirmModal(
                     'Delete Menu Item',
-                    'Are you sure you want to delete this menu item? This action cannot be undone.',
-                    async () => {
-                        try {
-                            const { error } = await _supabase.from('menu_items').delete().eq('id', itemId);
-                            if (error) throw error;
+                    'Are you sure you want to delete this menu item? This action cannot be un                                async () =>                               try {
+                                    const { error } = await _supabas                _items').delete().eq('id', itemId);
+                                       or) throw error;
 
-                            showToast('Menu item deleted', 'success');
-                            await fetchMenu();
-                        } catch (err) {
-                            console.error('Delete menu item error:', err);
-                            showToast('Failed to delete: ' + err.message, 'error');
-                        }
-                    }
-                );
+                            showToa                    leted', 'succe                                              await fetchMenu(                               } catch (er                                     console.error('Delete menu item err                                            showToast('Failed to delete: ' + err.message, 'error');
+                                                  }
+                    );
             }
 
             // Expose globally for modal callbacks
-            window.fetchMenuGlobal = fetchMenu;
-
-            // --- STAFF ---
-            async function fetchStaff() {
-                const container = document.getElementById('staffTableContainer');
+            window.fe                    fetchMen                                   F ---
+            async function f                                  const container = document.getElementById('staffTableContainer');
                 /* 
-                  This query relies on foreign key logic. 
-                  If 'roles' table exists and FK is set up: .select('*, roles(name)')
+                                 relies                 ey                               If 'roles' table exists                     : .select('*, roles(name)')
                 */
-                const { data, error } = await _supabase.from('staff').select('*, roles(name)');
+                const { data, error }                     e.from('staff').select('*, roles(name)');
 
                 if (error) {
                     container.innerHTML = `<p style="color:red">Error: ${error.message}. Make sure 'roles' relationship exists.</p>`;
@@ -1645,368 +1478,254 @@
                 container.innerHTML = html;
             }
 
-            async function deleteStaff(id) {
-                if (confirm('Remove access for this staff member?')) {
-                    await _supabase.from('staff').delete().eq('id', id);
-                    fetchStaff();
+            async function deleteStaf                            i            rm(            access for this staff member?')) {
+                        await _supabase.from('staff').delete().eq('id', i                            fetchStaff();
                 }
             }
-
-            // --- ROLES ---
-            async function fetchRoles() {
-                const container = document.getElementById('rolesList');
-                const { data, error } = await _supabase.from('roles').select('*').order('position', { ascending: false });
-                if (error) {
-                    container.innerHTML = `<p style="color: red;">Error loading roles: ${error.message}</p>`;
-                    return;
+                 // --- ROLES                     async function fetchRoles() {
+                            ntainer = document.getElementById('rolesList');
+                    const { data, error } = await _supabase.from('roles'                ).order('position', { ascending: false });
+                            r) {
+                    co                rHTML = `<p style="color: red;">Error loading roles: ${error.message}</p>`;
+                        return;
+                      
+                if (!data ||                     0) {
+                    containe                    p style="color:#666;">No roles created yet. Click "                    to create one.</p>';
+                              ;
                 }
 
-                if (!data || data.length === 0) {
-                    container.innerHTML = '<p style="color:#666;">No roles created yet. Click "+ Add New Role" to create one.</p>';
-                    return;
-                }
-
-                container.innerHTML = data.map(r => {
-                    const permCount = r.permissions.toString(2).split('1').length - 1; // Count set bits
-                    return `
-                <div style="background:#2a3040; padding:15px; margin-bottom:10px; border-radius:8px; border-left:4px solid ${r.color};">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <strong style="font-size:16px; color:${r.color};">${r.name}</strong>
-                            <div style="margin-top:5px; color:#94a3b8; font-size:12px;">
-                                Position: ${r.position} | ${permCount} permissions
-                            </div>
-                        </div>
-                        <div style="display:flex; gap:10px;">
-                            <button onclick="openRoleModal('${r.id}')" style="color:var(--primary); background:none; border:none; cursor:pointer; padding:5px 10px;">Edit</button>
-                            <button onclick="deleteRole('${r.id}')" style="color:var(--danger); background:none; border:none; cursor:pointer; padding:5px 10px;">Delete</button>
-                        </div>
-                    </div>
+                container.innerHTML = dat                                     const permCount = r.pe                            lit('1').length - 1; /                                         return `
+                <div style="backgroun                                gin-bottom:10px; border-radius:8px; border-left:4px solid                                       <div style="display:flex; justify-content:space-between;                                                   <di                                   <strong style="font-size:16px; color:${r.color};">${r.name}</str                                     <div style="margin-top:5px; color:#94a3b8; font-s                                                Position: ${r.position} | ${permCount} permissions
+                                                               </div>
+                                                        p:                                                              pe                        )" s                var(--pri                    d:none; border:                    nter; padding:5px 10px;">Edit</butt                                        <button onclick="deleteRole('${r.id}')" style="color:va                 background:none; border:none; cursor:pointer; padding:5px 10px;                tton>
+                                                       </div>
                 </div>
-            `;
-                }).join('');
+                                   }).join('');
             }
 
             function openRoleModal(roleId = null) {
-                const modal = document.getElementById('roleModal');
-                const title = document.getElementById('roleModalTitle');
-
-                // Reset form
-                document.getElementById('roleId').value = '';
-                document.getElementById('roleName').value = '';
-                document.getElementById('roleColor').value = '#99AAB5';
-                document.getElementById('rolePosition').value = '10';
-
-                // Uncheck all permissions
-                document.querySelectorAll('.perm-checkbox').forEach(cb => cb.checked = false);
-
-                if (roleId) {
-                    // Edit mode - load role data
-                    title.textContent = 'Edit Role';
-                    document.getElementById('roleId').value = roleId;
-
-                    // Find role from fetched data
-                    _supabase.from('roles').select('*').eq('id', roleId).single()
-                        .then(({ data: role, error }) => {
-                            if (!error && role) {
-                                document.getElementById('roleName').value = role.name;
-                                document.getElementById('roleColor').value = role.color;
-                                document.getElementById('rolePosition').value = role.position;
-
-                                // Check permissions
-                                for (const [permName, permValue] of Object.entries(PERMISSIONS)) {
-                                    if (hasPermission(role.permissions, permValue)) {
-                                        const checkbox = document.querySelector(`[data-perm="${permName}"]`);
-                                        if (checkbox) checkbox.checked = true;
-                                    }
-                                }
-                            }
-                        });
-                } else {
-                    // Create mode
-                    title.textContent = 'Create Role';
-                }
-
-                // Add event listener for Administrator checkbox auto-check
-                const adminCheckbox = document.getElementById('adminCheckbox');
-                if (adminCheckbox) {
-                    adminCheckbox.addEventListener('change', function () {
-                        const allCheckboxes = document.querySelectorAll('.perm-checkbox:not(#adminCheckbox)');
-                        allCheckboxes.forEach(cb => {
-                            cb.checked = this.checked;
-                        });
-                    });
-                }
-
-                modal.style.display = 'flex';
-            }
-
-            function closeRoleModal() {
-                document.getElementById('roleModal').style.display = 'none';
-            }
-
-            async function saveRole() {
-                const roleId = document.getElementById('roleId').value;
-                const name = document.getElementById('roleName').value.trim();
-                const color = document.getElementById('roleColor').value;
-                const position = parseInt(document.getElementById('rolePosition').value);
-
-                if (!name) {
-                    showToast('Please enter a role name', 'error');
-                    return;
-                }
-
-                // Calculate permissions from checked boxes
-                let permissions = 0;
-                document.querySelectorAll('.perm-checkbox:checked').forEach(cb => {
-                    const permName = cb.dataset.perm;
-                    permissions = addPermission(permissions, PERMISSIONS[permName]);
-                });
-
-                try {
-                    const roleData = { name, color, position, permissions };
+                          modal = document.getElementBy                                     const title = docu                        'rol                                        //                                document.getEle            ('r            value = '';
+                                ElementById('roleName').value = '';
+                document.            ntB            eColor').value = '#99AAB5';
+                    document.getElementById('rolePosition').value = '10'                       // Uncheck all permissions
+                document.quer                ('.perm-checkbox').forEach(cb => cb.checked = false);
 
                     if (roleId) {
-                        // Update existing role
-                        const { error } = await _supabase.from('roles')
-                            .update(roleData)
-                            .eq('id', roleId);
+                    // Edit mode - load role data
+                          tle.textConte                    ;
+                    document.getElementById('r                    roleId;
+                                   d role from fetched data
+                                   rom('roles').select('                 roleId).single()
+                        .then(({ data: role, error                                         if (!error &&                                             document.getElementById('roleName').valu                e;
+                                            ment.getElementById('roleColor').value = role.color;
+                                    doc                        ('rolePosition').value =                                                     // Check permission                                      for (con                             of Object.entries(P                                                                        sion(role.permissions, permValue)) {
+                                                                   cument.querySelecto                        mName}"]`);
+                                                                ox.checked = true;
+                                        }
+                                    }
+                            }
+                                                           {
+                                    de
+                           le.textContent =                                    }
 
-                        if (error) throw error;
-                        showToast('Role updated successfully', 'success');
-                    } else {
-                        // Create new role
-                        const { error } = await _supabase.from('roles')
-                            .insert([roleData]);
-
-                        if (error) throw error;
-                        showToast('Role created successfully', 'success');
-                    }
-
-                    closeRoleModal();
-                    fetchRoles();
-                } catch (err) {
-                    console.error('Save role error:', err);
-                    showToast('Failed to save role: ' + err.message, 'error');
-                }
+                // Ad                     for Administrator checkbox auto-check
+                cons                bo            men            mentById('adminCheckbox');
+                         dminCheckbox) {
+                        adminCheckbox                    r('change', function () {
+                        const allCheckboxes = document.querySelectorAll('.per                    adminCheckbox)                                                          cb => {
+                            cb.checked = this.checked;
+                                                    });
+                                       modal.style.display = 'flex';
             }
 
-            async function deleteRole(roleId) {
-                showConfirmModal(
-                    'Delete Role',
-                    'Are you sure you want to delete this role? Staff members with this role will need to be reassigned.',
-                    async () => {
-                        try {
-                            const { error } = await _supabase.from('roles').delete().eq('id', roleId);
-                            if (error) throw error;
-
-                            showToast('Role deleted successfully', 'success');
-                            fetchRoles();
-                        } catch (err) {
-                            console.error('Delete role error:', err);
-                            showToast('Failed to delete: ' + err.message, 'error');
-                        }
-                    }
-                );
+                                leModal() {
+                          nt.getElementByI                            play = 'none';
             }
 
-            // --- STAFF MANAGEMENT ---
-            function openStaffModal(staffId = null) {
-                const modal = document.getElementById('staffModal');
-                const title = document.getElementById('staffModalTitle');
+                                        ) {
+                const roleId = document.getElementBy                                              ns                ume            eme            roleName').value.trim();
+                    const color = document.getElementById                ).value;
+                const position = parseInt(do                ementById('rolePosition').value);
 
-                // Reset form
-                document.getElementById('staffId').value = '';
-                document.getElementById('staffName').value = '';
-                document.getElementById('staffEmail').value = '';
-                document.getElementById('staffPhone').value = '';
-
-                // Populate role dropdown
-                _supabase.from('roles').select('id,name,color').order('position', { ascending: false })
-                    .then(({ data: roles, error }) => {
-                        const select = document.getElementById('staffRoleSelect');
-                        select.innerHTML = '<option value="">Select a role...</option>';
-
-                        if (!error && roles) {
-                            roles.forEach(role => {
-                                const option = document.createElement('option');
-                                option.value = role.id;
-                                option.textContent = role.name;
-                                select.appendChild(option);
-                            });
-                        }
-                    });
-
-                title.textContent = staffId ? 'Edit Staff Member' : 'Add Staff Member';
-                modal.style.display = 'flex';
-            }
-
-            function closeStaffModal() {
-                document.getElementById('staffModal').style.display = 'none';
-            }
-
-            async function saveStaff() {
-                async function saveStaff() {
-                    const name = document.getElementById('staffName').value.trim();
-                    const email = document.getElementById('staffEmail').value.trim();
-                    const phone = document.getElementById('staffPhone').value.trim();
-                    const roleId = document.getElementById('staffRoleSelect').value;
-
-                    if (!name || !email || !roleId) {
-                        showToast('Please fill in all required fields', 'error');
-                        return;
-                    }
-
-                    try {
-                        const { error: staffError } = await _supabase.from('staff').insert([{
-                            name,
-                            email,
-                            phone: phone || null,
-                            role_id: roleId
-                        }]);
-
-                        if (staffError) throw staffError;
-
-                        showToast(`Staff added! ${name} can login using customer login`, 'success');
-
-                        closeStaffModal();
-                        fetchStaff();
-                    } catch (err) {
-                        console.error('Save staff error:', err);
-                        showToast('Failed to add staff: ' + err.message, 'error');
-                    }
+                if (!nam                             s                ease enter a role name', 'error');
+                            rn;
                 }
 
-                // --- MODALS (Enhanced) ---
-                function openMenuModal(id) {
-                    const modal = document.getElementById('menuModal');
-                    const item = id ? window._menuData.find(i => i.id == id) : {};
-
-                    document.getElementById('modalTitle').textContent = id ? 'Edit Menu Item' : 'Add New Item';
-                    document.getElementById('editItemId').value = id || '';
-                    document.getElementById('itemName').value = item.name || '';
-                    document.getElementById('itemPrice').value = item.price || '';
-                    document.getElementById('itemCat').value = item.category || 'Mains';
-                    document.getElementById('itemImg').value = item.image_url || '';
-
-                    modal.style.display = 'flex';
-                }
-
-                function closeMenuModal() {
-                    document.getElementById('menuModal').style.display = 'none';
-                }
-
-                async function saveMenuItem() {
-                    const id = document.getElementById('editItemId').value;
-                    const name = document.getElementById('itemName').value;
-                    const price = parseFloat(document.getElementById('itemPrice').value);
-                    const category = document.getElementById('itemCat').value;
-                    const image_url = document.getElementById('itemImg').value;
-
-                    if (!name || isNaN(price)) { alert('Please enter valid name and price'); return; }
-
-                    const payload = { name, price, category, image_url };
-
-                    if (id) {
-                        await _supabase.from('menu_items').update(payload).eq('id', id);
-                    } else {
-                        await _supabase.from('menu_items').insert([payload]);
-                    }
-
-                    closeMenuModal();
-                    fetchMenuItems();
-                }
-
-                // Expose functions globally for inline onclick handlers
-                window.openStaffModal = openStaffModal;
-                window.deleteStaff = deleteStaff;
-                window.updateOrder = updateOrder;
-                window.showSection = showSection;
-                window.openMenuModal = openMenuModal;
-                window.deleteMenuItem = deleteMenuItem;
-                window.openCategoryModal = openCategoryModal;
-                window.filterMenuByCategory = filterMenuByCategory;
-                window.logout = logout;
-
-                // Debug: Log that functions are exposed
-                console.log('Global functions exposed:', {
-                    openMenuModal: typeof window.openMenuModal,
-                    deleteMenuItem: typeof window.deleteMenuItem
+                // Calcula                ns from checked boxes
+                let permissi                             document.querySelectorAll('.perm-check                ).forEach(cb => {
+                        const permName = cb.dataset.perm;
+                    permissions = addPermission(permis                    NS[permName]);
                 });
 
-                // --- GLOBAL MENU FUNCTIONS ---
-                // These MUST be global so onclick handlers can access them
+                        {
+                    const roleData = { name, color, posit                        
+                    if (roleId) {
+                        // Upda                                             co                            upabase.from('roles')
+                                  pdate(roleData)
+                            .eq('                                           if (error) th                                       showToast('Role updated s                                                  } else {
+                             / Cr                                              const                 await _supabase.from('roles')
+                            .insert([role                                     if (error            err                                showToast                ed successfully', 'success');
+                    }
+
+                                    eModal();
+                                   );
+                } catch (e                              console.error('Save role error:', err);
+                                  'Failed to save role: ' + err.message, 'error');
+                }                                async function deleteRole(roleId) {
+                sh                                        'Delete Role',
+                    'Are you su                    elete this role? Staff members wit                        d to be reassigned.',
+                    async () => {
+                            try {
+                                            error                        .from('roles').delete().eq('id', roleId);
+                                                        
+                                 howToas                            ully', 'success');
+                                fetchRoles();
+                            } c                                             console.error(                        , err);
+                            showToast('Failed to delete: ' + err.messa                                          }                         }
+                                   }
+
+                                 GEMENT ---
+            function openStaff                        ) {
+                const modal = document.getElementById('                                      con                ocument.getElementById('staff                ;
+
+                // Reset f                        document.getElementById('staffId').value = '';
+                     ocument.getElementById('staffName').value = '';
+                                    entById('staffEmail').value = '';
+                document.getElementById('staffPhone').valu                             // Populate role dropdown
+                _supa                    ').select('id,name,color').order('position', { ascending: fal                              .then(({ data: roles, error }) => {
+                                     ect = document.getElementById('staffRoleSelect');
+                                       rHTML = '<option value="">Select a role...</option>';
+
+                               (!error && roles) {
+                                             Each(role => {
+                                    const option = document.createElement('option');
+                                            on.value = role.id;
+                                    option.textContent = role.name;
+                                        ct.appendChild(option);
+                            });
+                            }
+                    });
+
+                title.textContent =                     Staff Member' : 'Add Staff Member';
+                modal.                    'flex';
+            }
+
+            function closeStaffModal()                       document.getElementById('staffModal').style.display = 'none';
+            }
+
+                        nction saveStaff() {
+                async function sav                                                      cument.getElementById('staffName').value.trim();
+                                    = documen                        affEmail').value.trim();
+                    const pho                    tEl                    Phone').value.trim                            const role                t.g                d('staffRoleSelect').value;
+
+                    if (!nam                || !roleId) {
+                        sh                ase fill in all required fields',                                       return;
+                        }
+
+                    try {
+                            const { error: staffError }                pabase.from('staff').insert([{
+                                name,
+                            email                                  phone: phone || null,
+                                role_id: roleId
+                            }]);
+
+                        if (                throw staffError;
+
+                                             added! ${name} can login using customer log                    
+
+                        closeStaffModal();
+                                     Staff();
+                    } ca                                        console.error('Save staff error:', er                                showToast('Failed                     + err.message, 'error');
+                    }
+                                       // --- MODALS (Enhanced) ---
+                function                    d) {
+                    const modal                         tById('menuModal');
+                                          window._menuData.fin                    d) : {};
+                         document.getElementById('modalTitle                     i                nu                  New Item';
+                    document                    'editItemId').value = id || '';
+                    docume                    d('itemName').value = item.name || '';
+                                 getElementById('itemPrice').value = item.price || '';
+                        document.getElementById('itemCat').value = item.category || 'Mai                             document.getElementById('item                    em.image_url || '';
+
+                                      splay = 'flex';
+                                       function closeMenuModal() {
+                    documen                        nuModal'                    = '                           }
+
+                async function saveM                                    const id = docu                    yId('editItemId').value;
+                                       cument.getElementById('itemName').value;
+                                ice = parseFloat(document                        mPrice').value);
+                                       = document.getElementById('itemCat'                                            mage_url = document.getElementById('i                    
+                    if (!name || isNaN(price)) { alert                    alid name and price'); return; }
+
+                        const payload = { name, price, category, image_ur                              if (id) {
+                                           .from('menu_it                    load).eq('id', id);
+                    } else {
+                            await _supabase.from('menu_items').insert                                     }
+
+                    closeMenuModal();
+                    fetchMenu                             }
+
+                // Expose functions globally for inlin                    rs
+                window.openStaffModal = openStaffMo                         window.deleteStaff = deleteStaff;
+                              ateOrder = updateOrder;
+                window.showSect                    n;
+                window.openMenuModal = openMenuMo                         window.deleteMenuItem = deleteMenuItem;
+                               CategoryModal = openCategoryModal;
+                window.fi                    ry = filterMen                                 wind                        
+                // Debug: Log that fu                                        console.log('Global functions exposed:'                            openMenuModal: typ                        odal,
+                    deleteMenuItem: typeof window.de                                 });                             GLOBAL MENU FUNCTIONS ---
+                // These MUST be g                            s can access them
 
                 function handleCategoryChange() {
-                    const select = document.getElementById('menuCategory');
-                    const customInput = document.getElementById('customCategory');
-                    if (select.value === '__custom__') {
+                            t select = document.getElementById('menuCategory');
+                                       ut = document.getElementById('customCategory');
+                    if (sel                            _') {
                         customInput.style.display = 'block';
-                        customInput.focus();
+                               tomInput.focus();
                     } else {
-                        customInput.style.display = 'none';
+                        custo                            none';
                     }
                 }
 
-                function openMenuModal(itemId = null) {
-                    console.log('openMenuModal called with itemId:', itemId);
-                    const modal = document.getElementById('menuModal');
-                    const title = document.getElementById('menuModalTitle');
-                    const categorySelect = document.getElementById('menuCategory');
+                function openMenuM                        {
+                        conso                        l called wit                        
+                    const modal = do                    tBy                    
+                    const title = docu                    yId('menuModalTitle');
+                          nst categorySelect = documen                ByI                ory');
 
-                    console.log('Modal element:', modal);
-                    console.log('Title element:', title);
+                                        al element:', modal);
+                    console.lo                    :', title);
 
-                    if (!modal || !title) {
-                        console.error('Modal or title not found!', { modal, title });
-                        return;
-                    }
+                                   ||                                       console.er                    tle not found!', { modal, title });
+                                                        }
 
-                    // Populate category dropdown from database  
+                    // Populate category dro                    ase  
                     categorySelect.innerHTML = '';
-                    window._categoriesData.forEach(cat => {
-                        const option = document.createElement('option');
+                                 ategoriesData.forEach(cat => {
+                        const option = docu                    nt('option');
                         option.value = cat.name;
-                        option.textContent = cat.name;
-                        categorySelect.appendChild(option);
-                    });
+                                    extContent = cat.name;
+                        categorySelect.appendChild(o                                });
                     // Add custom category option at end
-                    const customOption = document.createElement('option');
-                    customOption.value = '__custom__';
-                    customOption.textContent = '+ Create New Category';
-                    categorySelect.appendChild(customOption);
+                        const customOption = document.createElement('option');
+                                    .value = '__custom__';
+                    customOption.textConten                    w Category';
+                    categorySelect.appendChild(customOption)                           // Res                                document.getElementById('menuItemId').                                                    El                    ame').value = '';                         document.getElementById('menuCategory').value = window._c                        me || ''                                           lementById('custom                        play =                                 d                        Id('cus                        = '';
+                    document                        uPrice').value = '';
+                                .getElementById('menu                        = '';
+                                        entB                    l').va                                                              'menuIsPub                                              document.getElem                                hecked = true;
 
-                    // Reset form
-                    document.getElementById('menuItemId').value = '';
-                    document.getElementById('menuName').value = '';
-                    document.getElementById('menuCategory').value = window._categoriesData[0]?.name || '';
-                    document.getElementById('customCategory').style.display = 'none';
-                    document.getElementById('customCategory').value = '';
-                    document.getElementById('menuPrice').value = '';
-                    document.getElementById('menuDescription').value = '';
-                    document.getElementById('menuImageUrl').value = '';
-                    document.getElementById('menuIsPublic').checked = true;
-                    document.getElementById('menuIsAvailable').checked = true;
-
-                    if (itemId) {
-                        // Edit mode
-                        title.textContent = 'Edit Menu Item';
-                        document.getElementById('menuItemId').value = itemId;
-
-                        // Find item in cache
-                        const item = window._menuData?.find(i => i.id == itemId);
-                        if (item) {
-                            document.getElementById('menuName').value = item.name || '';
-                            document.getElementById('menuCategory').value = item.category || '';
-                            document.getElementById('menuPrice').value = item.price || '';
-                            document.getElementById('menuDescription').value = item.description || '';
-                            document.getElementById('menuImageUrl').value = item.image_url || '';
-                            document.getElementById('menuIsPublic').checked = item.is_public !== false;
-                            document.getElementById('menuIsAvailable').checked = item.is_available !== false;
-                        }
+                                    {
+                                                                                          Edit Menu Item';
+                               ument.get                            ).value =                                      // Find item in cache
+                                   tem = window._menuDa                                );
+                                                                                           ByI                        = item.name || '';                                 document.getElementById(                        e = item.category || '';
+                                                       ('menuPrice').value = item                                                  document.get                        cription').value = item.description                                        document.getElementById('                    al                age                                                    ment.getElementById('menuIsPublic').ch                .is_public !== false;
+                                  cument.getElementById('menuIsAvailab                 = item.is_available !== false;
+                            }
                     } else {
-                        // Add mode
-                        title.textContent = 'Add Menu Item';
+                             /  Add mode
+                        titext = 'Add Menu Item';
                     }
 
                     console.log('About to show modal...');
@@ -2083,7 +1802,7 @@
                 window.saveMenuItem = saveMenuItem;
                 window.deleteMenuItem = deleteMenuItem;
                 window.handleCategoryChange = handleCategoryChange;
-            }) (); // Close checkAdminAccess IIFE
+            })(); // Close checkAdminAccess IIFE
     </script>
 </body>
 
