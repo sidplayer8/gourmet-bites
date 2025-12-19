@@ -893,6 +893,17 @@
         // --- AUTH & INIT ---
         (async function checkAdminAccess() {
             // 1. Session Check
+        // === NAVIGATION ===
+        function showSection(sectionId) {
+            document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
+            const target = document.getElementById(sectionId + '-section');
+            if (target) target.style.display = 'block';
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            event.target.classList.add('active');
+            const titles = {'dashboard':'Dashboard','orders':'Calls (Orders)','history':'History','menu':'Menu Management','staff':'Staff Management','roles':'Roles & Permissions','tables':'Tables'};
+            document.getElementById('pageTitle').textContent = titles[sectionId] || 'Dashboard';
+        }
+        
             const { data: { session } } = await _supabase.auth.getSession();
             let user = session?.user;
 
@@ -904,69 +915,7 @@
             }
 
             if (!user || (!user.id && !user.uid)) {
-                // === NAVIGATION ===
-                function showSection(sectionId) {
-                    // Hide all sections
-                    document.querySelectorAll('.content-section').forEach(section => {
-                        section.style.display = 'none';
-                    });
-
-                    // Show selected section
-                    const targetSection = document.getElementById(`${sectionId}-section`);
-                    if (targetSection) {
-                        targetSection.style.display = 'block';
-                    }
-
-                    // Update nav active state
-                    document.querySelectorAll('.nav-item').forEach(item => {
-                        item.classList.remove('active');
-                    });
-                    if (event && event.target) event.target.classList.add('active');
-
-                    // Update page title
-                    const titles = {
-                        'dashboard': 'Dashboard',
-                        'orders': 'Calls (Orders)',
-                        'history': 'History',
-                        'menu': 'Menu Management',
-                        'staff': 'Staff Management',
-                        'roles': 'Roles & Permissions',
-                        'tables': 'Tables'
-                    };
-                    document.getElementById('pageTitle').textContent = titles[sectionId] || 'Dashboard';
-                }
-
-                window.location.href = 'login.html';
-                return;
-            }
-
-            const uEmail = user.email || (user.user && user.user.email);
-            const uPhone = user.phone || (user.user && user.user.phone);
-
-            // 3. Allowlist (The Bypass)
-            const allowed = ['sapsinfocomm22@gmail.com', '+6590214181'];
-            if (allowed.includes(uEmail) || allowed.includes(uPhone)) {
-                document.getElementById('adminName').textContent = `Owner (${uEmail || uPhone})`;
-                showSection('dashboard');
-                return;
-            }
-            // 4. DB Check
-            // We use user.id (UUID) or try to find by email/phone if user.id fails
-            // For now, strict check on user.id is safest for standard flow
-            if (user.id) {
-                const { data: staff } = await _supabase.from('staff').select('*, roles(name)').eq('user_id', user.id).single();
-                if (staff) {
-                    document.getElementById('adminName').textContent = `${staff.roles?.name || 'Staff'} (${staff.name || uEmail})`;
-                    return;
-                }
-            }
-
-            // If we got here, access denied
-            window.location.href = 'menu.html';
-        })(); // Invoke the IIFE
-
-        async function logout() {
-            await _supabase.auth.signOut();
+                
             localStorage.clear();
             window.location.href = 'login.html';
         }
