@@ -769,32 +769,40 @@
             <h2 id="staffModalTitle">Add Staff Member</h2>
             <input type="hidden" id="staffId">
 
-            <label>Full Name *</label>
-            <input type="text" id="staffName" placeholder="John Doe" required>
+            <label style="display:block; margin-bottom:8px; color:#e2e8f0; font-weight:500;">Full Name *</label>
+            <input type="text" id="staffName" placeholder="John Doe" required
+                style="width:100%; padding:12px; background:#1e293b; border:1px solid #334155; border-radius:8px; color:#fff; font-size:14px; margin-bottom:15px;">
 
-            <label>Email *</label>
-            <input type="email" id="staffEmail" placeholder="john@restaurant.com" required>
+            <label style="display:block; margin-bottom:8px; color:#e2e8f0; font-weight:500;">Email *</label>
+            <input type="email" id="staffEmail" placeholder="john@restaurant.com" required
+                style="width:100%; padding:12px; background:#1e293b; border:1px solid #334155; border-radius:8px; color:#fff; font-size:14px; margin-bottom:15px;">
 
-            <label>Phone Number (Optional)</label>
-            <input type="tel" id="staffPhone" placeholder="+1234567890">
-            <small style="color:#94a3b8; margin-top:-10px; display:block;">If provided, staff can login with either
-                email or phone</small>
+            <label style="display:block; margin-bottom:8px; color:#e2e8f0; font-weight:500;">Phone Number
+                (Optional)</label>
+            <input type="tel" id="staffPhone" placeholder="+1234567890"
+                style="width:100%; padding:12px; background:#1e293b; border:1px solid #334155; border-radius:8px; color:#fff; font-size:14px; margin-bottom:5px;">
+            <small style="color:#94a3b8; margin-top:0; margin-bottom:15px; display:block;">If provided, staff can login
+                with either email or phone</small>
 
-            <label>Assign Role *</label>
-            <select id="staffRoleSelect" required>
+            <label style="display:block; margin-bottom:8px; color:#e2e8f0; font-weight:500;">Assign Role *</label>
+            <select id="staffRoleSelect" required
+                style="width:100%; padding:12px; background:#1e293b; border:1px solid #334155; border-radius:8px; color:#fff; font-size:14px; margin-bottom:15px; cursor:pointer;">
                 <option value="">Select a role...</option>
                 <!-- Populated dynamically -->
             </select>
 
-            <label>Initial Password</label>
-            <div style="display:flex; gap:10px;">
-                <input type="text" id="staffPassword" placeholder="Auto-generated if empty" style="flex:1;">
+            <label style="display:block; margin-bottom:8px; color:#e2e8f0; font-weight:500;">Initial Password</label>
+            <div style="display:flex; gap:10px; margin-bottom:5px;">
+                <input type="text" id="staffPassword" placeholder="Auto-generated if empty"
+                    style="flex:1; padding:12px; background:#1e293b; border:1px solid #334155; border-radius:8px; color:#fff; font-size:14px;">
                 <button type="button" onclick="generateStaffPassword()"
-                    style="padding:10px 15px; background:#3b82f6; color:white; border:none; border-radius:6px; cursor:pointer; white-space:nowrap;">🎲
-                    Generate</button>
+                    style="padding:12px 20px; background:#3b82f6; color:white; border:none; border-radius:8px; cursor:pointer; white-space:nowrap; font-weight:600; transition:background 0.2s;"
+                    onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+                    🎲 Generate
+                </button>
             </div>
-            <small style="color:#94a3b8; margin-top:-10px; display:block;">Minimum 6 characters. Share this with the
-                staff member securely.</small>
+            <small style="color:#94a3b8; margin-top:0; margin-bottom:20px; display:block;">Minimum 6 characters. Share
+                this with the staff member securely.</small>
 
             <div style="display:flex; gap:10px; margin-top:20px;">
                 <button onclick="saveStaff()" class="btn-primary">Create Account</button>
