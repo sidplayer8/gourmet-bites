@@ -1293,7 +1293,7 @@
             const modal = document.getElementById('menuModal');
             const title = document.getElementById('menuModalTitle');
 
-            // Reset form
+            // Reset form first
             document.getElementById('menuItemId').value = '';
             document.getElementById('menuName').value = '';
             document.getElementById('menuPrice').value = '';
@@ -1340,6 +1340,7 @@
                     }
                 }
 
+                // Populate form with item data
                 if (item) {
                     document.getElementById('menuName').value = item.name || '';
                     document.getElementById('menuCategory').value = item.category || '';
@@ -1348,12 +1349,15 @@
                     document.getElementById('menuImageUrl').value = item.image_url || '';
                     document.getElementById('menuIsPublic').checked = item.is_public !== false;
                     document.getElementById('menuIsAvailable').checked = item.is_available !== false;
+                } else {
+                    showToast('Error: Could not load item data', 'error');
                 }
             } else {
                 // Add mode
                 title.textContent = 'Add Menu Item';
             }
 
+            // Show modal AFTER all data is loaded
             modal.style.display = 'flex';
         }
 
