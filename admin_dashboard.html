@@ -1257,9 +1257,13 @@
                     ? '<span style="background:#3b82f6; color:white; padding:2px 6px; border-radius:4px; font-size:10px; margin-left:5px;">Public</span>'
                     : '<span style="background:#64748b; color:white; padding:2px 6px; border-radius:4px; font-size:10px; margin-left:5px;">Hidden</span>';
 
-                // Check if category still exists in active categories
-                const categoryExists = window._categoriesData?.some(cat => cat.name === item.category);
-                const displayCategory = categoryExists ? item.category : 'Uncategorized';
+                // Check if category still exists (only if category list is loaded)
+                const categoriesLoaded = window._categoriesData && window._categoriesData.length > 0;
+                const categoryExists = categoriesLoaded
+                    ? window._categoriesData.some(cat => cat.name === item.category)
+                    : true; // Assume exists if categories not loaded yet
+
+                const displayCategory = (item.category && categoryExists) ? item.category : 'Uncategorized';
                 const categoryStyle = categoryExists ? '#334' : '#666';
 
                 return `
