@@ -1881,21 +1881,18 @@
                 
 
                 if (authError) console.warn('Auth creation warning:', authError);
-
                 const { error: staffError } = await _supabase.from('staff').insert([{
                     name,
                     email,
                     phone: phone || null,
                     role_id: roleId,
                     auth_user_id: authData?.user?.id || null
-                }]);
 
                 if (staffError) throw staffError;
 
                 // Show credentials in a better way - just use toast for now
-                showToast(`Staff added! \ can login using customer login`, 'success');
+                showToast(+'Staff added!  can login using customer login'+, 'success');
                 console.log(`📧 Staff Credentials:\nEmail: ${email}\n${phone ? `Phone: ${phone}\n` : ''}Password: ${password}`);
-
                 closeStaffModal();
                 fetchStaff();
             } catch (err) {
