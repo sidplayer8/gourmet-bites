@@ -1257,10 +1257,15 @@
                     ? '<span style="background:#3b82f6; color:white; padding:2px 6px; border-radius:4px; font-size:10px; margin-left:5px;">Public</span>'
                     : '<span style="background:#64748b; color:white; padding:2px 6px; border-radius:4px; font-size:10px; margin-left:5px;">Hidden</span>';
 
+                // Check if category still exists in active categories
+                const categoryExists = window._categoriesData?.some(cat => cat.name === item.category);
+                const displayCategory = categoryExists ? item.category : 'Uncategorized';
+                const categoryStyle = categoryExists ? '#334' : '#666';
+
                 return `
                 <tr>
                     <td><strong>${item.name || 'Unnamed'}</strong></td>
-                    <td><span style="background:#334; padding:2px 6px; border-radius:4px;">${item.category || 'Uncategorized'}</span></td>
+                    <td><span style="background:${categoryStyle}; padding:2px 6px; border-radius:4px;">${displayCategory}</span></td>
                     <td>$${Number(item.price || 0).toFixed(2)}</td>
                     <td>${availBadge} ${publicBadge}</td>
                     <td>
@@ -1314,6 +1319,12 @@
                 option.textContent = cat.name;
                 categorySelect.appendChild(option);
             });
+
+            // Add "Uncategorized" option for items with deleted categories
+            const uncatOption = document.createElement('option');
+            uncatOption.value = 'Uncategorized';
+            uncatOption.textContent = 'Uncategorized';
+            categorySelect.appendChild(uncatOption);
 
             if (itemId) {
                 // Edit mode
