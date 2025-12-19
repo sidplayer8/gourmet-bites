@@ -1650,26 +1650,6 @@
             }
         }
 
-        async function deleteMenuItem(itemId) {
-            if (!confirm('Delete this menu item?')) return;
-
-            try {
-                const { error } = await _supabase
-                    .from('menu_items')
-                    .delete()
-                    .eq('id', itemId);
-
-                if (error) throw error;
-
-                if (typeof window.fetchMenuGlobal === 'function') {
-                    window.fetchMenuGlobal();
-                }
-            } catch (err) {
-                console.error('Delete error:', err);
-                alert('Failed to delete: ' + err.message);
-            }
-        }
-
         // Expose to window
         window.openMenuModal = openMenuModal;
         window.closeMenuModal = closeMenuModal;
