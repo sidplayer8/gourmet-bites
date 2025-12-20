@@ -2072,6 +2072,11 @@
 
         // --- MODALS (Enhanced) ---
         function openMenuModal(id) {
+            // Permission check
+            const perm = id ? PERMISSIONS.EDIT_MENU : PERMISSIONS.CREATE_MENU;
+            const action = id ? 'edit menu items' : 'create menu items';
+            if (!requirePermission(perm, action)) return;
+
             const modal = document.getElementById('menuModal');
             const item = id ? window._menuData.find(i => i.id == id) : {};
 
