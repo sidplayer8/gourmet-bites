@@ -1086,14 +1086,22 @@
 
                 if (staffMembers && staffMembers.length > 0) {
                     const staff = staffMembers[0];
-                    document.getElementById('adminName').textContent = `${staff.roles?.name || 'Staff'} (${staff.name || uEmail})`;
+                    const roleName = staff.roles?.name || 'Staff';
+                    const staffName = staff.name || uEmail;
+
+                    document.getElementById('adminName').textContent = staffName;
+                    document.getElementById('adminRole').textContent = roleName;
+                    document.getElementById('avatarIcon').textContent = getAvatarEmoji(roleName);
 
                     // Load permissions from role
                     currentUserPermissions = staff.roles?.permissions || 0;
-                    console.log('✅ Permissions loaded:', currentUserPermissions, 'Role:', staff.roles?.name);
+                    console.log('✅ Permissions loaded:', currentUserPermissions, 'Role:', roleName);
 
                     // Apply UI restrictions based on permissions
                     applyPermissionBasedUI();
+
+                    // Populate dashboard with personalized stats
+                    populateDashboard(roleName, staffName, staff);
 
                     return;
                 }
@@ -1102,6 +1110,88 @@
             // If we got here, access denied
             window.location.href = 'menu.html';
         })(); // Invoke the IIFE
+
+        // Helper function to get emoji based on role
+        function getAvatarEmoji(role) {
+            const roleEmojis = {
+                'Owner': '👑',
+                'Manager': '👔',
+                'Chef': '👨‍🍳',
+                'Server': '🍽️',
+                'Staff': '👤'
+            };
+            return roleEmojis[role] || '👤';
+        }
+
+        // Populate dashboard with personalized stats based on role
+        async function populateDashboard(role, name, staffData) {
+            const timeOfDay = new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening';
+
+            // Update welcome message
+            document.getElementById('welcomeMessage').textContent = `👋 Good ${timeOfDay}, ${name}!`;
+            document.getElementById('welcomeSubtext').textContent = `Here's your ${role} dashboard`;
+
+            // Get stats based on role
+            if (role === 'Owner' || role === 'Manager') {
+                // Manager/Owner sees business stats
+                document.getElementById('stat1-label').textContent = 'Today\'s Orders';
+                document.getElementById('stat1-value').textContent = '0'; // TODO: fetch real data
+
+                document.getElementById('stat2-label').textContent = 'Revenue';
+                document.getElementById('stat2-value').textContent = '$0.00';
+
+                document.getElementById('stat3-label').textContent = 'Active Staff';
+                document.getElementById('stat3-value').textContent = '0';
+
+                document.getElementById('stat4-label').textContent = 'Completion Rate';
+                document.getElementById('stat4-value').textContent = '0%';
+            } else if (role === 'Server') {
+                // Server sees personal performance
+                document.getElementById('stat1-label').textContent = 'Orders Taken';
+                document.getElementById('stat1-value').textContent = '0';
+
+                document.getElementById('stat2-label').textContent = 'Tables Served';
+                document.getElementById('stat2-value').textContent = '0';
+
+                document.getElementById('stat3-label').textContent = 'Avg Response Time';
+                document.getElementById('stat3-value').textContent = '-';
+
+                document.getElementById('stat4-label').textContent = 'Customer Rating';
+                document.getElementById('stat4-value').textContent = '⭐ -';
+            } else if (role === 'Chef') {
+                // Chef sees kitchen stats
+                document.getElementById('stat1-label').textContent = 'Dishes Completed';
+                document.getElementById('stat1-value').textContent = '0';
+
+                document.getElementById('stat2-label').textContent = 'Pending Orders';
+                document.getElementById('stat2-value').textContent = '0';
+
+                document.getElementById('stat3-label').textContent = 'Avg Prep Time';
+                document.getElementById('stat3-value').textContent = '-';
+
+                document.getElementById('stat4-label').textContent = 'On-Time Rate';
+                document.getElementById('stat4-value').textContent = '0%';
+            } else {
+                // General staff
+                document.getElementById('stat1-label').textContent = 'Hours This Week';
+                document.getElementById('stat1-value').textContent = '0h';
+
+                document.getElementById('stat2-label').textContent = 'Tasks Completed';
+                document.getElementById('stat2-value').textContent = '0';
+
+                document.getElementById('stat3-label').textContent = 'Upcoming Shifts';
+                document.getElementById('stat3-value').textContent = '0';
+
+                document.getElementById('stat4-label').textContent = 'Performance';
+                document.getElementById('stat4-value').textContent = '100%';
+            }
+
+            // Update recent activity
+            document.getElementById('recentActivity').innerHTML = `
+                <p style="color:#666; font-size:14px;">• Logged in at ${new Date().toLocaleTimeString()}</p>
+                <p style="color:#666; font-size:14px;">• No recent activity</p>
+            `;
+        }
 
         async function logout() {
             await _supabase.auth.signOut();
