@@ -969,6 +969,11 @@
             const allowed = ['sapsinfocomm22@gmail.com', '+6590214181'];
             if (allowed.includes(uEmail) || allowed.includes(uPhone)) {
                 document.getElementById('adminName').textContent = `Owner (${uEmail || uPhone})`;
+
+                // Give full permissions to owners
+                currentUserPermissions = 0xFFFFFFFF; // All permissions
+                console.log('✅ Owner permissions loaded: Full access');
+
                 showSection('dashboard');
                 return;
             }
