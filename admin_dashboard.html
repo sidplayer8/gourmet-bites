@@ -920,8 +920,6 @@
             }
 
             // 4. DB Check - Check staff table by email OR phone (not user_id)
-            const uEmail = user.email || (user.user && user.user.email);
-            const uPhone = user.phone || (user.user && user.user.phone);
 
             if (uEmail || uPhone) {
                 let query = _supabase.from('staff').select('*, roles(name)');
