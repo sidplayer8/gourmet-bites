@@ -963,6 +963,31 @@
             }, 3000);
         }
 
+
+        // Confirmation Dialog Functions
+        let confirmCallback = null;
+
+        function showConfirmDialog(title, message, onConfirm) {
+            const modal = document.getElementById('confirmModal');
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            confirmCallback = onConfirm;
+            modal.style.display = 'flex';
+            
+            const confirmBtn = document.getElementById('confirmBtn');
+            confirmBtn.onclick = () => {
+                closeConfirmModal();
+                if (confirmCallback) {
+                    confirmCallback();
+                    confirmCallback = null;
+                }
+            };
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+            confirmCallback = null;
+        }
         function toggleSidebar() {
             document.querySelector('.sidebar').classList.toggle('open');
             document.querySelector('.sidebar-overlay').classList.toggle('active');
