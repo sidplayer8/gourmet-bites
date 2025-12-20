@@ -1774,6 +1774,9 @@
 
         // Edit staff - opens modal with pre-filled data
         async function editStaff(id, name, email, phone, roleId) {
+            // Permission check
+            if (!requirePermission(PERMISSIONS.EDIT_STAFF, 'edit staff members')) return;
+
             document.getElementById('staffId').value = id;
             document.getElementById('staffName').value = name;
             document.getElementById('staffEmail').value = email;
@@ -1803,6 +1806,9 @@
 
         // Delete staff with themed confirmation modal
         async function deleteStaff(id) {
+            // Permission check
+            if (!requirePermission(PERMISSIONS.DELETE_STAFF, 'delete staff members')) return;
+
             showConfirmDialog(
                 'Remove Staff Member?',
                 'Are you sure you want to remove this staff member? They will no longer have access to the admin dashboard.',
