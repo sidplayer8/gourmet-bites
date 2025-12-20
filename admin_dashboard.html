@@ -987,7 +987,7 @@
 
                     if (staffMembers && staffMembers.length > 0) {
                         const staff = staffMembers[0];
-                        document.getElementById('adminName').textContent = ${ staff.roles?.name || 'Staff' } ();
+                        document.getElementById('adminName').textContent = `${staff.roles?.name || 'Staff'} (${staff.name || uEmail})`;
 
                         // Load and store permissions
                         currentUserPermissions = staff.roles?.permissions || 0;
@@ -1046,7 +1046,7 @@
                     function showAccessDeniedModal(actionName) {
                         const modal = document.getElementById('accessDeniedModal');
                         document.getElementById('accessDeniedMessage').textContent =
-                            You don't have permission to . Please contact your administrator if you need access.;
+                            `You don't have permission to ${actionName}. Please contact your administrator if you need access.`;
                         modal.style.display = 'flex';
                     }
 
