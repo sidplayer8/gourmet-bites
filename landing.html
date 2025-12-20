@@ -142,16 +142,30 @@
             }
 
             // === 2. DATABASE ROLE CHECK ===
-            if (user.id && _supabase) {
+            if (_supabase) {
                 try {
-                    const { data: staffMember, error } = await _supabase
-                        .from('staff')
-                        .select('*, roles(name)')
-                        .eq('user_id', user.id)
-                        .single();
+                    const uEmail = user.email || (user.user && user.user.email);
+                    const uPhone = user.phone || (user.user && user.user.phone);
 
-                    if (staffMember) {
-                        showStaffUI(staffMember);
+                    // Check staff table by email OR phone (not user_id)
+                    let query = _supabase
+                        .from('staff')
+                        .select('*, roles(name)');
+
+                    if (uEmail) {
+                        query = query.eq('email', uEmail);
+                    } else if (uPhone) {
+                        query = query.eq('phone', uPhone);
+                    } else {
+                        // No email or phone - assume customer
+                        goCustomer();
+                        return;
+                    }
+
+                    const { data: staffMembers, error } = await query;
+
+                    if (staffMembers && staffMembers.length > 0) {
+                        showStaffUI(staffMembers[0]);
                     } else {
                         // NOT STAFF -> INSTANT REDIRECT
                         goCustomer();
