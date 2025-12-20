@@ -1666,7 +1666,8 @@
                     <td>${s.phone || '-'}</td>
                     <td><span style="background:#334; padding:2px 6px; border-radius:4px;">${s.roles?.name || s.role_id}</span></td>
                     <td>
-                        <button onclick="deleteStaff('${s.id}')" style="color:var(--danger); background:none; border:none; cursor:pointer;">Remove</button>
+                        <button onclick='editStaff("${s.id}", "${(s.name || '').replace(/"/g, '&quot;')}", "${(s.email || '').replace(/"/g, '&quot;')}", "${(s.phone || '').replace(/"/g, '&quot;')}", "${s.role_id}")' style="color:#10b981; background:none; border:none; cursor:pointer; margin-right:12px; font-weight:500;">?? Edit</button>
+                        <button onclick="deleteStaff('${s.id}')" style="color:var(--danger); background:none; border:none; cursor:pointer; font-weight:500;">🗑️ Remove</button>
                     </td>
                 </tr>
             `).join('');
@@ -1674,11 +1675,28 @@
             container.innerHTML = html;
         }
 
+        // Edit staff - opens modal with pre-filled data
+        function editStaff(id, name, email, phone, roleId) {
+            document.getElementById('staffId').value = id;
+            document.getElementById('staffName').value = name;
+            document.getElementById('staffEmail').value = email;
+            document.getElementById('staffPhone').value = phone;
+            document.getElementById('staffRoleSelect').value = roleId;
+            document.getElementById('staffModalTitle').textContent = 'Edit Staff Member';
+            document.getElementById('staffModal').style.display = 'flex';
+        }
+
+        // Delete staff with themed confirmation modal
         async function deleteStaff(id) {
-            if (confirm('Remove access for this staff member?')) {
-                await _supabase.from('staff').delete().eq('id', id);
-                fetchStaff();
-            }
+            showConfirmDialog(
+                'Remove Staff Member?',
+                'Are you sure you want to remove this staff member? They will no longer have access to the admin dashboard.',
+                async () => {
+                    await _supabase.from('staff').delete().eq('id', id);
+                    showToast('Staff member removed successfully', 'success');
+                    fetchStaff();
+                }
+            );
         }
 
         // --- ROLES ---
@@ -1875,6 +1893,7 @@
         }
 
         async function saveStaff() {
+            const staffId = document.getElementById('staffId').value;
             const name = document.getElementById('staffName').value.trim();
             const email = document.getElementById('staffEmail').value.trim();
             const phone = document.getElementById('staffPhone').value.trim();
@@ -1886,24 +1905,35 @@
             }
 
             try {
-                // Simply insert staff record - no auth creation needed
-                // Staff will use customer login (Google/SMS) to access admin dashboard
-                const { error: staffError } = await _supabase.from('staff').insert([{
-                    name,
-                    email,
-                    phone: phone || null,
-                    role_id: roleId
-                }]);
+                if (staffId) {
+                    // UPDATE existing staff
+                    const { error } = await _supabase.from('staff').update({
+                        name,
+                        email,
+                        phone: phone || null,
+                        role_id: roleId
+                    }).eq('id', staffId);
 
-                if (staffError) throw staffError;
+                    if (error) throw error;
+                    showToast(`Staff updated successfully!`, 'success');
+                } else {
+                    // INSERT new staff
+                    const { error } = await _supabase.from('staff').insert([{
+                        name,
+                        email,
+                        phone: phone || null,
+                        role_id: roleId
+                    }]);
 
-                showToast(`Staff added! ${name} can now login using customer login (Google/SMS)`, 'success');
+                    if (error) throw error;
+                    showToast(`Staff added! ${name} can now login using customer login (Google/SMS)`, 'success');
+                }
 
                 closeStaffModal();
                 fetchStaff();
             } catch (err) {
                 console.error('Save staff error:', err);
-                showToast('Failed to add staff: ' + err.message, 'error');
+                showToast('Failed to save staff: ' + err.message, 'error');
             }
         }
 
