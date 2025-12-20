@@ -801,7 +801,7 @@
             </div>
 
             <div style="display:flex; gap:10px; margin-top:20px;">
-                <button onclick="saveStaff()" class="btn-primary">Add Staff Member</button>
+                <button id="staffSaveBtn" onclick="saveStaff()" class="btn-primary">Add Staff Member</button>
                 <button onclick="closeStaffModal()">Cancel</button>
             </div>
         </div>
@@ -973,7 +973,7 @@
             document.getElementById('confirmMessage').textContent = message;
             confirmCallback = onConfirm;
             modal.style.display = 'flex';
-            
+
             const confirmBtn = document.getElementById('confirmBtn');
             confirmBtn.onclick = () => {
                 closeConfirmModal();
@@ -1708,6 +1708,7 @@
             document.getElementById('staffPhone').value = phone;
             document.getElementById('staffRoleSelect').value = roleId;
             document.getElementById('staffModalTitle').textContent = 'Edit Staff Member';
+            document.getElementById('staffSaveBtn').textContent = 'Save Changes';
             document.getElementById('staffModal').style.display = 'flex';
         }
 
@@ -1910,6 +1911,7 @@
                 });
 
             title.textContent = staffId ? 'Edit Staff Member' : 'Add Staff Member';
+            document.getElementById('staffSaveBtn').textContent = 'Add Staff Member';
             modal.style.display = 'flex';
         }
 
