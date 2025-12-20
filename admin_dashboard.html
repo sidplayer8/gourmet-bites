@@ -808,7 +808,7 @@
     </div>
 
     <script>
-        const supabaseUrl = 'https://pklaofjfpcrlgevxkozy.supabase.co';
+        const supabaseUrl =laofjfpcrlgevxkozy.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBrbGFvZmpmcGNybGdldnhrb3p5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyNjY1MDcsImV4cCI6MjA4MDg0MjUwN30.sNg6OVLocM1D-bG9LXTlDSsy6s74oW1SQ89QWCMbOKE';
         let _supabase;
 
@@ -887,8 +887,22 @@
             return 'UNKNOWN';
         }
 
+
         // Store current user's permissions globally
         let currentUserPermissions = 0;
+
+        // Permission helper functions
+        function hasPermission(flag) {
+            return (currentUserPermissions & flag) !== 0;
+        }
+
+        function requirePermission(flag, actionName) {
+            if (!hasPermission(flag)) {
+                showAccessDeniedModal(actionName);
+                return false;
+            }
+            return true;
+        }
 
         // --- AUTH & INIT ---
         (async function checkAdminAccess() {
@@ -1860,13 +1874,11 @@
                     // Update existing role
                     const { error } = await _supabase.from('roles')
                         .update(roleData)
-                        .eq('id', roleId);
-
-                    if (error) throw error;
-                    showToast('Role updated successfully', 'success');
+                                           
+                             ) throw error;
+                    showTo                          ully', 'success');
                 } else {
-                    // Create new role
-                    const { error } = await _supabase.from('roles')
+                    // C                                   const { error } = await _supabase.from('roles')
                         .insert([roleData]);
 
                     if (error) throw error;
