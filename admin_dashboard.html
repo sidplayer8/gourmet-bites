@@ -1972,6 +1972,9 @@
 
         // --- STAFF MANAGEMENT ---
         function openStaffModal(staffId = null) {
+            // Permission check
+            if (!requirePermission(PERMISSIONS.CREATE_STAFF, 'create staff members')) return;
+
             const modal = document.getElementById('staffModal');
             const title = document.getElementById('staffModalTitle');
 
