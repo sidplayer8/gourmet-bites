@@ -918,12 +918,24 @@
                 showSection('dashboard');
                 return;
             }
-            // 4. DB Check
-            // We use user.id (UUID) or try to find by email/phone if user.id fails
-            // For now, strict check on user.id is safest for standard flow
-            if (user.id) {
-                const { data: staff } = await _supabase.from('staff').select('*, roles(name)').eq('user_id', user.id).single();
-                if (staff) {
+
+            // 4. DB Check - Check staff table by email OR phone (not user_id)
+            const uEmail = user.email || (user.user && user.user.email);
+            const uPhone = user.phone || (user.user && user.user.phone);
+
+            if (uEmail || uPhone) {
+                let query = _supabase.from('staff').select('*, roles(name)');
+
+                if (uEmail) {
+                    query = query.eq('email', uEmail);
+                } else if (uPhone) {
+                    query = query.eq('phone', uPhone);
+                }
+
+                const { data: staffMembers } = await query;
+
+                if (staffMembers && staffMembers.length > 0) {
+                    const staff = staffMembers[0];
                     document.getElementById('adminName').textContent = `${staff.roles?.name || 'Staff'} (${staff.name || uEmail})`;
                     return;
                 }
