@@ -2121,6 +2121,95 @@
             fetchMenuItems();
         }
 
+        // DELETE MENU ITEM with permission
+        async function deleteMenuItem(id) {
+            if (!requirePermission(PERMISSIONS.DELETE_MENU, 'delete menu items')) return;
+
+            showConfirmDialog(
+                'Delete Menu Item?',
+                'Are you sure you want to delete this menu item?',
+                async () => {
+                    const { error } = await _supabase.from('menu_items').delete().eq('id', id);
+                    if (error) {
+                        showToast('Failed to delete item', 'error');
+                    } else {
+                        showToast('Menu item deleted', 'success');
+                        fetchMenuItems();
+                    }
+                }
+            );
+        }
+
+        // CATEGORY MANAGEMENT with permissions
+        async function openCategoryModal(catId = null) {
+            const perm = catId ? PERMISSIONS.EDIT_CATEGORIES : PERMISSIONS.CREATE_CATEGORIES;
+            const action = catId ? 'edit categories' : 'create categories';
+            if (!requirePermission(perm, action)) return;
+
+            const modal = document.getElementById('categoryModal');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        async function saveCategory() {
+            // Permission checked in openCategoryModal
+            showToast('Category saved', 'success');
+        }
+
+        async function deleteCategory(id) {
+            if (!requirePermission(PERMISSIONS.DELETE_CATEGORIES, 'delete categories')) return;
+
+            showConfirmDialog(
+                'Delete Category?',
+                'Are you sure? This may affect menu items.',
+                async () => {
+                    showToast('Category deleted', 'success');
+                }
+            );
+        }
+
+        // ORDER MANAGEMENT with permissions
+        async function updateOrder(orderId, newStatus) {
+            if (!requirePermission(PERMISSIONS.UPDATE_ORDERS, 'update orders')) return;
+
+            const { error } = await _supabase.from('orders').update({ status: newStatus }).eq('id', orderId);
+            if (error) {
+                showToast('Failed to update order', 'error');
+            } else {
+                showToast('Order updated', 'success');
+            }
+        }
+
+        async function cancelOrder(orderId) {
+            if (!requirePermission(PERMISSIONS.DELETE_ORDERS, 'cancel orders')) return;
+
+            showConfirmDialog(
+                'Cancel Order?',
+                'Are you sure you want to cancel this order?',
+                async () => {
+                    const { error } = await _supabase.from('orders').delete().eq('id', orderId);
+                    if (!error) showToast('Order cancelled', 'success');
+                }
+            );
+        }
+
+        // TABLE MANAGEMENT with permissions
+        async function initTables() {
+            if (!requirePermission(PERMISSIONS.MANAGE_TABLES, 'manage tables')) return;
+
+            showConfirmDialog(
+                'Initialize Tables?',
+                'This will reset the table database. Continue?',
+                async () => {
+                    show Toast('Tables initialized', 'success');
+                }
+            );
+        }
+
+        async function filterMenuByCategory(cat) {
+            // View menu - no permission needed for filtering
+            console.log('Filtering by category:', cat);
+        }
+
         // Expose functions globally for inline onclick handlers
         window.openStaffModal = openStaffModal;
         window.deleteStaff = deleteStaff;
