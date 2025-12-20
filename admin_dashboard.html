@@ -2096,6 +2096,12 @@
 
         async function saveMenuItem() {
             const id = document.getElementById('editItemId').value;
+
+            // Permission check
+            const perm = id ? PERMISSIONS.EDIT_MENU : PERMISSIONS.CREATE_MENU;
+            const action = id ? 'edit menu items' : 'create menu items';
+            if (!requirePermission(perm, action)) return;
+
             const name = document.getElementById('itemName').value;
             const price = parseFloat(document.getElementById('itemPrice').value);
             const category = document.getElementById('itemCat').value;
