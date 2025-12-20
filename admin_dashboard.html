@@ -63,10 +63,16 @@
             cursor: pointer;
             transition: all 0.3s;
             color: #ccc;
-            display: flex;
+            display: none;
+            /* HIDDEN BY DEFAULT - shown via JS after permission check */
             align-items: center;
             gap: 10px;
             text-decoration: none;
+        }
+
+        .nav-item.visible {
+            display: flex;
+            /* Show when permission granted */
         }
 
         .nav-item:hover,
@@ -948,24 +954,26 @@
         function applyPermissionBasedUI() {
             console.log('🔒 Applying UI restrictions based on permissions:', currentUserPermissions);
 
-            // Hide/show sidebar items
-            const hideIfNoPermission = (navId, permission) => {
+            // Show/hide sidebar items based on permissions
+            const showIfHasPermission = (navId, permission) => {
                 const navItem = document.getElementById(navId);
                 if (navItem) {
-                    if (!hasPermission(permission)) {
-                        navItem.style.display = 'none';
+                    if (hasPermission(permission)) {
+                        navItem.classList.add('visible'); // Show
                     } else {
-                        navItem.style.display = '';
+                        navItem.classList.remove('visible'); // Keep hidden
                     }
                 }
             };
 
             // Sidebar navigation permissions
-            hideIfNoPermission('nav-menu', PERMISSIONS.VIEW_MENU);
-            hideIfNoPermission('nav-staff', PERMISSIONS.VIEW_STAFF);
-            hideIfNoPermission('nav-roles', PERMISSIONS.MANAGE_ROLES);
-            hideIfNoPermission('nav-tables', PERMISSIONS.VIEW_TABLES);
-            hideIfNoPermission('nav-orders', PERMISSIONS.VIEW_ORDERS);
+            showIfHasPermission('nav-dashboard', PERMISSIONS.VIEW_ANALYTICS); // Dashboard needs analytics
+            showIfHasPermission('nav-orders', PERMISSIONS.VIEW_ORDERS);
+            showIfHasPermission('nav-history', PERMISSIONS.VIEW_ORDERS); // History also needs VIEW_ORDERS
+            showIfHasPermission('nav-menu', PERMISSIONS.VIEW_MENU);
+            showIfHasPermission('nav-staff', PERMISSIONS.VIEW_STAFF);
+            showIfHasPermission('nav-roles', PERMISSIONS.MANAGE_ROLES);
+            showIfHasPermission('nav-tables', PERMISSIONS.VIEW_TABLES);
 
             // Hide action buttons if no permission
             const hideButtonIfNoPermission = (btnId, permission) => {
