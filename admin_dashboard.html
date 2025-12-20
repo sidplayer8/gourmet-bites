@@ -75,6 +75,11 @@
             /* Show when permission granted */
         }
 
+        .nav-item.always-visible {
+            display: flex !important;
+            /* ALWAYS show (logout) */
+        }
+
         .nav-item:hover,
         .nav-item.active {
             background: rgba(255, 102, 0, 0.1);
@@ -361,7 +366,7 @@
         <div id="nav-roles" class="nav-item" onclick="showSection('roles')">🔐 Roles</div>
         <div id="nav-tables" class="nav-item" onclick="showSection('tables')">🪑 Tables</div>
         <div style="flex:1"></div>
-        <div class="nav-item" onclick="logout()">🚪 Logout</div>
+        <div class="nav-item always-visible" onclick="logout()">🚪 Logout</div>
     </div>
 
     <!-- Main Content -->
@@ -371,28 +376,51 @@
                 <div class="hamburger" onclick="toggleSidebar()">☰</div>
                 <h1 id="pageTitle">Dashboard</h1>
             </div>
-            <div class="user-profile">
-                <span id="adminName" style="display:none;">Loading...</span>
-                <!-- Hidden on mobile via CSS if needed, or just simplified -->
-                <div class="avatar">A</div>
+            <div class="user-profile" style="display:flex; align-items:center; gap:15px;">
+                <div style="text-align:right;">
+                    <div id="adminName" style="font-weight:600; color:white;">Loading...</div>
+                    <div id="adminRole" style="font-size:12px; color:#888;">Role</div>
+                </div>
+                <div class="avatar" id="avatarIcon">A</div>
             </div>
         </div>
         <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
         <!-- SECTION: DASHBOARD -->
         <div id="dashboard-section" class="content-section active">
-            <div class="stats-grid">
+            <!-- Welcome Banner -->
+            <div class="stat-card"
+                style="background: linear-gradient(135deg, #ff6600 0%, #ff9933 100%); margin-bottom:20px; border:none;">
+                <h2 id="welcomeMessage" style="margin:0; color:white;">👋 Welcome back!</h2>
+                <p id="welcomeSubtext" style="margin:5px 0 0 0; color:rgba(255,255,255,0.9); font-size:14px;">Here's
+                    your performance overview</p>
+            </div>
+
+            <!-- Personal Stats Grid -->
+            <div class="stats-grid" id="personalStatsGrid">
                 <div class="stat-card">
-                    <div class="stat-label">Total Orders</div>
-                    <div class="stat-value" id="stat-total-orders">0</div>
+                    <div class="stat-label" id="stat1-label">Loading...</div>
+                    <div class="stat-value" id="stat1-value">-</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Active Tables</div>
-                    <div class="stat-value" id="stat-active-tables">0</div>
+                    <div class="stat-label" id="stat2-label">Loading...</div>
+                    <div class="stat-value" id="stat2-value">-</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Revenue (Est)</div>
-                    <div class="stat-value" id="stat-revenue">$0.00</div>
+                    <div class="stat-label" id="stat3-label">Loading...</div>
+                    <div class="stat-value" id="stat3-value">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label" id="stat4-label">Loading...</div>
+                    <div class="stat-value" id="stat4-value">-</div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="stat-card" style="margin-top:20px;">
+                <h3 style="margin:0 0 15px 0; color:white;">📋 Recent Activity</h3>
+                <div id="recentActivity" style="color:#999;">
+                    <p>Loading your recent activity...</p>
                 </div>
             </div>
         </div>
@@ -967,7 +995,10 @@
             };
 
             // Sidebar navigation permissions
-            showIfHasPermission('nav-dashboard', PERMISSIONS.VIEW_ANALYTICS); // Dashboard needs analytics
+            // Dashboard is ALWAYS visible (no permission needed)
+            showIfHasPermission('nav-dashboard', 0); // 0 means always pass
+            document.getElementById('nav-dashboard')?.classList.add('visible'); // Force show
+
             showIfHasPermission('nav-orders', PERMISSIONS.VIEW_ORDERS);
             showIfHasPermission('nav-history', PERMISSIONS.VIEW_ORDERS); // History also needs VIEW_ORDERS
             showIfHasPermission('nav-menu', PERMISSIONS.VIEW_MENU);
