@@ -2095,14 +2095,13 @@
                     alert('Failed to save: ' + err.message);
                 }
             }
+            // Expose to window
+            window.openMenuModal = openMenuModal;
+            window.closeMenuModal = closeMenuModal;
+            window.saveMenuItem = saveMenuItem;
+            window.deleteMenuItem = deleteMenuItem;
+            window.handleCategoryChange = handleCategoryChange;
         }) (); // Close checkAdminAccess IIFE
-
-        // Expose to window
-        window.openMenuModal = openMenuModal;
-        window.closeMenuModal = closeMenuModal;
-        window.saveMenuItem = saveMenuItem;
-        window.deleteMenuItem = deleteMenuItem;
-        window.handleCategoryChange = handleCategoryChange;
     </script>
 </body>
 
