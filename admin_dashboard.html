@@ -1871,36 +1871,29 @@
             const roleId = document.getElementById('staffRoleSelect').value;
 
             if (!name || !email || !roleId) {
-                showToast('Please fill in all required fields', 'error');
+                showToast('Please fill in Name, Email, and Role', 'error');
                 return;
             }
 
-            
-
             try {
-                
-
-                if (authError) console.warn('Auth creation warning:', authError);
-
+                // Simply insert staff record - no auth creation needed
+                // Staff will use customer login (Google/SMS) to access admin dashboard
                 const { error: staffError } = await _supabase.from('staff').insert([{
                     name,
                     email,
                     phone: phone || null,
-                    role_id: roleId,
-                    auth_user_id: authData?.user?.id || null
+                    role_id: roleId
                 }]);
 
                 if (staffError) throw staffError;
 
-                // Show credentials in a better way - just use toast for now
-                showToast(`Staff added! \ can login using customer login`, 'success');
-                console.log(`📧 Staff Credentials:\nEmail: ${email}\n${phone ? `Phone: ${phone}\n` : ''}Password: ${password}`);
+                showToast(`Staff added! ${name} can now login using customer login (Google/SMS)`, 'success');
 
                 closeStaffModal();
                 fetchStaff();
             } catch (err) {
                 console.error('Save staff error:', err);
-                showToast('Failed to create staff: ' + err.message, 'error');
+                showToast('Failed to add staff: ' + err.message, 'error');
             }
         }
 
