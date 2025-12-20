@@ -1058,8 +1058,8 @@
             // 3. Allowlist (The Bypass)
             const allowed = ['sapsinfocomm22@gmail.com', '+6590214181'];
             if (allowed.includes(uEmail) || allowed.includes(uPhone)) {
-                document.getElementById('adminName').textContent = uEmail || uPhone;
-                document.getElementById('adminRole').textContent = 'Owner';
+                document.getElementById('adminName').textContent = 'Owner';
+                document.getElementById('adminRole').textContent = 'Administrator';
                 document.getElementById('avatarIcon').textContent = '👑';
 
                 // Give full permissions to owners
@@ -1070,7 +1070,7 @@
                 applyPermissionBasedUI();
 
                 // Populate dashboard with owner stats
-                populateDashboard('Owner', uEmail || uPhone, {});
+                populateDashboard('Owner', 'Owner', {});
 
                 showSection('dashboard');
                 return;
@@ -1437,7 +1437,8 @@
             }).join('');
         }
 
-        // --- STATS ---
+        // --- STATS --- (DISABLED - using populateDashboard instead)
+        /*
         async function fetchStats() {
             try {
                 const { count } = await _supabase.from('orders').select('*', { count: 'exact', head: true });
@@ -1463,6 +1464,7 @@
                 console.error('fetchStats error:', err);
             }
         }
+        */
 
         // --- ORDERS ---
         async function fetchOrders() {
