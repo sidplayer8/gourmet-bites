@@ -943,6 +943,26 @@
             return true;
         }
 
+        function showSection(sectionId) {
+            // Auto-close sidebar on mobile
+            if (window.innerWidth <= 768) {
+               toggleSidebar();
+            }
+            
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
+            
+            // Show target section
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.style.display = 'block';
+            }
+            
+            // Update active nav state
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            event?.target?.classList?.add('active');
+        }
+
         // --- AUTH & INIT ---
         (async function checkAdminAccess() {
             // 1. Session Check
