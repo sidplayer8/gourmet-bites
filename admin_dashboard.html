@@ -1861,6 +1861,9 @@
         }
 
         function openRoleModal(roleId = null) {
+            // Permission check
+            if (!requirePermission(PERMISSIONS.MANAGE_ROLES, 'manage roles')) return;
+
             const modal = document.getElementById('roleModal');
             const title = document.getElementById('roleModalTitle');
 
@@ -1886,9 +1889,9 @@
                             document.getElementById('roleColor').value = role.color;
                             document.getElementById('rolePosition').value = role.position;
 
-                            // Check permissions
+                            // Check permissions using correct bitwise operator
                             for (const [permName, permValue] of Object.entries(PERMISSIONS)) {
-                                if (hasPermission(role.permissions, permValue)) {
+                                if ((role.permissions & permValue) !== 0) {
                                     const checkbox = document.querySelector(`[data-perm="${permName}"]`);
                                     if (checkbox) checkbox.checked = true;
                                 }
