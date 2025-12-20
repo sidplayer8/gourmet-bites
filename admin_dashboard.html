@@ -989,6 +989,11 @@
                 if (staffMembers && staffMembers.length > 0) {
                     const staff = staffMembers[0];
                     document.getElementById('adminName').textContent = `${staff.roles?.name || 'Staff'} (${staff.name || uEmail})`;
+
+                    // Load permissions from role
+                    currentUserPermissions = staff.roles?.permissions || 0;
+                    console.log('✅ Permissions loaded:', currentUserPermissions, 'Role:', staff.roles?.name);
+
                     return;
                 }
             }
