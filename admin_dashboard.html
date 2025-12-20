@@ -347,13 +347,13 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="logo">🍴 Gourmet Admin</div>
-        <div class="nav-item active" onclick="showSection('dashboard')">📊 Dashboard</div>
-        <div class="nav-item" onclick="showSection('orders')">📞 Calls (Orders)</div>
-        <div class="nav-item" onclick="showSection('history')">📜 History</div>
-        <div class="nav-item" onclick="showSection('menu')">🍔 Menu Management</div>
-        <div class="nav-item" onclick="showSection('staff')">👥 Staff</div>
-        <div class="nav-item" onclick="showSection('roles')">🔐 Roles</div>
-        <div class="nav-item" onclick="showSection('tables')">🪑 Tables</div>
+        <div id="nav-dashboard" class="nav-item active" onclick="showSection('dashboard')">📊 Dashboard</div>
+        <div id="nav-orders" class="nav-item" onclick="showSection('orders')">📞 Calls (Orders)</div>
+        <div id="nav-history" class="nav-item" onclick="showSection('history')">📜 History</div>
+        <div id="nav-menu" class="nav-item" onclick="showSection('menu')">🍔 Menu Management</div>
+        <div id="nav-staff" class="nav-item" onclick="showSection('staff')">👥 Staff</div>
+        <div id="nav-roles" class="nav-item" onclick="showSection('roles')">🔐 Roles</div>
+        <div id="nav-tables" class="nav-item" onclick="showSection('tables')">🪑 Tables</div>
         <div style="flex:1"></div>
         <div class="nav-item" onclick="logout()">🚪 Logout</div>
     </div>
@@ -944,6 +944,57 @@
             return true;
         }
 
+        // Apply UI restrictions based on permissions
+        function applyPermissionBasedUI() {
+            console.log('🔒 Applying UI restrictions based on permissions:', currentUserPermissions);
+
+            // Hide/show sidebar items
+            const hideIfNoPermission = (navId, permission) => {
+                const navItem = document.getElementById(navId);
+                if (navItem) {
+                    if (!hasPermission(permission)) {
+                        navItem.style.display = 'none';
+                    } else {
+                        navItem.style.display = '';
+                    }
+                }
+            };
+
+            // Sidebar navigation permissions
+            hideIfNoPermission('nav-menu', PERMISSIONS.VIEW_MENU);
+            hideIfNoPermission('nav-staff', PERMISSIONS.VIEW_STAFF);
+            hideIfNoPermission('nav-roles', PERMISSIONS.MANAGE_ROLES);
+            hideIfNoPermission('nav-tables', PERMISSIONS.VIEW_TABLES);
+            hideIfNoPermission('nav-orders', PERMISSIONS.VIEW_ORDERS);
+
+            // Hide action buttons if no permission
+            const hideButtonIfNoPermission = (btnId, permission) => {
+                const btn = document.getElementById(btnId);
+                if (btn) {
+                    if (!hasPermission(permission)) {
+                        btn.style.display = 'none';
+                    } else {
+                        btn.style.display = '';
+                    }
+                }
+            };
+
+            // Menu Management buttons
+            hideButtonIfNoPermission('addMenuItem', PERMISSIONS.CREATE_MENU);
+            hideButtonIfNoPermission('addCategory', PERMISSIONS.CREATE_CATEGORIES);
+
+            // Staff Management buttons
+            hideButtonIfNoPermission('addStaffBtn', PERMISSIONS.CREATE_STAFF);
+
+            // Role Management buttons
+            hideButtonIfNoPermission('addRoleBtn', PERMISSIONS.MANAGE_ROLES);
+
+            // Tables Management buttons
+            hideButtonIfNoPermission('initTablesBtn', PERMISSIONS.MANAGE_TABLES);
+
+            console.log('✅ UI restrictions applied');
+        }
+
         // --- AUTH & INIT ---
         (async function checkAdminAccess() {
             // 1. Session Check
@@ -974,6 +1025,9 @@
                 currentUserPermissions = 0xFFFFFFFF; // All permissions
                 console.log('✅ Owner permissions loaded: Full access');
 
+                // Apply UI (owners see everything)
+                applyPermissionBasedUI();
+
                 showSection('dashboard');
                 return;
             }
@@ -998,6 +1052,9 @@
                     // Load permissions from role
                     currentUserPermissions = staff.roles?.permissions || 0;
                     console.log('✅ Permissions loaded:', currentUserPermissions, 'Role:', staff.roles?.name);
+
+                    // Apply UI restrictions based on permissions
+                    applyPermissionBasedUI();
 
                     return;
                 }
