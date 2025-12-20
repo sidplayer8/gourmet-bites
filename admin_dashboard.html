@@ -891,7 +891,6 @@
         let currentUserPermissions = 0;
 
         // --- AUTH & INIT ---
-        (async function checkAdminAccess() {
             // 1. Session Check
             const { data: { session } } = await _supabase.auth.getSession();
             let user = session?.user;
@@ -2102,7 +2101,6 @@
             window.deleteMenuItem = deleteMenuItem;
             window.handleCategoryChange = handleCategoryChange;
         })();
-    </script>
 </body>
 
 </html>
