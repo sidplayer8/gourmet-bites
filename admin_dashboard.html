@@ -1691,7 +1691,7 @@
                     <td>${s.phone || '-'}</td>
                     <td><span style="background:#334; padding:2px 6px; border-radius:4px;">${s.roles?.name || s.role_id}</span></td>
                     <td>
-                        <button onclick='editStaff("${s.id}", "${(s.name || '').replace(/"/g, '&quot;')}", "${(s.email || '').replace(/"/g, '&quot;')}", "${(s.phone || '').replace(/"/g, '&quot;')}", "${s.role_id}")' style="color:#10b981; background:none; border:none; cursor:pointer; margin-right:12px; font-weight:500;">?? Edit</button>
+                        <button onclick='editStaff("${s.id}", "${(s.name || '').replace(/"/g, '&quot;')}", "${(s.email || '').replace(/"/g, '&quot;')}", "${(s.phone || '').replace(/"/g, '&quot;')}", "${s.role_id}")' style="color:#10b981; background:none; border:none; cursor:pointer; margin-right:12px; font-weight:500;">Edit</button>
                         <button onclick="deleteStaff('${s.id}')" style="color:var(--danger); background:none; border:none; cursor:pointer; font-weight:500;">🗑️ Remove</button>
                     </td>
                 </tr>
@@ -1701,14 +1701,31 @@
         }
 
         // Edit staff - opens modal with pre-filled data
-        function editStaff(id, name, email, phone, roleId) {
+        async function editStaff(id, name, email, phone, roleId) {
             document.getElementById('staffId').value = id;
             document.getElementById('staffName').value = name;
             document.getElementById('staffEmail').value = email;
             document.getElementById('staffPhone').value = phone;
-            document.getElementById('staffRoleSelect').value = roleId;
             document.getElementById('staffModalTitle').textContent = 'Edit Staff Member';
             document.getElementById('staffSaveBtn').textContent = 'Save Changes';
+
+            // Load roles first, then set the selected one
+            const { data: roles } = await _supabase.from('roles').select('id,name,color').order('position', { ascending: false });
+            const select = document.getElementById('staffRoleSelect');
+            select.innerHTML = '<option value="">Select a role...</option>';
+
+            if (roles) {
+                roles.forEach(role => {
+                    const option = document.createElement('option');
+                    option.value = role.id;
+                    option.textContent = role.name;
+                    select.appendChild(option);
+                });
+            }
+
+            // Now set the current role
+            select.value = roleId;
+
             document.getElementById('staffModal').style.display = 'flex';
         }
 
