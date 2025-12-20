@@ -1130,72 +1130,79 @@
 
         // Populate dashboard with personalized stats based on role
         async function populateDashboard(role, name, staffData) {
-            const timeOfDay = new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening';
+            console.log('📊 Populating dashboard for:', role, name);
 
-            // Update welcome message
-            document.getElementById('welcomeMessage').textContent = `👋 Good ${timeOfDay}, ${name}!`;
-            document.getElementById('welcomeSubtext').textContent = `Here's your ${role} dashboard`;
+            try {
+                const timeOfDay = new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening';
 
-            // Get stats based on role
-            if (role === 'Owner' || role === 'Manager') {
-                // Manager/Owner sees business stats
-                document.getElementById('stat1-label').textContent = 'Today\'s Orders';
-                document.getElementById('stat1-value').textContent = '0'; // TODO: fetch real data
+                // Helper to safely set element text
+                const safeSet = (id, text) => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.textContent = text;
+                    } else {
+                        console.warn(`Element not found: ${id}`);
+                    }
+                };
 
-                document.getElementById('stat2-label').textContent = 'Revenue';
-                document.getElementById('stat2-value').textContent = '$0.00';
+                // Update welcome message
+                safeSet('welcomeMessage', `👋 Good ${timeOfDay}, ${name}!`);
+                safeSet('welcomeSubtext', `Here's your ${role} dashboard`);
 
-                document.getElementById('stat3-label').textContent = 'Active Staff';
-                document.getElementById('stat3-value').textContent = '0';
+                // Get stats based on role
+                if (role === 'Owner' || role === 'Manager') {
+                    safeSet('stat1-label', "Today's Orders");
+                    safeSet('stat1-value', '0');
+                    safeSet('stat2-label', 'Revenue');
+                    safeSet('stat2-value', '$0.00');
+                    safeSet('stat3-label', 'Active Staff');
+                    safeSet('stat3-value', '0');
+                    safeSet('stat4-label', 'Completion Rate');
+                    safeSet('stat4-value', '0%');
+                } else if (role === 'Server') {
+                    safeSet('stat1-label', 'Orders Taken');
+                    safeSet('stat1-value', '0');
+                    safeSet('stat2-label', 'Tables Served');
+                    safeSet('stat2-value', '0');
+                    safeSet('stat3-label', 'Avg Response Time');
+                    safeSet('stat3-value', '-');
+                    safeSet('stat4-label', 'Customer Rating');
+                    safeSet('stat4-value', '⭐ -');
+                } else if (role === 'Chef') {
+                    safeSet('stat1-label', 'Dishes Completed');
+                    safeSet('stat1-value', '0');
+                    safeSet('stat2-label', 'Pending Orders');
+                    safeSet('stat2-value', '0');
+                    safeSet('stat3-label', 'Avg Prep Time');
+                    safeSet('stat3-value', '-');
+                    safeSet('stat4-label', 'On-Time Rate');
+                    safeSet('stat4-value', '0%');
+                } else {
+                    safeSet('stat1-label', 'Hours This Week');
+                    safeSet('stat1-value', '0h');
+                    safeSet('stat2-label', 'Tasks Completed');
+                    safeSet('stat2-value', '0');
+                    safeSet('stat3-label', 'Upcoming Shifts');
+                    safeSet('stat3-value', '0');
+                    safeSet('stat4-label', 'Performance');
+                    safeSet('stat4-value', '100%');
+                }
 
-                document.getElementById('stat4-label').textContent = 'Completion Rate';
-                document.getElementById('stat4-value').textContent = '0%';
-            } else if (role === 'Server') {
-                // Server sees personal performance
-                document.getElementById('stat1-label').textContent = 'Orders Taken';
-                document.getElementById('stat1-value').textContent = '0';
+                // Update recent activity
+                const activityEl = document.getElementById('recentActivity');
+                if (activityEl) {
+                    activityEl.innerHTML = `
+                        <p style="color:#666; font-size:14px;">• Logged in at ${new Date().toLocaleTimeString()}</p>
+                        <p style="color:#666; font-size:14px;">• No recent activity</p>
+                    `;
+                } else {
+                    console.warn('recentActivity element not found');
+                }
 
-                document.getElementById('stat2-label').textContent = 'Tables Served';
-                document.getElementById('stat2-value').textContent = '0';
-
-                document.getElementById('stat3-label').textContent = 'Avg Response Time';
-                document.getElementById('stat3-value').textContent = '-';
-
-                document.getElementById('stat4-label').textContent = 'Customer Rating';
-                document.getElementById('stat4-value').textContent = '⭐ -';
-            } else if (role === 'Chef') {
-                // Chef sees kitchen stats
-                document.getElementById('stat1-label').textContent = 'Dishes Completed';
-                document.getElementById('stat1-value').textContent = '0';
-
-                document.getElementById('stat2-label').textContent = 'Pending Orders';
-                document.getElementById('stat2-value').textContent = '0';
-
-                document.getElementById('stat3-label').textContent = 'Avg Prep Time';
-                document.getElementById('stat3-value').textContent = '-';
-
-                document.getElementById('stat4-label').textContent = 'On-Time Rate';
-                document.getElementById('stat4-value').textContent = '0%';
-            } else {
-                // General staff
-                document.getElementById('stat1-label').textContent = 'Hours This Week';
-                document.getElementById('stat1-value').textContent = '0h';
-
-                document.getElementById('stat2-label').textContent = 'Tasks Completed';
-                document.getElementById('stat2-value').textContent = '0';
-
-                document.getElementById('stat3-label').textContent = 'Upcoming Shifts';
-                document.getElementById('stat3-value').textContent = '0';
-
-                document.getElementById('stat4-label').textContent = 'Performance';
-                document.getElementById('stat4-value').textContent = '100%';
+                console.log('✅ Dashboard populated successfully');
+            } catch (error) {
+                console.error('❌ Error populating dashboard:', error);
             }
-
-            // Update recent activity
-            document.getElementById('recentActivity').innerHTML = `
-                <p style="color:#666; font-size:14px;">• Logged in at ${new Date().toLocaleTimeString()}</p>
-                <p style="color:#666; font-size:14px;">• No recent activity</p>
-            `;
         }
 
         async function logout() {
