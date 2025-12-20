@@ -848,7 +848,7 @@
     </div>
 
     <script>
-        const supabaseUrl = laofjfpcrlgevxkozy.supabase.co';
+        const supabaseUrl = 'https://pklaofjfpcrlgevxkozy.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBrbGFvZmpmcGNybGdldnhrb3p5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyNjY1MDcsImV4cCI6MjA4MDg0MjUwN30.sNg6OVLocM1D-bG9LXTlDSsy6s74oW1SQ89QWCMbOKE';
         let _supabase;
 
@@ -1938,11 +1938,13 @@
                     // Update existing role
                     const { error } = await _supabase.from('roles')
                         .update(roleData)
-                                           
-                             ) throw error;
-                    showTo                          ully', 'success');
+                        .eq('id', roleId);
+
+                    if (error) throw error;
+                    showToast('Role updated successfully', 'success');
                 } else {
-                    // C                                   const { error } = await _supabase.from('roles')
+                    // Create new role
+                    const { error } = await _supabase.from('roles')
                         .insert([roleData]);
 
                     if (error) throw error;
