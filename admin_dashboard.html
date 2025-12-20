@@ -1054,11 +1054,13 @@
 
             const uEmail = user.email || (user.user && user.user.email);
             const uPhone = user.phone || (user.user && user.user.phone);
+            const displayName = user.user_metadata?.full_name || user.user_metadata?.name || 'Owner';
+            console.log('👤 User metadata:', user.user_metadata);
 
             // 3. Allowlist (The Bypass)
             const allowed = ['sapsinfocomm22@gmail.com', '+6590214181'];
             if (allowed.includes(uEmail) || allowed.includes(uPhone)) {
-                document.getElementById('adminName').textContent = 'Owner';
+                document.getElementById('adminName').textContent = displayName;
                 document.getElementById('adminRole').textContent = 'Administrator';
                 document.getElementById('avatarIcon').textContent = '👑';
 
@@ -1070,7 +1072,7 @@
                 applyPermissionBasedUI();
 
                 // Populate dashboard with owner stats
-                populateDashboard('Owner', 'Owner', {});
+                populateDashboard('Owner', displayName, {});
 
                 showSection('dashboard');
                 return;
@@ -1290,7 +1292,7 @@
             document.getElementById('pageTitle').textContent = sectionId.charAt(0).toUpperCase() + sectionId.slice(1);
 
             // Fetch Data
-            if (sectionId === 'dashboard') fetchStats();
+            // if (sectionId === 'dashboard') fetchStats(); // DISABLED - using populateDashboard instead
             if (sectionId === 'orders') fetchOrders();
             if (sectionId === 'history') fetchHistory();
             if (sectionId === 'menu') {
