@@ -408,7 +408,7 @@
         <div id="menu-section" class="content-section">
             <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
                 <h3>Menu Management</h3>
-                <button class="btn-primary" onclick="openMenuModal()">+ Add New Item</button>
+                <button id="addMenuItem" class="btn-primary" onclick="openMenuModal()">+ Add New Item</button>
             </div>
 
             <!-- Two-column layout: Categories sidebar + Menu items -->
@@ -417,7 +417,7 @@
                 <div class="stat-card" style="padding:15px; height:fit-content;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                         <h4 style="margin:0;">Categories</h4>
-                        <button onclick="openCategoryModal()" class="btn-primary"
+                        <button id="addCategory" onclick="openCategoryModal()" class="btn-primary"
                             style="padding:6px 12px; font-size:13px;">+</button>
                     </div>
                     <div id="categorySidebar">
@@ -436,7 +436,7 @@
         <div id="staff-section" class="content-section">
             <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
                 <h3>Staff Management</h3>
-                <button class="btn-primary" onclick="openStaffModal()">+ Add Staff</button>
+                <button id="addStaffBtn" class="btn-primary" onclick="openStaffModal()">+ Add Staff</button>
             </div>
             <div class="stat-card table-container" id="staffTableContainer">
                 <p>Loading staff...</p>
@@ -448,7 +448,7 @@
             <div class="stat-card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                     <h3 style="margin:0;">Roles & Permissions</h3>
-                    <button class="btn-primary" onclick="openRoleModal()">+ Add New Role</button>
+                    <button id="addRoleBtn" class="btn-primary" onclick="openRoleModal(null)">+ Add Role</button>
                 </div>
                 <div id="rolesList" style="margin-top:20px;">Loading roles...</div>
             </div>
