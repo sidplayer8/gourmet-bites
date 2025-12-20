@@ -1058,7 +1058,9 @@
             // 3. Allowlist (The Bypass)
             const allowed = ['sapsinfocomm22@gmail.com', '+6590214181'];
             if (allowed.includes(uEmail) || allowed.includes(uPhone)) {
-                document.getElementById('adminName').textContent = `Owner (${uEmail || uPhone})`;
+                document.getElementById('adminName').textContent = uEmail || uPhone;
+                document.getElementById('adminRole').textContent = 'Owner';
+                document.getElementById('avatarIcon').textContent = '👑';
 
                 // Give full permissions to owners
                 currentUserPermissions = 0xFFFFFFFF; // All permissions
@@ -1066,6 +1068,9 @@
 
                 // Apply UI (owners see everything)
                 applyPermissionBasedUI();
+
+                // Populate dashboard with owner stats
+                populateDashboard('Owner', uEmail || uPhone, {});
 
                 showSection('dashboard');
                 return;
