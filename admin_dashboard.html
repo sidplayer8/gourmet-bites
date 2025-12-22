@@ -1153,14 +1153,44 @@
 
                 // Get stats based on role
                 if (role === 'Owner' || role === 'Manager') {
+                    // Manager/Owner sees business stats - FETCH REAL DATA
                     safeSet('stat1-label', "Today's Orders");
-                    safeSet('stat1-value', '0');
                     safeSet('stat2-label', 'Revenue');
-                    safeSet('stat2-value', '$0.00');
                     safeSet('stat3-label', 'Active Staff');
-                    safeSet('stat3-value', '0');
                     safeSet('stat4-label', 'Completion Rate');
-                    safeSet('stat4-value', '0%');
+
+                    // Fetch today's orders count
+                    const today = new Date().toISOString().split('T')[0];
+                    const { count: ordersToday } = await _supabase
+                        .from('orders')
+                        .select('*', { count: 'exact', head: true })
+                        .gte('created_at', today);
+                    safeSet('stat1-value', ordersToday || '0');
+
+                    // Fetch total revenue
+                    const { data: allOrders } = await _supabase
+                        .from('orders')
+                        .select('total_price');
+                    const totalRevenue = allOrders?.reduce((sum, order) => sum + (Number(order.total_price) || 0), 0) || 0;
+                    safeSet('stat2-value', `$${totalRevenue.toFixed(2)}`);
+
+                    // Fetch active staff count
+                    const { count: staffCount } = await _supabase
+                        .from('staff')
+                        .select('*', { count: 'exact', head: true });
+                    safeSet('stat3-value', staffCount || '0');
+
+                    // Calculate completion rate
+                    const { count: completedOrders } = await _supabase
+                        .from('orders')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('status', 'completed');
+                    const { count: totalOrders } = await _supabase
+                        .from('orders')
+                        .select('*', { count: 'exact', head: true });
+                    const completionRate = totalOrders > 0 ? ((completedOrders / totalOrders) * 100).toFixed(0) : 0;
+                    safeSet('stat4-value', `${completionRate}%`);
+
                 } else if (role === 'Server') {
                     safeSet('stat1-label', 'Orders Taken');
                     safeSet('stat1-value', '0');
