@@ -350,6 +350,76 @@
                 opacity: 1;
             }
         }
+
+        /* Mobile Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 80%;
+                max-width: 300px;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 50;
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 15px;
+                width: 100%;
+            }
+
+            .hamburger {
+                display: flex !important;
+            }
+
+            .header h1 {
+                font-size: 18px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                min-width: 600px;
+                font-size: 13px;
+            }
+
+            .table-container {
+                overflow-x: auto;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+
+            .user-profile div {
+                display: none;
+            }
+
+            .avatar {
+                width: 35px;
+                height: 35px;
+            }
+        }
     </style>
 </head>
 
@@ -388,15 +458,9 @@
 
         <!-- SECTION: DASHBOARD -->
         <div id="dashboard-section" class="content-section active">
-            <!-- Welcome Banner -->
-            <div class="stat-card"
-                style="background: linear-gradient(135deg, #ff6600 0%, #ff9933 100%); margin-bottom:20px; border:none;">
-                <h2 id="welcomeMessage" style="margin:0; color:white;">👋 Welcome back!</h2>
-                <p id="welcomeSubtext" style="margin:5px 0 0 0; color:rgba(255,255,255,0.9); font-size:14px;">Here's
-                    your performance overview</p>
-            </div>
+            <h2>Owner Dashboard</h2>
 
-            <!-- Personal Stats Grid -->
+            <!-- Stats Grid -->
             <div class="stats-grid" id="personalStatsGrid">
                 <div class="stat-card">
                     <div class="stat-label" id="stat1-label">Loading...</div>
@@ -413,14 +477,6 @@
                 <div class="stat-card">
                     <div class="stat-label" id="stat4-label">Loading...</div>
                     <div class="stat-value" id="stat4-value">-</div>
-                </div>
-            </div>
-
-            <!-- Recent Activity -->
-            <div class="stat-card" style="margin-top:20px;">
-                <h3 style="margin:0 0 15px 0; color:white;">📋 Recent Activity</h3>
-                <div id="recentActivity" style="color:#999;">
-                    <p>Loading your recent activity...</p>
                 </div>
             </div>
         </div>
